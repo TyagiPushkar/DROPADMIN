@@ -1,27 +1,101 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import {
+  forwardRef,
+  useEffect,
+  useState,
+  useMemo,
+  useImperativeHandle,
+} from "react"
 import { Eye, FileText, MapPin } from "lucide-react"
 
-export default function RecentOrders() {
+const RecentOrders = forwardRef(({ filter, search }, ref) => {
   const [orders, setOrders] = useState([])
+  const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+  
+  const fetchOrders = async () => {
+    try {
+      const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+      const res = await fetch(`${BASE_URL}/src/orders/get_order.php?role=admin`)
+      const data = await res.json()
+      if (data.success) {
+        setOrders(data.data)
+      }
+    } catch (error) {
+      console.error("Failed to fetch orders:", error)
+    }
+  }
 
   useEffect(() => {
-    async function fetchOrders() {
-      try {
-        const res = await fetch(
-          "https://namami-infotech.com/DROP/src/orders/get_order.php?role=admin"
-        )
-        const data = await res.json()
-        if (data.success) {
-          setOrders(data.data)
-        }
-      } catch (error) {
-        console.error("Failed to fetch orders:", error)
-      }
-    }
     fetchOrders()
   }, [])
+
+  
+  const filteredOrders = useMemo(() => {
+    let result = orders
+
+    if (filter && filter !== "All Orders") {
+      result = result.filter((o) => o.order_status === filter)
+    }
+
+    if (search && search.trim() !== "") {
+      const lower = search.toLowerCase()
+      result = result.filter(
+        (o) =>
+          o.order_id.toString().includes(lower) ||
+          o.customer_name.toLowerCase().includes(lower) ||
+          o.restaurant_name.toLowerCase().includes(lower)
+      )
+    }
+
+    return result
+  }, [orders, filter, search])
+
+  
+  const handleExport = () => {
+    const header = [
+      "Order ID",
+      "Customer",
+      "Phone",
+      "Vendor",
+      "Items",
+      "Total",
+      "Status",
+      "Order Time",
+    ]
+    const rows = filteredOrders.map((o) => [
+      o.order_id,
+      o.customer_name,
+      o.customer_phone,
+      o.restaurant_name,
+      o.items.map((i) => i.item_name).join(", "),
+      o.total_amount,
+      o.order_status,
+      o.created_at,
+    ])
+
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      [header, ...rows].map((r) => r.join(",")).join("\n")
+
+    const link = document.createElement("a")
+    link.href = encodeURI(csvContent)
+    link.download = "orders.csv"
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
+ 
+  const handleRefresh = () => {
+    fetchOrders()
+  }
+
+  
+  useImperativeHandle(ref, () => ({
+    handleExport,
+    handleRefresh,
+  }))
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -46,7 +120,7 @@ export default function RecentOrders() {
         <h2 className="text-lg font-semibold text-gray-900">Recent Orders</h2>
       </div>
 
-     
+    
       <div className="overflow-x-auto hidden sm:block">
         <table className="w-full text-sm text-left">
           <thead className="bg-gray-50 text-gray-700">
@@ -62,14 +136,16 @@ export default function RecentOrders() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {orders.map((order) => (
+            {filteredOrders.map((order) => (
               <tr key={order.order_id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 font-medium text-gray-900">
                   #{order.order_id}
                 </td>
                 <td className="px-6 py-4">
                   <div>{order.customer_name}</div>
-                  <div className="text-xs text-gray-500">{order.customer_phone}</div>
+                  <div className="text-xs text-gray-500">
+                    {order.customer_phone}
+                  </div>
                 </td>
                 <td className="px-6 py-4">{order.restaurant_name}</td>
                 <td className="px-6 py-4">
@@ -105,7 +181,7 @@ export default function RecentOrders() {
 
      
       <div className="sm:hidden divide-y divide-gray-200">
-        {orders.map((order) => (
+        {filteredOrders.map((order) => (
           <div key={order.order_id} className="p-4">
             <div className="flex justify-between items-center">
               <span className="font-semibold text-gray-900">
@@ -154,4 +230,7 @@ export default function RecentOrders() {
       </div>
     </div>
   )
-}
+})
+
+RecentOrders.displayName = "RecentOrders"
+export default RecentOrders
