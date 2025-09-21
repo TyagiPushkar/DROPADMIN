@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { BarChart3, ShoppingCart, Package, Users, Settings, X } from "lucide-react"
@@ -13,7 +14,15 @@ const menuItems = [
 ]
 
 export default function Sidebar({ open, setOpen }) {
+  const [mounted, setMounted] = useState(false)
   const pathname = usePathname()
+
+ 
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) return null
 
   return (
     <>
@@ -54,7 +63,6 @@ export default function Sidebar({ open, setOpen }) {
         </nav>
       </aside>
 
-     
       {open && (
         <div
           onClick={() => setOpen(false)}

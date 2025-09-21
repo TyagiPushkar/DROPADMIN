@@ -2,35 +2,28 @@
 
 import {
   forwardRef,
-  useEffect,
-  useState,
   useMemo,
   useImperativeHandle,
 } from "react"
 import { Eye, FileText, MapPin } from "lucide-react"
+import useSWR from "swr"
+
+const fetcher = (url) => fetch(url).then((res) => res.json())
 
 const RecentOrders = forwardRef(({ filter, search }, ref) => {
-  const [orders, setOrders] = useState([])
   const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
-  
-  const fetchOrders = async () => {
-    try {
-      const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
-      const res = await fetch(`${BASE_URL}/src/orders/get_order.php?role=admin`)
-      const data = await res.json()
-      if (data.success) {
-        setOrders(data.data)
-      }
-    } catch (error) {
-      console.error("Failed to fetch orders:", error)
-    }
-  }
-
-  useEffect(() => {
-    fetchOrders()
-  }, [])
 
   
+  const { data, error, isLoading, mutate } = useSWR(
+    `${BASE_URL}/src/orders/get_order.php?role=admin`,
+    fetcher,
+    { refreshInterval: 10000 } 
+  )
+
+ 
+  const orders = data?.success ? data.data : []
+
+ 
   const filteredOrders = useMemo(() => {
     let result = orders
 
@@ -88,7 +81,7 @@ const RecentOrders = forwardRef(({ filter, search }, ref) => {
 
  
   const handleRefresh = () => {
-    fetchOrders()
+    mutate() 
   }
 
   
@@ -97,6 +90,7 @@ const RecentOrders = forwardRef(({ filter, search }, ref) => {
     handleRefresh,
   }))
 
+  
   const getStatusColor = (status) => {
     switch (status) {
       case "Placed":
@@ -114,13 +108,17 @@ const RecentOrders = forwardRef(({ filter, search }, ref) => {
     }
   }
 
+ 
+  if (error) return <div className="p-4 text-red-600">Failed to load orders</div>
+  if (isLoading) return <div className="p-4 text-gray-500">Loading orders...</div>
+
   return (
     <div className="bg-white shadow rounded-lg overflow-hidden">
       <div className="px-6 py-4 border-b border-gray-200">
         <h2 className="text-lg font-semibold text-gray-900">Recent Orders</h2>
       </div>
 
-    
+      
       <div className="overflow-x-auto hidden sm:block">
         <table className="w-full text-sm text-left">
           <thead className="bg-gray-50 text-gray-700">
