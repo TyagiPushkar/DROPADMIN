@@ -11,8 +11,7 @@ export default function LoginPage() {
   const [error, setError] = useState("")
   const router = useRouter()
 
-  const API_URL = `${process.env.NEXT_PUBLIC_RIDER_API_BASE_URL}/src/auth/login.php`
-
+  const API_URL = "https://namami-infotech.com/DROPRIDER/src/auth/login.php"
 
   const handleSendOtp = async (e) => {
     e.preventDefault()
@@ -30,7 +29,7 @@ export default function LoginPage() {
       } else {
         setError(data.message || "Failed to send OTP")
       }
-    } catch (err) {
+    } catch {
       setError("Something went wrong")
     } finally {
       setLoading(false)
@@ -50,12 +49,11 @@ export default function LoginPage() {
       const data = await res.json()
       if (data.success) {
         localStorage.setItem("token", data.token)
-        console.log("Logged in:", data)
         router.push("/analytics")
       } else {
         setError(data.message || "Invalid OTP")
       }
-    } catch (err) {
+    } catch {
       setError("Something went wrong")
     } finally {
       setLoading(false)
@@ -63,67 +61,99 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="mt-40 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white shadow-lg rounded-xl p-8 space-y-6">
-        <h2 className="text-2xl font-bold text-gray-900 text-center">Login</h2>
+    <div className="min-h-screen flex flex-col md:flex-row">
+     
+      <div className="hidden md:flex md:w-1/2 bg-gradient-to-br from-blue-600 via-indigo-500 to-purple-600 items-center justify-center p-10 text-white relative">
+        <div className="max-w-md text-center space-y-6">
+          
+          <div className="text-4xl font-extrabold tracking-wide">Your Logo</div>
 
-        {error && (
-          <div className="text-red-600 text-sm p-2 bg-red-50 rounded">{error}</div>
-        )}
+          
+          <p className="text-lg opacity-90">
+            Welcome back! Sign in securely with your email OTP.
+          </p>
 
-        {step === 1 ? (
-          <form onSubmit={handleSendOtp} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                placeholder="Enter your email"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
-            >
-              {loading ? "Sending OTP..." : "Send OTP"}
-            </button>
-          </form>
-        ) : (
-          <form onSubmit={handleVerifyOtp} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                OTP
-              </label>
-              <input
-                type="text"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-                required
-                placeholder="Enter OTP"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition"
-            >
-              {loading ? "Verifying..." : "Verify OTP"}
-            </button>
-            <p
-              className="text-sm text-blue-600 hover:underline cursor-pointer text-center"
-              onClick={() => setStep(1)}
-            >
-              Resend OTP
+         
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-sm opacity-70">
+            Secure Access • Fast • Reliable
+          </div>
+        </div>
+      </div>
+
+     
+      <div className="flex-1 flex items-center justify-center bg-gray-50 p-6">
+        <div className="w-full max-w-md bg-white/80 backdrop-blur-lg shadow-xl rounded-2xl p-8 space-y-6">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold text-gray-900">
+              {step === 1 ? "Sign in to Continue" : "Verify Your OTP"}
+            </h2>
+            <p className="text-gray-600 text-sm mt-2">
+              {step === 1
+                ? "Enter your email to receive a one-time login code."
+                : "Check your email and enter the OTP below."}
             </p>
-          </form>
-        )}
+          </div>
+
+          {error && (
+            <div className="text-red-600 text-sm p-3 bg-red-50 border border-red-200 rounded-lg text-center">
+              {error}
+            </div>
+          )}
+
+          {step === 1 ? (
+            <form onSubmit={handleSendOtp} className="space-y-5">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  placeholder="you@example.com"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 shadow-sm"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-lg hover:opacity-90 transition font-semibold shadow-lg"
+              >
+                {loading ? "Sending OTP..." : "Send OTP"}
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleVerifyOtp} className="space-y-5">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  OTP
+                </label>
+                <input
+                  type="text"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  required
+                  placeholder="6-digit OTP"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 outline-none text-gray-900 shadow-sm"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 rounded-lg hover:opacity-90 transition font-semibold shadow-lg"
+              >
+                {loading ? "Verifying..." : "Verify OTP"}
+              </button>
+              <p
+                className="text-sm text-blue-600 hover:underline cursor-pointer text-center"
+                onClick={() => setStep(1)}
+              >
+                Resend OTP
+              </p>
+            </form>
+          )}
+        </div>
       </div>
     </div>
   )
