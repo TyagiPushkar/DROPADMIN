@@ -59,7 +59,7 @@ const handleVerifyOtp = async (e) => {
 
     if (data.success) {
       
-      Cookies.set("user", JSON.stringify(data.data), { expires: 7 }) 
+      Cookies.set("user", JSON.stringify(data.data), { expires: 1 }) 
 
       
       router.push("/analytics")
