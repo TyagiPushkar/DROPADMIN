@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import Cookies from "js-cookie"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -36,29 +37,45 @@ export default function LoginPage() {
     }
   }
 
-  const handleVerifyOtp = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setError("")
-    try {
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identifier: email, otp }),
-      })
-      const data = await res.json()
-      if (data.success) {
-        localStorage.setItem("token", data.token)
-        router.push("/analytics")
-      } else {
-        setError(data.message || "Invalid OTP")
-      }
-    } catch {
-      setError("Something went wrong")
-    } finally {
-      setLoading(false)
-    }
+  
+
+const handleVerifyOtp = async (e) => {
+  e.preventDefault()
+  if (!otp || otp.length < 6) {
+    setError("Please enter a valid 6-digit OTP")
+    return
   }
+
+  setLoading(true)
+  setError("")
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ identifier: email, otp, verify_otp: true }),
+    })
+    const data = await res.json()
+    console.log("Verify response:", data)
+
+    if (data.success) {
+      
+      Cookies.set("user", JSON.stringify(data.data), { expires: 7 }) 
+
+      
+      router.push("/analytics")
+    } else {
+      setError(data.message || "Invalid OTP")
+    }
+  } catch (err) {
+    console.error(err)
+    setError("Something went wrong")
+  } finally {
+    setLoading(false)
+  }
+}
+
+  
+  
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
