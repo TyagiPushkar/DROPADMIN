@@ -4,12 +4,12 @@ import { forwardRef, useState, useEffect, useMemo, useImperativeHandle } from "r
 
 const RecentVendors = forwardRef(({ filter, search }, ref) => {
   const [vendors, setVendors] = useState([])
-  const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+  
 
   
   const fetchVendors = async () => {
     try {
-      const res = await fetch(`${BASE_URL}/src/restaurants/get_restaurants.php`)
+      const res = await fetch(`https://namami-infotech.com/DROP/src/restaurants/get_restaurants.php`)
       const data = await res.json()
       if (data.success) setVendors(data.data)
     } catch (err) {

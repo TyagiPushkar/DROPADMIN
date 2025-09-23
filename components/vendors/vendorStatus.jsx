@@ -13,9 +13,8 @@ const statusConfig = [
 ]
 
 export default function VendorStatus() {
-  const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
   const { data, error, isLoading } = useSWR(
-    `${BASE_URL}/src/restaurants/get_single_restaurant.php?restaurant_id=1`,
+    `https://namami-infotech.com/DROP/src/restaurants/get_single_restaurant.php?restaurant_id=1`,
     fetcher,
     { refreshInterval: 10000 }
   )
