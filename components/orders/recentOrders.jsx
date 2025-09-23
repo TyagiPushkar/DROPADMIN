@@ -11,11 +11,10 @@ import useSWR from "swr"
 const fetcher = (url) => fetch(url).then((res) => res.json())
 
 const RecentOrders = forwardRef(({ filter, search }, ref) => {
-  const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
-
+ 
   
   const { data, error, isLoading, mutate } = useSWR(
-    `${BASE_URL}/src/orders/get_order.php?role=admin`,
+    `https://namami-infotech.com/DROP/src/orders/get_order.php?role=admin`,
     fetcher,
     { refreshInterval: 10000 } 
   )

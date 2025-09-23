@@ -14,9 +14,8 @@ const statusConfig = [
 ]
 
 export default function OrderStatus() {
-  const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
   const { data, error, isLoading } = useSWR(
-    `${BASE_URL}/src/orders/get_order.php?role=admin`,
+    `https://namami-infotech.com/DROP/src/orders/get_order.php?role=admin`,
     fetcher,
     { refreshInterval: 10000 }
   )
