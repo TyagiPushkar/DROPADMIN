@@ -73,8 +73,20 @@ export default function LoginPage() {
     <div className="min-h-screen flex flex-col md:flex-row">
       
       <div className="hidden md:flex md:w-1/2 bg-gradient-to-br from-blue-600 via-indigo-500 to-purple-600 items-center justify-center p-10 text-white relative">
+      <div className="absolute inset-0">
+    {/* <img
+      src="/images/delivery.jpg"
+      alt="Delivery background"
+      className="w-full h-full object-cover opacity-90"
+    /> */}
+    {/* <div className="absolute inset-0 bg-black/70" />  */}
+  </div>
         <div className="max-w-md text-center space-y-6">
-          <div className="text-4xl font-extrabold tracking-wide">Your Logo</div>
+        <img
+      src="/images/droplogo.jpg" 
+      alt="App Logo"
+      className="mx-auto w-24 h-24 object-contain bg-white/80 p-2 rounded-full shadow-lg"
+    />
           <p className="text-lg opacity-90">
             Welcome back! Sign in securely with your email OTP.
           </p>
@@ -120,18 +132,50 @@ export default function LoginPage() {
                 />
               </div>
               <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-lg hover:opacity-90 transition font-semibold shadow-lg"
-              >
-                {loading ? "Sending OTP..." : "Send OTP"}
-              </button>
+  type="submit"
+  disabled={loading}
+  className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 cursor-pointer rounded-lg hover:opacity-90 transition font-semibold shadow-lg disabled:opacity-70"
+>
+  {loading && (
+    <svg
+      className="animate-spin h-5 w-5 text-white"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      ></circle>
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+      ></path>
+    </svg>
+  )}
+  {loading ? "Sending OTP..." : "Send OTP"}
+</button>
+
               <button
                 type="button"
-                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-lg hover:opacity-90 transition font-semibold shadow-lg"
+                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-lg hover:opacity-90 cursor-pointer transition font-semibold shadow-lg"
               >
                 Login with Password
               </button>
+              <p className="text-center text-sm text-gray-600 mt-3">Click
+  <a
+    href="/add-vendor"
+    className="text-blue-600 hover:underline font-medium"
+  >
+     &nbsp; here 
+  </a> to register your restaurant
+</p>
+
             </form>
           ) : (
             <form onSubmit={handleVerifyOtp} className="space-y-5">

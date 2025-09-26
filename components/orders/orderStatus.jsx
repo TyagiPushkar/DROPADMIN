@@ -32,17 +32,19 @@ export default function OrderStatus() {
   }
 
   return (
-    <div className="flex flex-wrap gap-3 mt-4">
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mt-4 w-full">
       {statusConfig.map(({ key, label, icon: Icon, color }) => (
         <div
           key={key}
-          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium shadow-sm border border-gray-200 bg-white`}
+          className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium shadow-sm border border-gray-200 bg-white"
         >
           <div className={`p-1.5 rounded-full ${color}`}>
             <Icon className="h-4 w-4" />
           </div>
-          <span className="text-gray-700">{label}:</span>
-          <span className="font-semibold text-gray-900">{counts[key] || 0}</span>
+          <div className="flex flex-col">
+            <span className="text-gray-700">{label}</span>
+            <span className="font-semibold text-gray-900">{counts[key] || 0}</span>
+          </div>
         </div>
       ))}
     </div>

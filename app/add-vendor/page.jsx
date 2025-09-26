@@ -22,7 +22,7 @@ export default function AddVendorPage() {
     mapLink: "",
     openingHours: "",
     closingHours: "",
-    daysOpen: [],
+    daysOpen: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
     delivery: false,
     accountName: "",
     accountNumber: "",
@@ -131,7 +131,7 @@ export default function AddVendorPage() {
               <div className="grid grid-cols-7 gap-2">
                 {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
                   <label key={day} className="flex items-center gap-2">
-                    <input type="checkbox" name="daysOpen" value={day} onChange={handleChange} />
+                    <input type="checkbox" name="daysOpen" value={day}  checked={formData.daysOpen.includes(day)|| false} onChange={handleChange} />
                     {day}
                   </label>
                 ))}
