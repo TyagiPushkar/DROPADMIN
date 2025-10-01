@@ -70,19 +70,40 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row">
+    <div className="flex h-screen">
       
-      <div className="hidden md:flex md:w-1/2 bg-gradient-to-br from-blue-600 via-indigo-500 to-purple-600 items-center justify-center p-10 text-white relative">
-        <div className="max-w-md text-center space-y-6">
-          <div className="text-4xl font-extrabold tracking-wide">Your Logo</div>
-          <p className="text-lg opacity-90">
-            Welcome back! Sign in securely with your email OTP.
-          </p>
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-sm opacity-70">
-            Secure Access • Fast • Reliable
-          </div>
-        </div>
-      </div>
+     
+<div className="hidden md:flex md:w-1/2 relative text-white">
+  
+  <img
+    src="/images/delivery.jpg"
+    alt="Delivery background"
+    className="absolute inset-0 w-full h-full object-cover"
+  />
+  <div className="absolute inset-0 bg-black/60" />
+
+  
+  <div className="relative z-10 flex flex-col justify-between items-center w-full p-10">
+    
+    <div className="flex flex-col items-center text-center space-y-6 mt-48">
+      <img
+        src="/images/droplogo.jpg"
+        alt="App Logo"
+        className="mx-auto w-28 h-28 object-contain bg-white p-3 rounded-full shadow-2xl ring-4 ring-indigo-500"
+      />
+
+      <p className="text-lg opacity-90 max-w-sm">
+        Welcome back! Sign in securely with your email OTP.
+      </p>
+    </div>
+
+    
+    <div className="text-sm opacity-70 mb-4">
+      Secure Access • Fast • Reliable
+    </div>
+  </div>
+</div>
+
 
       
       <div className="flex-1 flex items-center justify-center bg-gray-50 p-6">
@@ -120,18 +141,50 @@ export default function LoginPage() {
                 />
               </div>
               <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-lg hover:opacity-90 transition font-semibold shadow-lg"
-              >
-                {loading ? "Sending OTP..." : "Send OTP"}
-              </button>
+  type="submit"
+  disabled={loading}
+  className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 cursor-pointer rounded-lg hover:opacity-90 transition font-semibold shadow-lg disabled:opacity-70"
+>
+  {loading && (
+    <svg
+      className="animate-spin h-5 w-5 text-white"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      ></circle>
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+      ></path>
+    </svg>
+  )}
+  {loading ? "Sending OTP..." : "Send OTP"}
+</button>
+
               <button
                 type="button"
-                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-lg hover:opacity-90 transition font-semibold shadow-lg"
+                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-lg hover:opacity-90 cursor-pointer transition font-semibold shadow-lg"
               >
                 Login with Password
               </button>
+              <p className="text-center text-sm text-gray-600 mt-3">Click
+  <a
+    href="/add-vendor"
+    className="text-blue-600 hover:underline font-medium"
+  >
+     &nbsp; here 
+  </a> to register your restaurant
+</p>
+
             </form>
           ) : (
             <form onSubmit={handleVerifyOtp} className="space-y-5">

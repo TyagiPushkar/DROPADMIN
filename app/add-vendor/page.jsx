@@ -14,7 +14,9 @@ export default function AddVendorPage() {
     cuisines: [],
     avgCost: "",
     gst: "",
+    gstProof: null,   
     fssai: "",
+    fssaiProof: null, 
     address: "",
     city: "",
     state: "",
@@ -22,17 +24,21 @@ export default function AddVendorPage() {
     mapLink: "",
     openingHours: "",
     closingHours: "",
-    daysOpen: [],
+    daysOpen: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
     delivery: false,
     accountName: "",
     accountNumber: "",
     ifsc: "",
+    bankProof: null, 
     upi: "",
   })
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target
-    if (type === "checkbox") {
+    const { name, value, type, checked, files } = e.target
+
+    if (type === "file") {
+      setFormData((prev) => ({ ...prev, [name]: files[0] })) 
+    } else if (type === "checkbox") {
       if (name === "cuisines") {
         setFormData((prev) => ({
           ...prev,
@@ -55,10 +61,35 @@ export default function AddVendorPage() {
     }
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log("Vendor Data Submitted:", formData)
-    alert("Vendor registration submitted!")
+
+   
+    const data = new FormData()
+    for (const key in formData) {
+      if (formData[key] instanceof File) {
+        data.append(key, formData[key])
+      } else if (Array.isArray(formData[key])) {
+        formData[key].forEach((item) => data.append(`${key}[]`, item))
+      } else {
+        data.append(key, formData[key])
+      }
+    }
+
+    try {
+      
+      const res = await fetch("/api/vendors", {
+        method: "POST",
+        body: data,
+      })
+
+      if (!res.ok) throw new Error("Failed to submit")
+
+      alert("✅ Vendor registration submitted!")
+    } catch (err) {
+      console.error(err)
+      alert("❌ Something went wrong. Try again!")
+    }
   }
 
   return (
@@ -74,7 +105,7 @@ export default function AddVendorPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="p-8 space-y-10">
-         
+          
           <Section title="👤 Owner & Basic Information">
             <Input label="Restaurant Name" name="restaurantName" value={formData.restaurantName} onChange={handleChange} />
             <Input label="Owner / Contact Person Name" name="ownerName" value={formData.ownerName} onChange={handleChange} />
@@ -84,7 +115,7 @@ export default function AddVendorPage() {
             <Input label="Confirm Password" type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} />
           </Section>
 
-          
+         
           <Section title="🍽️ Restaurant Details">
             <div>
               <label className="form-label">Type</label>
@@ -108,8 +139,20 @@ export default function AddVendorPage() {
             </div>
 
             <Input label="Average Cost for Two" name="avgCost" value={formData.avgCost} onChange={handleChange} />
+
+           
             <Input label="GST Number" name="gst" value={formData.gst} onChange={handleChange} />
+            <div>
+              <label className="form-label">Upload GST Proof (PDF/JPG)</label>
+              <input type="file" name="gstProof" accept=".pdf,.jpg,.jpeg,.png" onChange={handleChange} className="form-input" />
+            </div>
+
+           
             <Input label="FSSAI License Number" name="fssai" value={formData.fssai} onChange={handleChange} />
+            <div>
+              <label className="form-label">Upload FSSAI Proof (PDF/JPG)</label>
+              <input type="file" name="fssaiProof" accept=".pdf,.jpg,.jpeg,.png" onChange={handleChange} className="form-input" />
+            </div>
           </Section>
 
           
@@ -131,14 +174,12 @@ export default function AddVendorPage() {
               <div className="grid grid-cols-7 gap-2">
                 {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
                   <label key={day} className="flex items-center gap-2">
-                    <input type="checkbox" name="daysOpen" value={day} onChange={handleChange} />
+                    <input type="checkbox" name="daysOpen" value={day} checked={formData.daysOpen.includes(day) || false} onChange={handleChange} />
                     {day}
                   </label>
                 ))}
               </div>
             </div>
-
-           
           </Section>
 
           
@@ -147,9 +188,13 @@ export default function AddVendorPage() {
             <Input label="Bank Account Number" name="accountNumber" value={formData.accountNumber} onChange={handleChange} />
             <Input label="IFSC Code" name="ifsc" value={formData.ifsc} onChange={handleChange} />
             <Input label="UPI ID (optional)" name="upi" value={formData.upi} onChange={handleChange} />
+
+            <div className="col-span-2">
+              <label className="form-label">Upload Bank Proof (PDF/JPG)</label>
+              <input type="file" name="bankProof" accept=".pdf,.jpg,.jpeg,.png" onChange={handleChange} className="form-input" />
+            </div>
           </Section>
 
-          
           <div className="flex justify-center">
             <button
               type="submit"
@@ -163,7 +208,6 @@ export default function AddVendorPage() {
     </div>
   )
 }
-
 
 function Section({ title, children }) {
   return (

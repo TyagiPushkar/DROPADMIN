@@ -91,7 +91,7 @@ export default function SettingsPage() {
         <div className="border-t pt-6 flex justify-end">
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 text-red-600 font-medium hover:text-red-700 transition"
+            className="flex items-center gap-2 text-red-600 cursor-pointer font-medium hover:text-red-700 transition"
           >
             <LogOut className="h-5 w-5" />
             Logout
