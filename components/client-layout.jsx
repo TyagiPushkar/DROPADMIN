@@ -8,10 +8,12 @@ import Navbar from "./navbar"
 export default function ClientLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
-  const isLoginPage = pathname === "/" || "/add-vendor"
 
-  if (isLoginPage) {
-    
+  
+  const noLayoutRoutes = ["/", "/add-vendor","/drop"]
+  const isNoLayoutPage = noLayoutRoutes.includes(pathname)
+
+  if (isNoLayoutPage) {
     return <main className="min-h-screen">{children}</main>
   }
 
