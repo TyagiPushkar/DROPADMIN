@@ -19,9 +19,9 @@ export default function AddVendorMultiStep() {
     cuisines: [],
     avgCost: "",
     gst: "",
-    gstProof: null,   
+    gstProof: null,
     fssai: "",
-    fssaiProof: null, 
+    fssaiProof: null,
     address: "",
     city: "",
     state: "",
@@ -34,9 +34,10 @@ export default function AddVendorMultiStep() {
     accountName: "",
     accountNumber: "",
     ifsc: "",
-    bankProof: null, 
+    bankProof: null,
     upi: "",
-  })
+    email: "",
+  });
 
   const API_URL = "https://namami-infotech.com/DROPRIDER/src/auth/login.php"
   const REGISTER_URL ="https://namami-infotech.com/DROP/src/restaurants/add_restaurant.php"
