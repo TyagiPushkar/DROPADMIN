@@ -76,51 +76,55 @@ export default function AddVendorMultiStep() {
     mode: "onBlur",
   })
 
-  const handleSendOtp = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setError("")
+  const handleSendOtp = async (data) => {
+    setLoading(true);
+    setError("");
+  
     try {
       const res = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identifier: email, send_otp: true }),
-      })
-      const data = await res.json()
-      if (data.success) setStep(2)
-      else setError(data.message || "Failed to send OTP")
+        body: JSON.stringify({ identifier: data.email, send_otp: true }),
+      });
+      const responseData = await res.json();
+  
+      if (responseData.success) {
+        setEmail(data.email);
+        setStep(2);
+      } else {
+        setError(responseData.message || "Failed to send OTP");
+      }
     } catch {
-      setError("Something went wrong")
+      setError("Something went wrong");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
+  
 
-  const handleVerifyOtp = async (e) => {
-    e.preventDefault()
-    if (!otp || otp.length < 6) {
-      setError("Please enter a valid 6-digit OTP")
-      return
-    }
-    setLoading(true)
-    setError("")
+  const handleVerifyOtp = async (data) => {
+    setLoading(true);
+    setError("");
     try {
       const res = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identifier: email, otp, verify_otp: true }),
-      })
-      const data = await res.json()
-      if (data.success) {
-        Cookies.set("user", JSON.stringify(data.data), { expires: 1 })
-        setStep(3)
-      } else setError(data.message || "Invalid OTP")
+        body: JSON.stringify({ identifier: email, otp: data.otp, verify_otp: true }),
+      });
+      const responseData = await res.json();
+      if (responseData.success) {
+        Cookies.set("user", JSON.stringify(responseData.data), { expires: 1 });
+        setStep(3);
+      } else {
+        setError(responseData.message || "Invalid OTP");
+      }
     } catch {
-      setError("Something went wrong")
+      setError("Something went wrong");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
+  
 
   const handleChange = (e) => {
     const { name, value, type, checked, files } = e.target
@@ -307,8 +311,6 @@ export default function AddVendorMultiStep() {
             <input
               type="text"
               placeholder="6-digit OTP"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value)}
               {...registerOtp("otp")}
               className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none"
               required
