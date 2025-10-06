@@ -2,6 +2,19 @@
 
 import { useState } from "react"
 import Cookies from "js-cookie"
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+
+
+
+const emailSchema = z.object({
+  email: z.string().min(1, "Email is required").email("Enter a valid email"),
+})
+const otpSchema = z.object({
+  otp: z.string().regex(/^[0-9]{6}$/, "OTP must be exactly 6 digits"),
+})
+
 
 export default function AddVendorMultiStep() {
   const [step, setStep] = useState(1) 
@@ -11,6 +24,7 @@ export default function AddVendorMultiStep() {
   const [error, setError] = useState("")
 
   const [formData, setFormData] = useState({
+    email:"",
     restaurantName: "",
     ownerName: "",
     phone: "",
@@ -42,7 +56,27 @@ export default function AddVendorMultiStep() {
   const API_URL = "https://namami-infotech.com/DROPRIDER/src/auth/login.php"
   const REGISTER_URL ="https://namami-infotech.com/DROP/src/restaurants/add_restaurant.php"
 
- 
+
+  
+  const {
+    register: registerEmail,
+    handleSubmit: handleEmailSubmit,
+    formState: { errors: emailErrors },
+  } = useForm({
+    resolver: zodResolver(emailSchema),
+    mode: "onBlur",
+  })
+
+  
+  const {
+    register: registerOtp,
+    handleSubmit: handleOtpSubmit,
+    formState: { errors: otpErrors },
+  } = useForm({
+    resolver: zodResolver(otpSchema),
+    mode: "onBlur",
+  })
+
   const handleSendOtp = async (e) => {
     e.preventDefault()
     setLoading(true)
@@ -125,7 +159,7 @@ export default function AddVendorMultiStep() {
         restaurantName: formData.restaurantName,
         ownerName: formData.ownerName,
         phone: formData.phone,
-        email: formData.email,
+        email: email,
         password: formData.phone, 
         type: formData.type,
         cuisines: formData.cuisines,
@@ -181,38 +215,64 @@ export default function AddVendorMultiStep() {
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-purple-50 via-pink-50 to-white">
 
-<div className="md:w-1/4 bg-white shadow-xl p-8 flex flex-col items-center gap-8">
-  
-  <div className="w-24 h-24 rounded-full bg-blue-100 flex items-center justify-center shadow-md">
-    <img src="/images/droplogo.jpg" alt="Logo" className="w-16 h-16 object-contain" />
-  </div>
-
-  <h2 className="text-xl font-bold text-gray-800 text-center">Registration Progress</h2>
-
-  <div className="w-full flex flex-col gap-4 mt-4">
-    {steps.map((s, i) => {
+<div className="md:w-1/4 bg-white shadow-xl p-8 flex flex-col items-center gap-8 rounded-2xl">
       
-      const isColored = i + 1 <= step
+      
+      <div className="w-24 h-24 rounded-full overflow-hidden shadow-md">
+        <img
+          src="/images/droplogo.jpg"
+          alt="Logo"
+          className="w-full h-full object-cover"
+        />
+      </div>
 
-      return (
-        <div key={i} className="flex items-center gap-3">
-          
-          <div
-            className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold text-white
-              ${isColored ? "bg-blue-600" : "bg-gray-300"}`}
-          >
-            {i + 1}
-          </div>
+      <h2 className="text-xl font-bold text-gray-900 text-center">
+        Registration Progress
+      </h2>
 
-          
-          <span className={`text-sm font-medium ${isColored ? "text-gray-800" : "text-gray-400"}`}>
-            {s}
-          </span>
-        </div>
-      )
-    })}
-  </div>
-</div>
+      
+      <div className="relative w-full flex flex-col mt-4">
+        
+        <div className="absolute left-4 top-0 h-full w-1 bg-gray-200 rounded-full" />
+        
+        <div
+          className="absolute left-4 top-0 w-1 bg-blue-600 rounded-full transition-all duration-500"
+          style={{ height: `${((step - 1) / (steps.length - 1)) * 100}%` }}
+        />
+
+        {steps.map((s, i) => {
+          const isActive = i + 1 === step
+          const isCompleted = i + 1 < step
+
+          return (
+            <div key={i} className="relative flex items-center gap-3 mb-6">
+             
+              <div
+                className={`relative z-10 w-8 h-8 rounded-full flex items-center justify-center font-semibold shadow-md transition-all duration-300
+                  ${isCompleted ? "bg-blue-600 text-white" : isActive ? "bg-blue-100 text-blue-600 border-2 border-blue-600" : "bg-gray-200 text-gray-500"}
+                `}
+              >
+                {i + 1}
+              </div>
+
+              
+              <span
+                className={`text-sm transition-colors duration-300 ${
+                  isCompleted
+                    ? "text-gray-800 font-medium"
+                    : isActive
+                    ? "text-blue-700 font-semibold"
+                    : "text-gray-400"
+                }`}
+              >
+                {s}
+              </span>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  
 
 
 
@@ -221,17 +281,20 @@ export default function AddVendorMultiStep() {
       <div className="md:w-3/4 flex-1 p-8">
         
         {step === 1 && (
-          <form onSubmit={handleSendOtp} className="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-lg space-y-4">
+          <form onSubmit={handleEmailSubmit(handleSendOtp)} className="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-lg space-y-4">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">📧 Enter your Email</h2>
             <input
               type="email"
               placeholder="Your email"
+              {...registerEmail("email")}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none"
               required
             />
-            {error && <p className="text-red-500 text-sm">{error}</p>}
+             {emailErrors.email && (
+            <p className="text-red-500 text-sm">{emailErrors.email.message}</p>
+          )}
             <button type="submit" disabled={loading} className="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold hover:opacity-90 transition">
               {loading ? "Sending OTP..." : "Send OTP"}
             </button>
@@ -240,17 +303,20 @@ export default function AddVendorMultiStep() {
 
         
         {step === 2 && (
-          <form onSubmit={handleVerifyOtp} className="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-lg space-y-4">
+          <form  onSubmit={handleOtpSubmit(handleVerifyOtp)} className="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-lg space-y-4">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">🔑 Enter OTP</h2>
             <input
               type="text"
               placeholder="6-digit OTP"
               value={otp}
               onChange={(e) => setOtp(e.target.value)}
+              {...registerOtp("otp")}
               className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none"
               required
             />
-            {error && <p className="text-red-500 text-sm">{error}</p>}
+            {otpErrors.otp && (
+            <p className="text-red-500 text-sm">{otpErrors.otp.message}</p>
+          )}
             <button type="submit" disabled={loading} className="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold hover:opacity-90 transition">
               {loading ? "Verifying..." : "Verify OTP"}
             </button>
