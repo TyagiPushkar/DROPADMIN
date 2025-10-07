@@ -93,7 +93,45 @@ export default function AddVendorMultiStep() {
   const API_URL = "https://namami-infotech.com/DROPRIDER/src/auth/login.php"
   const REGISTER_URL ="https://namami-infotech.com/DROP/src/restaurants/add_restaurant.php"
 
-
+  const indianStates = [
+    "Andhra Pradesh",
+    "Arunachal Pradesh",
+    "Assam",
+    "Bihar",
+    "Chhattisgarh",
+    "Goa",
+    "Gujarat",
+    "Haryana",
+    "Himachal Pradesh",
+    "Jharkhand",
+    "Karnataka",
+    "Kerala",
+    "Madhya Pradesh",
+    "Maharashtra",
+    "Manipur",
+    "Meghalaya",
+    "Mizoram",
+    "Nagaland",
+    "Odisha",
+    "Punjab",
+    "Rajasthan",
+    "Sikkim",
+    "Tamil Nadu",
+    "Telangana",
+    "Tripura",
+    "Uttar Pradesh",
+    "Uttarakhand",
+    "West Bengal",
+    "Andaman and Nicobar Islands",
+    "Chandigarh",
+    "Dadra and Nagar Haveli and Daman and Diu",
+    "Delhi",
+    "Jammu and Kashmir",
+    "Ladakh",
+    "Lakshadweep",
+    "Puducherry"
+  ];
+  
   
   const {
     register: registerEmail,
@@ -473,7 +511,21 @@ export default function AddVendorMultiStep() {
               <Section title="📍 Location & Operational">
                 <Input label="Complete Address" name="address" value={formData.address} onChange={handleChange} colSpan />
                 <Input label="City" name="city" value={formData.city} onChange={handleChange} />
-                <Input label="State" name="state" value={formData.state} onChange={handleChange} />
+                <div>
+  <label className="form-label">State / UT</label>
+  <select
+    name="state"
+    value={formData.state}
+    onChange={handleChange}
+    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 shadow-sm bg-white"
+  >
+    <option value="">Select State / UT</option>
+    {indianStates.map((state) => (
+      <option key={state} value={state}>{state}</option>
+    ))}
+  </select>
+</div>
+dr
                 <Input label="Pincode" name="pincode" value={formData.pincode} onChange={handleChange} />
                 <Input label="Google Maps Link" name="mapLink" value={formData.mapLink} onChange={handleChange} colSpan />
                 <Section title="🕒 Operational Details">
