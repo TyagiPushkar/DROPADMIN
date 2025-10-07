@@ -14,6 +14,42 @@ const emailSchema = z.object({
 const otpSchema = z.object({
   otp: z.string().regex(/^[0-9]{6}$/, "OTP must be exactly 6 digits"),
 })
+const ownerInfoSchema = z.object({
+  restaurantName: z.string().min(1, "Restaurant name is required"),
+  ownerName: z.string().min(1, "Owner name is required"),
+  phone: z.string()
+    .regex(/^[0-9]{10}$/, "Phone must be 10 digits"),
+});
+
+const restaurantDetailsSchema = z.object({
+  type: z.string().nonempty("Select restaurant type."),
+  cuisines: z.array(z.string()).min(1, "Select at least one cuisine."),
+  avgCost: z.string().nonempty("Enter average cost."),
+  gst: z.string().nonempty("Enter GST number."),
+  gstProof: z.any().refine((file) => file instanceof File, "Upload GST proof."),
+  fssai: z.string().nonempty("Enter FSSAI number."),
+  fssaiProof: z.any().refine((file) => file instanceof File, "Upload FSSAI proof.")
+});
+const locationOperationalSchema = z.object({
+  address: z.string().min(1, "Address is required"),
+  city: z.string().min(1, "City is required"),
+  state: z.string().min(1, "State is required"),
+  pincode: z
+    .string()
+    .regex(/^[0-9]{6}$/, "Pincode must be 6 digits"),
+  mapLink: z.string().url("Enter a valid Google Maps link"),
+  openingHours: z.string().min(1, "Opening hours required"),
+  closingHours: z.string().min(1, "Closing hours required"),
+  daysOpen: z.array(z.string()).min(1, "Select at least one day"),
+});
+
+const bankDetailsSchema = z.object({
+  accountName: z.string().nonempty("Enter account holder name."),
+  accountNumber: z.string().nonempty("Enter account number."),
+  ifsc: z.string().regex(/^[A-Z]{4}0[A-Z0-9]{6}$/, "Enter valid IFSC code."),
+  upi: z.string().optional(),
+  bankProof: z.any().refine((file) => file instanceof File, "Upload bank proof.")
+});
 
 
 export default function AddVendorMultiStep() {
@@ -22,6 +58,8 @@ export default function AddVendorMultiStep() {
   const [otp, setOtp] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [emailVerified, setEmailVerified] = useState(false)
+
 
   const [formData, setFormData] = useState({
     email:"",
@@ -114,6 +152,7 @@ export default function AddVendorMultiStep() {
       const responseData = await res.json();
       if (responseData.success) {
         Cookies.set("user", JSON.stringify(responseData.data), { expires: 1 });
+        setEmailVerified(true);
         setStep(3);
       } else {
         setError(responseData.message || "Invalid OTP");
@@ -199,12 +238,72 @@ export default function AddVendorMultiStep() {
       const data = await res.json()
   
       if (!res.ok) throw new Error(data.message || "Failed to submit")
-      alert("✅ Vendor registration submitted!")
+        alert("✅ Vendor registration submitted!")
+
+     
+      setFormData({
+        email:"",
+        restaurantName: "",
+        ownerName: "",
+        phone: "",
+        password: "",
+        type: "Both",
+        cuisines: [],
+        avgCost: "",
+        gst: "",
+        gstProof: null,
+        fssai: "",
+        fssaiProof: null,
+        address: "",
+        city: "",
+        state: "",
+        pincode: "",
+        mapLink: "",
+        openingHours: "",
+        closingHours: "",
+        daysOpen: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+        delivery: false,
+        accountName: "",
+        accountNumber: "",
+        ifsc: "",
+        bankProof: null,
+        upi: "",
+      })
+      
+      
+      setEmail("")
+      setOtp("")
+      setEmailVerified(false)
+      setStep(1)
+      
     } catch (err) {
       console.error(err)
       alert("❌ Something went wrong. Try again!")
     }
   }
+  const handleNextStep = () => {
+    let validation;
+  
+    if (step === 1) validation = emailSchema.safeParse({ email });
+    if (step === 2) validation = otpSchema.safeParse({ otp });
+    if (step === 3) validation = ownerInfoSchema.safeParse(formData);
+    if (step === 4) validation = restaurantDetailsSchema.safeParse(formData);
+    if (step === 5) validation = locationOperationalSchema.safeParse(formData);
+    if (step === 6) validation = bankDetailsSchema.safeParse(formData);
+  
+   
+    if (validation && !validation.success) {
+      const firstError = validation.error?.issues?.[0]?.message || "Invalid input";
+      alert("⚠️ " + firstError);
+      return;
+    }
+  
+   
+    setStep((prev) => prev + 1);
+  };
+  
+  
+  
   
   const steps = [
     "Email Address",
@@ -410,13 +509,18 @@ export default function AddVendorMultiStep() {
 
             
             <div className="flex justify-between">
-              {step > 3 && (
-                <button type="button" onClick={() => setStep(step - 1)} className="px-6 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition">
-                  ← Previous
-                </button>
-              )}
+            {step > 3 && !emailVerified && (
+  <button
+    type="button"
+    onClick={() => setStep(step - 1)}
+    className="px-6 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
+  >
+    ← Previous
+  </button>
+)}
+
               {step < 6 && step >= 3 && (
-                <button type="button" onClick={() => setStep(step + 1)} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:opacity-90 transition">
+                <button type="button" onClick={() => handleNextStep()} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:opacity-90 transition">
                   Next →
                 </button>
               )}
