@@ -5,6 +5,7 @@ import Cookies from "js-cookie"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
+import LocationPicker from "@/components/locationPicker"
 
 
 
@@ -507,44 +508,80 @@ export default function AddVendorMultiStep() {
               </Section>
             )}
 
-            {step === 5 && (
-              <Section title="📍 Location & Operational">
-                <Input label="Complete Address" name="address" value={formData.address} onChange={handleChange} colSpan />
-                <Input label="City" name="city" value={formData.city} onChange={handleChange} />
-                <div>
-  <label className="form-label">State / UT</label>
-  <select
-    name="state"
-    value={formData.state}
-    onChange={handleChange}
-    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 shadow-sm bg-white"
-  >
-    <option value="">Select State / UT</option>
-    {indianStates.map((state) => (
-      <option key={state} value={state}>{state}</option>
-    ))}
-  </select>
-</div>
-dr
-                <Input label="Pincode" name="pincode" value={formData.pincode} onChange={handleChange} />
-                <Input label="Google Maps Link" name="mapLink" value={formData.mapLink} onChange={handleChange} colSpan />
-                <Section title="🕒 Operational Details">
-                  <Input label="Opening Hours" type="time" name="openingHours" value={formData.openingHours} onChange={handleChange} />
-                  <Input label="Closing Hours" type="time" name="closingHours" value={formData.closingHours} onChange={handleChange} />
-                  <div className="col-span-2">
-                    <label className="form-label">Days Open</label>
-                    <div className="grid grid-cols-7 gap-2">
-                      {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
-                        <label key={day} className="flex items-center gap-2">
-                          <input type="checkbox" name="daysOpen" value={day} checked={formData.daysOpen.includes(day)} onChange={handleChange} />
-                          {day}
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                </Section>
-              </Section>
-            )}
+{step === 5 && (
+  <Section title="📍 Location & Operational">
+    <Input
+      label="Complete Address"
+      name="address"
+      value={formData.address}
+      onChange={handleChange}
+      colSpan
+    />
+    <Input label="City" name="city" value={formData.city} onChange={handleChange} />
+
+    <div>
+      <label className="form-label">State / UT</label>
+      <select
+        name="state"
+        value={formData.state}
+        onChange={handleChange}
+        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 shadow-sm bg-white"
+      >
+        <option value="">Select State / UT</option>
+        {indianStates.map((state) => (
+          <option key={state} value={state}>
+            {state}
+          </option>
+        ))}
+      </select>
+    </div>
+
+    <Input
+      label="Pincode"
+      name="pincode"
+      value={formData.pincode}
+      onChange={handleChange}
+    />
+
+    {/* ✅ Replace the manual input with interactive map picker */}
+    <LocationPicker formData={formData} setFormData={setFormData} />
+
+    <Section title="🕒 Operational Details">
+      <Input
+        label="Opening Hours"
+        type="time"
+        name="openingHours"
+        value={formData.openingHours}
+        onChange={handleChange}
+      />
+      <Input
+        label="Closing Hours"
+        type="time"
+        name="closingHours"
+        value={formData.closingHours}
+        onChange={handleChange}
+      />
+      <div className="col-span-2">
+        <label className="form-label">Days Open</label>
+        <div className="grid grid-cols-7 gap-2">
+          {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
+            <label key={day} className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                name="daysOpen"
+                value={day}
+                checked={formData.daysOpen.includes(day)}
+                onChange={handleChange}
+              />
+              {day}
+            </label>
+          ))}
+        </div>
+      </div>
+    </Section>
+  </Section>
+)}
+
 
             {step === 6 && (
               <Section title="🏦 Bank Details">

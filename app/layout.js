@@ -1,6 +1,8 @@
 
 import "./globals.css"
 import ClientLayout from "@/components/client-layout"
+import "leaflet/dist/leaflet.css"
+
 
 export const metadata = {
   title: "Drop Admin Dashboard",
