@@ -25,11 +25,45 @@ const ownerInfoSchema = z.object({
 const restaurantDetailsSchema = z.object({
   type: z.string().nonempty("Select restaurant type."),
   cuisines: z.array(z.string()).min(1, "Select at least one cuisine."),
-  avgCost: z.string().nonempty("Enter average cost."),
-  gst: z.string().nonempty("Enter GST number."),
-  gstProof: z.any().refine((file) => file instanceof File, "Upload GST proof."),
-  fssai: z.string().nonempty("Enter FSSAI number."),
-  fssaiProof: z.any().refine((file) => file instanceof File, "Upload FSSAI proof.")
+  avgCost: z
+  .string()
+  .nonempty("Enter average cost.")
+  .refine((val) => /^[0-9]+(\.[0-9]{1,2})?$/.test(val), {
+    message: "Average cost must be a valid number.",
+  })
+  .transform((val) => Number(val))
+  .refine((num) => num > 0, {
+    message: "Average cost must be greater than 0.",
+  }),
+  gst: z
+  .string()
+  .nonempty("Enter GST number.")
+  .regex(
+    /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/,
+    "Enter a valid GST number (15 characters, e.g., 22AAAAA0000A1Z5)"
+  ),
+  gstProof: z
+  .any()
+  .refine((file) => file instanceof File, "Upload GST proof.")
+  .refine(
+    (file) => ["image/jpeg", "image/png", "application/pdf"].includes(file.type),
+    "Only PDF, PNG, or JPG files are allowed for GST proof."
+  )
+  .refine((file) => file.size <= 2 * 1024 * 1024, "File size must be under 2MB."),
+ fssai: z
+    .string()
+    .nonempty("Enter FSSAI number.")
+    .regex(/^\d{14}$/, "FSSAI number must be exactly 14 digits."),
+
+  fssaiProof: z
+    .any()
+    .refine((file) => file instanceof File, "Upload FSSAI proof.")
+    .refine(
+      (file) => ["image/jpeg", "image/png", "application/pdf"].includes(file.type),
+      "Only PDF, PNG, or JPG files are allowed for FSSAI proof."
+    )
+    .refine((file) => file.size <= 2 * 1024 * 1024, "File size must be under 2MB."),
+
 });
 const locationOperationalSchema = z.object({
   address: z.string().min(1, "Address is required"),
@@ -45,12 +79,43 @@ const locationOperationalSchema = z.object({
 });
 
 const bankDetailsSchema = z.object({
-  accountName: z.string().nonempty("Enter account holder name."),
-  accountNumber: z.string().nonempty("Enter account number."),
-  ifsc: z.string().regex(/^[A-Z]{4}0[A-Z0-9]{6}$/, "Enter valid IFSC code."),
-  upi: z.string().optional(),
-  bankProof: z.any().refine((file) => file instanceof File, "Upload bank proof.")
-});
+ 
+  accountName: z
+    .string()
+    .nonempty("Enter account holder name.")
+    .regex(/^[A-Za-z\s.]+$/, "Name can only contain letters, spaces, and dots."),
+
+  
+  accountNumber: z
+    .string()
+    .nonempty("Enter account number.")
+    .regex(/^\d{9,18}$/, "Enter a valid account number (9–18 digits)."),
+
+  
+  ifsc: z
+    .string()
+    .nonempty("Enter IFSC code.")
+    .regex(/^[A-Z]{4}0[A-Z0-9]{6}$/, "Enter a valid IFSC code (e.g., SBIN0001234)."),
+
+  
+  upi: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || /^[\w.-]{2,256}@[a-zA-Z]{2,64}$/.test(val),
+      "Enter a valid UPI ID (e.g., name@bank)."
+    ),
+
+  
+  bankProof: z
+    .any()
+    .refine((file) => file instanceof File, "Upload bank proof.")
+    .refine(
+      (file) => ["image/jpeg", "image/png", "application/pdf"].includes(file.type),
+      "Only PDF, PNG, or JPG files are allowed for bank proof."
+    )
+    .refine((file) => file.size <= 2 * 1024 * 1024, "File size must be under 2MB."),
+})
 
 
 export default function AddVendorMultiStep() {
@@ -314,6 +379,10 @@ export default function AddVendorMultiStep() {
       setOtp("")
       setEmailVerified(false)
       setStep(1)
+      Cookies.remove("user");
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }, 100);
       
     } catch (err) {
       console.error(err)
@@ -436,7 +505,7 @@ export default function AddVendorMultiStep() {
              {emailErrors.email && (
             <p className="text-red-500 text-sm">{emailErrors.email.message}</p>
           )}
-            <button type="submit" disabled={loading} className="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold hover:opacity-90 transition">
+            <button type="submit" disabled={loading} className="w-full py-3 bg-blue-600 text-white cursor-pointer rounded-xl font-semibold hover:opacity-90 transition">
               {loading ? "Sending OTP..." : "Send OTP"}
             </button>
           </form>
@@ -456,7 +525,7 @@ export default function AddVendorMultiStep() {
             {otpErrors.otp && (
             <p className="text-red-500 text-sm">{otpErrors.otp.message}</p>
           )}
-            <button type="submit" disabled={loading} className="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold hover:opacity-90 transition">
+            <button type="submit" disabled={loading} className="w-full py-3 bg-blue-600 text-white cursor-pointer rounded-xl font-semibold hover:opacity-90 transition">
               {loading ? "Verifying..." : "Verify OTP"}
             </button>
           </form>
