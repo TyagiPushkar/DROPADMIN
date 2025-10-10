@@ -5,6 +5,7 @@ import Cookies from "js-cookie"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
+import LocationPicker from "@/components/locationPicker"
 
 
 
@@ -14,6 +15,107 @@ const emailSchema = z.object({
 const otpSchema = z.object({
   otp: z.string().regex(/^[0-9]{6}$/, "OTP must be exactly 6 digits"),
 })
+const ownerInfoSchema = z.object({
+  restaurantName: z.string().min(1, "Restaurant name is required"),
+  ownerName: z.string().min(1, "Owner name is required"),
+  phone: z.string()
+    .regex(/^[0-9]{10}$/, "Phone must be 10 digits"),
+});
+
+const restaurantDetailsSchema = z.object({
+  type: z.string().nonempty("Select restaurant type."),
+  cuisines: z.array(z.string()).min(1, "Select at least one cuisine."),
+  avgCost: z
+  .string()
+  .nonempty("Enter average cost.")
+  .refine((val) => /^[0-9]+(\.[0-9]{1,2})?$/.test(val), {
+    message: "Average cost must be a valid number.",
+  })
+  .transform((val) => Number(val))
+  .refine((num) => num > 0, {
+    message: "Average cost must be greater than 0.",
+  }),
+  gst: z
+  .string()
+  .nonempty("Enter GST number.")
+  .regex(
+    /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/,
+    "Enter a valid GST number (15 characters, e.g., 22AAAAA0000A1Z5)"
+  ),
+  gstProof: z
+  .any()
+  .refine((file) => file instanceof File, "Upload GST proof.")
+  .refine(
+    (file) => ["image/jpeg", "image/png", "application/pdf"].includes(file.type),
+    "Only PDF, PNG, or JPG files are allowed for GST proof."
+  )
+  .refine((file) => file.size <= 2 * 1024 * 1024, "File size must be under 2MB."),
+ fssai: z
+    .string()
+    .nonempty("Enter FSSAI number.")
+    .regex(/^\d{14}$/, "FSSAI number must be exactly 14 digits."),
+
+  fssaiProof: z
+    .any()
+    .refine((file) => file instanceof File, "Upload FSSAI proof.")
+    .refine(
+      (file) => ["image/jpeg", "image/png", "application/pdf"].includes(file.type),
+      "Only PDF, PNG, or JPG files are allowed for FSSAI proof."
+    )
+    .refine((file) => file.size <= 2 * 1024 * 1024, "File size must be under 2MB."),
+
+});
+const locationOperationalSchema = z.object({
+  address: z.string().min(1, "Address is required"),
+  city: z.string().min(1, "City is required"),
+  state: z.string().min(1, "State is required"),
+  pincode: z
+    .string()
+    .regex(/^[0-9]{6}$/, "Pincode must be 6 digits"),
+  mapLink: z.string().url("Enter a valid Google Maps link"),
+  openingHours: z.string().min(1, "Opening hours required"),
+  closingHours: z.string().min(1, "Closing hours required"),
+  daysOpen: z.array(z.string()).min(1, "Select at least one day"),
+});
+
+const bankDetailsSchema = z.object({
+ 
+  accountName: z
+    .string()
+    .nonempty("Enter account holder name.")
+    .regex(/^[A-Za-z\s.]+$/, "Name can only contain letters, spaces, and dots."),
+
+  
+  accountNumber: z
+    .string()
+    .nonempty("Enter account number.")
+    .regex(/^\d{9,18}$/, "Enter a valid account number (9–18 digits)."),
+
+  
+  ifsc: z
+    .string()
+    .nonempty("Enter IFSC code.")
+    .regex(/^[A-Z]{4}0[A-Z0-9]{6}$/, "Enter a valid IFSC code (e.g., SBIN0001234)."),
+
+  
+  upi: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || /^[\w.-]{2,256}@[a-zA-Z]{2,64}$/.test(val),
+      "Enter a valid UPI ID (e.g., name@bank)."
+    ),
+
+  
+  bankProof: z
+    .any()
+    .refine((file) => file instanceof File, "Upload bank proof.")
+    .refine(
+      (file) => ["image/jpeg", "image/png", "application/pdf"].includes(file.type),
+      "Only PDF, PNG, or JPG files are allowed for bank proof."
+    )
+    .refine((file) => file.size <= 2 * 1024 * 1024, "File size must be under 2MB."),
+})
 
 
 export default function AddVendorMultiStep() {
@@ -22,6 +124,8 @@ export default function AddVendorMultiStep() {
   const [otp, setOtp] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [emailVerified, setEmailVerified] = useState(false)
+
 
   const [formData, setFormData] = useState({
     email:"",
@@ -56,7 +160,45 @@ export default function AddVendorMultiStep() {
   const API_URL = "https://namami-infotech.com/DROPRIDER/src/auth/login.php"
   const REGISTER_URL ="https://namami-infotech.com/DROP/src/restaurants/add_restaurant.php"
 
-
+  const indianStates = [
+    "Andhra Pradesh",
+    "Arunachal Pradesh",
+    "Assam",
+    "Bihar",
+    "Chhattisgarh",
+    "Goa",
+    "Gujarat",
+    "Haryana",
+    "Himachal Pradesh",
+    "Jharkhand",
+    "Karnataka",
+    "Kerala",
+    "Madhya Pradesh",
+    "Maharashtra",
+    "Manipur",
+    "Meghalaya",
+    "Mizoram",
+    "Nagaland",
+    "Odisha",
+    "Punjab",
+    "Rajasthan",
+    "Sikkim",
+    "Tamil Nadu",
+    "Telangana",
+    "Tripura",
+    "Uttar Pradesh",
+    "Uttarakhand",
+    "West Bengal",
+    "Andaman and Nicobar Islands",
+    "Chandigarh",
+    "Dadra and Nagar Haveli and Daman and Diu",
+    "Delhi",
+    "Jammu and Kashmir",
+    "Ladakh",
+    "Lakshadweep",
+    "Puducherry"
+  ];
+  
   
   const {
     register: registerEmail,
@@ -115,6 +257,7 @@ export default function AddVendorMultiStep() {
       const responseData = await res.json();
       if (responseData.success) {
         Cookies.set("user", JSON.stringify(responseData.data), { expires: 1 });
+        setEmailVerified(true);
         setStep(3);
       } else {
         setError(responseData.message || "Invalid OTP");
@@ -200,12 +343,76 @@ export default function AddVendorMultiStep() {
       const data = await res.json()
   
       if (!res.ok) throw new Error(data.message || "Failed to submit")
-      alert("✅ Vendor registration submitted!")
+        alert("✅ Vendor registration submitted!")
+
+     
+      setFormData({
+        email:"",
+        restaurantName: "",
+        ownerName: "",
+        phone: "",
+        password: "",
+        type: "Both",
+        cuisines: [],
+        avgCost: "",
+        gst: "",
+        gstProof: null,
+        fssai: "",
+        fssaiProof: null,
+        address: "",
+        city: "",
+        state: "",
+        pincode: "",
+        mapLink: "",
+        openingHours: "",
+        closingHours: "",
+        daysOpen: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+        delivery: false,
+        accountName: "",
+        accountNumber: "",
+        ifsc: "",
+        bankProof: null,
+        upi: "",
+      })
+      
+      
+      setEmail("")
+      setOtp("")
+      setEmailVerified(false)
+      setStep(1)
+      Cookies.remove("user");
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }, 100);
+      
     } catch (err) {
       console.error(err)
       alert("❌ Something went wrong. Try again!")
     }
   }
+  const handleNextStep = () => {
+    let validation;
+  
+    if (step === 1) validation = emailSchema.safeParse({ email });
+    if (step === 2) validation = otpSchema.safeParse({ otp });
+    if (step === 3) validation = ownerInfoSchema.safeParse(formData);
+    if (step === 4) validation = restaurantDetailsSchema.safeParse(formData);
+    if (step === 5) validation = locationOperationalSchema.safeParse(formData);
+    if (step === 6) validation = bankDetailsSchema.safeParse(formData);
+  
+   
+    if (validation && !validation.success) {
+      const firstError = validation.error?.issues?.[0]?.message || "Invalid input";
+      alert("⚠️ " + firstError);
+      return;
+    }
+  
+   
+    setStep((prev) => prev + 1);
+  };
+  
+  
+  
   
   const steps = [
     "Email Address",
@@ -299,7 +506,7 @@ export default function AddVendorMultiStep() {
              {emailErrors.email && (
             <p className="text-red-500 text-sm">{emailErrors.email.message}</p>
           )}
-            <button type="submit" disabled={loading} className="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold hover:opacity-90 transition">
+            <button type="submit" disabled={loading} className="w-full py-3 bg-blue-600 text-white cursor-pointer rounded-xl font-semibold hover:opacity-90 transition">
               {loading ? "Sending OTP..." : "Send OTP"}
             </button>
           </form>
@@ -319,7 +526,7 @@ export default function AddVendorMultiStep() {
             {otpErrors.otp && (
             <p className="text-red-500 text-sm">{otpErrors.otp.message}</p>
           )}
-            <button type="submit" disabled={loading} className="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold hover:opacity-90 transition">
+            <button type="submit" disabled={loading} className="w-full py-3 bg-blue-600 text-white cursor-pointer rounded-xl font-semibold hover:opacity-90 transition">
               {loading ? "Verifying..." : "Verify OTP"}
             </button>
           </form>
@@ -371,30 +578,80 @@ export default function AddVendorMultiStep() {
               </Section>
             )}
 
-            {step === 5 && (
-              <Section title="📍 Location & Operational">
-                <Input label="Complete Address" name="address" value={formData.address} onChange={handleChange} colSpan />
-                <Input label="City" name="city" value={formData.city} onChange={handleChange} />
-                <Input label="State" name="state" value={formData.state} onChange={handleChange} />
-                <Input label="Pincode" name="pincode" value={formData.pincode} onChange={handleChange} />
-                <Input label="Google Maps Link" name="mapLink" value={formData.mapLink} onChange={handleChange} colSpan />
-                <Section title="🕒 Operational Details">
-                  <Input label="Opening Hours" type="time" name="openingHours" value={formData.openingHours} onChange={handleChange} />
-                  <Input label="Closing Hours" type="time" name="closingHours" value={formData.closingHours} onChange={handleChange} />
-                  <div className="col-span-2">
-                    <label className="form-label">Days Open</label>
-                    <div className="grid grid-cols-7 gap-2">
-                      {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
-                        <label key={day} className="flex items-center gap-2">
-                          <input type="checkbox" name="daysOpen" value={day} checked={formData.daysOpen.includes(day)} onChange={handleChange} />
-                          {day}
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                </Section>
-              </Section>
-            )}
+{step === 5 && (
+  <Section title="📍 Location & Operational">
+    <Input
+      label="Complete Address"
+      name="address"
+      value={formData.address}
+      onChange={handleChange}
+      colSpan
+    />
+    <Input label="City" name="city" value={formData.city} onChange={handleChange} />
+
+    <div>
+      <label className="form-label">State / UT</label>
+      <select
+        name="state"
+        value={formData.state}
+        onChange={handleChange}
+        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 shadow-sm bg-white"
+      >
+        <option value="">Select State / UT</option>
+        {indianStates.map((state) => (
+          <option key={state} value={state}>
+            {state}
+          </option>
+        ))}
+      </select>
+    </div>
+
+    <Input
+      label="Pincode"
+      name="pincode"
+      value={formData.pincode}
+      onChange={handleChange}
+    />
+
+    {/* ✅ Replace the manual input with interactive map picker */}
+    <LocationPicker formData={formData} setFormData={setFormData} />
+
+    <Section title="🕒 Operational Details">
+      <Input
+        label="Opening Hours"
+        type="time"
+        name="openingHours"
+        value={formData.openingHours}
+        onChange={handleChange}
+      />
+      <Input
+        label="Closing Hours"
+        type="time"
+        name="closingHours"
+        value={formData.closingHours}
+        onChange={handleChange}
+      />
+      <div className="col-span-2">
+        <label className="form-label">Days Open</label>
+        <div className="grid grid-cols-7 gap-2">
+          {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
+            <label key={day} className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                name="daysOpen"
+                value={day}
+                checked={formData.daysOpen.includes(day)}
+                onChange={handleChange}
+              />
+              {day}
+            </label>
+          ))}
+        </div>
+      </div>
+    </Section>
+  </Section>
+)}
+
 
             {step === 6 && (
               <Section title="🏦 Bank Details">
@@ -411,13 +668,18 @@ export default function AddVendorMultiStep() {
 
             
             <div className="flex justify-between">
-              {step > 3 && (
-                <button type="button" onClick={() => setStep(step - 1)} className="px-6 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition">
-                  ← Previous
-                </button>
-              )}
+            {step > 3 && !emailVerified && (
+  <button
+    type="button"
+    onClick={() => setStep(step - 1)}
+    className="px-6 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
+  >
+    ← Previous
+  </button>
+)}
+
               {step < 6 && step >= 3 && (
-                <button type="button" onClick={() => setStep(step + 1)} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:opacity-90 transition">
+                <button type="button" onClick={() => handleNextStep()} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:opacity-90 transition">
                   Next →
                 </button>
               )}
