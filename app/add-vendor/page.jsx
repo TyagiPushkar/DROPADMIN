@@ -41,7 +41,11 @@ const restaurantDetailsSchema = z.object({
   .regex(
     /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/,
     "Enter a valid GST number (15 characters, e.g., 22AAAAA0000A1Z5)"
-  ),
+  )
+  .refine((val) => val.length === 15, {
+    message: "GST number must be exactly 15 characters.",
+  }),
+
   gstProof: z
   .any()
   .refine((file) => file instanceof File, "Upload GST proof.")
@@ -107,14 +111,14 @@ const bankDetailsSchema = z.object({
     ),
 
   
-  bankProof: z
-    .any()
-    .refine((file) => file instanceof File, "Upload bank proof.")
-    .refine(
-      (file) => ["image/jpeg", "image/png", "application/pdf"].includes(file.type),
-      "Only PDF, PNG, or JPG files are allowed for bank proof."
-    )
-    .refine((file) => file.size <= 2 * 1024 * 1024, "File size must be under 2MB."),
+    bankProof: z.any().refine((file) => {
+  if (!file) return false; 
+  if (!(file instanceof File)) return false;
+  if (!["image/jpeg", "image/png", "application/pdf"].includes(file.type)) return false;
+  if (file.size > 2 * 1024 * 1024) return false;
+  return true;
+}, "Upload a valid file (PDF, PNG, JPG, max 2MB)"),
+
 })
 
 
@@ -142,7 +146,7 @@ export default function AddVendorMultiStep() {
     fssaiProof: null, 
     address: "",
     city: "",
-    state: "",
+    state: "West Bengal",
     pincode: "",
     mapLink: "",
     openingHours: "",
@@ -155,69 +159,68 @@ export default function AddVendorMultiStep() {
     bankProof: null, 
     upi: "",
   })
+  
+  const resetAll = () => {
+    setFormData({
+      email: "",
+      restaurantName: "",
+      ownerName: "",
+      phone: "",
+      password: "",
+      type: "Both",
+      cuisines: [],
+      avgCost: "",
+      gst: "",
+      gstProof: null,
+      fssai: "",
+      fssaiProof: null,
+      address: "",
+      city: "",
+      state: "West Bengal",
+      pincode: "",
+      mapLink: "",
+      openingHours: "",
+      closingHours: "",
+      daysOpen: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+      delivery: false,
+      accountName: "",
+      accountNumber: "",
+      ifsc: "",
+      bankProof: null,
+      upi: "",
+    });
+    setEmail("");
+    setOtp("");
+    setError("");
+    setEmailVerified(false);
+    resetEmailForm(); 
+    resetOtpForm();
+  };
 
   const API_URL = "https://namami-infotech.com/DROPRIDER/src/auth/login.php"
   const REGISTER_URL ="https://namami-infotech.com/DROP/src/restaurants/add_restaurant.php"
-
-  const indianStates = [
-    "Andhra Pradesh",
-    "Arunachal Pradesh",
-    "Assam",
-    "Bihar",
-    "Chhattisgarh",
-    "Goa",
-    "Gujarat",
-    "Haryana",
-    "Himachal Pradesh",
-    "Jharkhand",
-    "Karnataka",
-    "Kerala",
-    "Madhya Pradesh",
-    "Maharashtra",
-    "Manipur",
-    "Meghalaya",
-    "Mizoram",
-    "Nagaland",
-    "Odisha",
-    "Punjab",
-    "Rajasthan",
-    "Sikkim",
-    "Tamil Nadu",
-    "Telangana",
-    "Tripura",
-    "Uttar Pradesh",
-    "Uttarakhand",
-    "West Bengal",
-    "Andaman and Nicobar Islands",
-    "Chandigarh",
-    "Dadra and Nagar Haveli and Daman and Diu",
-    "Delhi",
-    "Jammu and Kashmir",
-    "Ladakh",
-    "Lakshadweep",
-    "Puducherry"
-  ];
   
   
   const {
     register: registerEmail,
     handleSubmit: handleEmailSubmit,
+    reset: resetEmailForm,
     formState: { errors: emailErrors },
   } = useForm({
     resolver: zodResolver(emailSchema),
     mode: "onBlur",
-  })
+  });
 
   
   const {
     register: registerOtp,
     handleSubmit: handleOtpSubmit,
+    reset: resetOtpForm,
     formState: { errors: otpErrors },
   } = useForm({
     resolver: zodResolver(otpSchema),
     mode: "onBlur",
-  })
-
+  });
   const handleSendOtp = async (data) => {
     setLoading(true);
     setError("");
@@ -297,16 +300,26 @@ export default function AddVendorMultiStep() {
   }
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
+    setLoading(true);
+    setError("");
   
     try {
-      
+     
+      const validation = bankDetailsSchema.safeParse(formData);
+      if (!validation.success) {
+        const firstError = validation.error?.issues?.[0]?.message || "Invalid bank details";
+        alert("⚠️ " + firstError);
+        setLoading(false);
+        return;
+      }
+  
       const payload = {
         restaurantName: formData.restaurantName,
         ownerName: formData.ownerName,
         phone: formData.phone,
         email: email,
-        password: formData.phone, 
+        password: formData.phone,
         type: formData.type,
         cuisines: formData.cuisines,
         avgCost: parseFloat(formData.avgCost) || 0,
@@ -319,7 +332,7 @@ export default function AddVendorMultiStep() {
         state: formData.state,
         pincode: formData.pincode,
         mapLink: formData.mapLink,
-        openingHours: formData.openingHours + ":00", 
+        openingHours: formData.openingHours + ":00",
         closingHours: formData.closingHours + ":00",
         daysOpen: formData.daysOpen,
         delivery: formData.delivery,
@@ -331,64 +344,35 @@ export default function AddVendorMultiStep() {
         description: formData.description || "",
         price_range: formData.price_range || "",
         avg_cost_for_two: parseFloat(formData.avg_cost_for_two) || 0,
-      }
+      };
   
       const res = await fetch(REGISTER_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-      })
+      });
   
-      const data = await res.json()
+      const data = await res.json();
   
-      if (!res.ok) throw new Error(data.message || "Failed to submit")
-        alert("✅ Vendor registration submitted!")
-
-     
-      setFormData({
-        email:"",
-        restaurantName: "",
-        ownerName: "",
-        phone: "",
-        password: "",
-        type: "Both",
-        cuisines: [],
-        avgCost: "",
-        gst: "",
-        gstProof: null,
-        fssai: "",
-        fssaiProof: null,
-        address: "",
-        city: "",
-        state: "",
-        pincode: "",
-        mapLink: "",
-        openingHours: "",
-        closingHours: "",
-        daysOpen: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-        delivery: false,
-        accountName: "",
-        accountNumber: "",
-        ifsc: "",
-        bankProof: null,
-        upi: "",
-      })
-      
-      
-      setEmail("")
-      setOtp("")
-      setEmailVerified(false)
-      setStep(1)
+      if (!res.ok) throw new Error(data.message || "Failed to submit");
+  
+      alert("✅ Vendor registration submitted!");
+      resetAll();
+setStep(1);
       Cookies.remove("user");
       setTimeout(() => {
         window.scrollTo({ top: 0, behavior: "smooth" });
       }, 100);
       
+  
     } catch (err) {
-      console.error(err)
-      alert("❌ Something went wrong. Try again!")
+      console.error(err);
+      alert("❌ Something went wrong. Try again!");
+    } finally {
+      setLoading(false);
     }
-  }
+  };
+  
   const handleNextStep = () => {
     let validation;
   
@@ -490,26 +474,65 @@ export default function AddVendorMultiStep() {
       
       <div className="md:w-3/4 flex-1 p-8">
         
-        {step === 1 && (
-          <form onSubmit={handleEmailSubmit(handleSendOtp)} className="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-lg space-y-4">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">📧 Enter your Email</h2>
-            <input
-              type="email"
-              placeholder="Your email"
-              {...registerEmail("email")}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none"
-              required
+      {step === 1 && (
+  <form
+    onSubmit={handleEmailSubmit(handleSendOtp)}
+    className="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-lg space-y-4"
+  >
+    <h2 className="text-2xl font-bold text-gray-800 mb-4">📧 Enter your Email</h2>
+
+    <input
+      type="email"
+      placeholder="Your email"
+      {...registerEmail("email")}
+      value={email}
+      onChange={(e) => setEmail(e.target.value)}
+      className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none"
+      required
+    />
+
+    {emailErrors.email && (
+      <p className="text-red-500 text-sm">{emailErrors.email.message}</p>
+    )}
+
+    <button
+      type="submit"
+      disabled={loading}
+      className={`w-full py-3 rounded-xl font-semibold cursor-pointer transition flex items-center justify-center gap-2
+        ${loading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:opacity-90 text-white"}`}
+    >
+      {loading ? (
+        <>
+          
+          <svg
+            className="animate-spin h-5 w-5 text-white"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
             />
-             {emailErrors.email && (
-            <p className="text-red-500 text-sm">{emailErrors.email.message}</p>
-          )}
-            <button type="submit" disabled={loading} className="w-full py-3 bg-blue-600 text-white cursor-pointer rounded-xl font-semibold hover:opacity-90 transition">
-              {loading ? "Sending OTP..." : "Send OTP"}
-            </button>
-          </form>
-        )}
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8v4l3.5-3.5L12 0v4a8 8 0 010 16v4l3.5-3.5L12 20v4a8 8 0 01-8-8z"
+            />
+          </svg>
+          Sending OTP...
+        </>
+      ) : (
+        "Send OTP"
+      )}
+    </button>
+  </form>
+)}
+
 
         
         {step === 2 && (
@@ -541,9 +564,18 @@ export default function AddVendorMultiStep() {
                 <Input label="Phone Number" type="tel" name="phone" value={formData.phone} onChange={handleChange} />
               </Section>
             )}
-
-            {step === 4 && (
+ {step === 4 && (
               <Section title="🍽️ Restaurant Details">
+                <Input label="GST Number" name="gst" value={formData.gst} onChange={handleChange} />
+                <div>
+                  <label className="form-label">Upload GST Proof</label>
+                  <input type="file" name="gstProof" accept=".pdf,.jpg,.jpeg,.png" onChange={handleChange} className="form-input" />
+                </div>
+                <Input label="FSSAI License Number" name="fssai" value={formData.fssai} onChange={handleChange} />
+                <div>
+                  <label className="form-label">Upload FSSAI Proof</label>
+                  <input type="file" name="fssaiProof" accept=".pdf,.jpg,.jpeg,.png" onChange={handleChange} className="form-input" />
+                </div>
                 <div>
                   <label className="form-label">Type</label>
                   <select name="type" value={formData.type} onChange={handleChange} className="form-input">
@@ -563,19 +595,14 @@ export default function AddVendorMultiStep() {
                     ))}
                   </div>
                 </div>
+                
                 <Input label="Average Cost for Two" name="avgCost" value={formData.avgCost} onChange={handleChange} />
-                <Input label="GST Number" name="gst" value={formData.gst} onChange={handleChange} />
-                <div>
-                  <label className="form-label">Upload GST Proof</label>
-                  <input type="file" name="gstProof" accept=".pdf,.jpg,.jpeg,.png" onChange={handleChange} className="form-input" />
-                </div>
-                <Input label="FSSAI License Number" name="fssai" value={formData.fssai} onChange={handleChange} />
-                <div>
-                  <label className="form-label">Upload FSSAI Proof</label>
-                  <input type="file" name="fssaiProof" accept=".pdf,.jpg,.jpeg,.png" onChange={handleChange} className="form-input" />
-                </div>
+               
               </Section>
             )}
+
+
+
 
 {step === 5 && (
   <Section title="📍 Location & Operational">
@@ -590,19 +617,13 @@ export default function AddVendorMultiStep() {
 
     <div>
       <label className="form-label">State / UT</label>
-      <select
+      <input
+        type="text"
         name="state"
-        value={formData.state}
-        onChange={handleChange}
-        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 shadow-sm bg-white"
-      >
-        <option value="">Select State / UT</option>
-        {indianStates.map((state) => (
-          <option key={state} value={state}>
-            {state}
-          </option>
-        ))}
-      </select>
+        value={formData.state || "West Bengal"}
+        readOnly
+        className="w-full border border-gray-300 rounded-lg px-4 py-3 bg-gray-100 text-gray-700 cursor-not-allowed"
+      />
     </div>
 
     <Input
@@ -612,7 +633,7 @@ export default function AddVendorMultiStep() {
       onChange={handleChange}
     />
 
-    {/* ✅ Replace the manual input with interactive map picker */}
+    
     <LocationPicker formData={formData} setFormData={setFormData} />
 
     <Section title="🕒 Operational Details">
@@ -671,22 +692,54 @@ export default function AddVendorMultiStep() {
   <button
     type="button"
     onClick={() => setStep(step - 1)}
-    className="px-6 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
+    className="px-6 py-2 bg-gray-200 cursor-pointer rounded-lg hover:bg-gray-300 transition"
   >
     ← Previous
   </button>
 )}
 
               {step < 6 && step >= 3 && (
-                <button type="button" onClick={() => handleNextStep()} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:opacity-90 transition">
+                <button type="button" onClick={() => handleNextStep()} className="px-6 py-2 bg-blue-600 cursor-pointer text-white rounded-lg hover:opacity-90 transition">
                   Next →
                 </button>
               )}
               {step === 6 && (
-                <button type="submit" className="px-6 py-2 bg-green-600 text-white rounded-lg hover:opacity-90 transition">
-                  Submit
-                </button>
-              )}
+  <button
+    type="submit"
+    disabled={loading}
+    className={`px-6 py-2 rounded-lg transition cursor-pointer flex items-center justify-center gap-2
+      ${loading ? "bg-green-400 cursor-not-allowed" : "bg-green-600 hover:opacity-90 text-white"}`}
+  >
+    {loading ? (
+      <>
+        <svg
+          className="animate-spin h-5 w-5 text-white"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          />
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8v4l3.5-3.5L12 0v4a8 8 0 010 16v4l3.5-3.5L12 20v4a8 8 0 01-8-8z"
+          />
+        </svg>
+        Submitting...
+      </>
+    ) : (
+      "Submit"
+    )}
+  </button>
+)}
+
             </div>
           </form>
         )}
@@ -708,10 +761,10 @@ function Section({ title, children }) {
 function Input({ label, colSpan = false, ...props }) {
   return (
     <div className={colSpan ? "col-span-2" : ""}>
-      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+      <label className="block text-sm font-medium text-gray-700 mb-[11px]">{label}</label>
       <input
         {...props}
-        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 shadow-sm bg-white"
+        className="w-full border border-gray-300 rounded-lg px-4 py-[13px] focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 shadow-sm bg-white"
       />
     </div>
   )
