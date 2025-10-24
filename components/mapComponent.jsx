@@ -59,31 +59,36 @@ export default function MapComponent({ formData, setFormData }) {
 
   return (
     <MapContainer
-      center={position}
-      zoom={14}
-      style={{ height: "300px", width: "100%" }}
-    >
-      <TileLayer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        attribution='&copy; OpenStreetMap contributors'
-      />
-      <Marker
-        position={position}
-        draggable
-        eventHandlers={{
-          dragend: (e) => {
-            const marker = e.target
-            const newPos = [marker.getLatLng().lat, marker.getLatLng().lng]
-            setPosition(newPos)
-            setFormData({
-              ...formData,
-              location: newPos,
-              mapLink: `https://www.google.com/maps?q=${newPos[0]},${newPos[1]}`,
-            })
-          },
-        }}
-      />
-      <LocationEvents />
-    </MapContainer>
+  center={position}
+  zoom={14}
+  style={{ height: "300px", width: "100%" }}
+>
+  <TileLayer
+    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    attribution='&copy; OpenStreetMap contributors'
+  />
+
+  {position && (
+    <Marker
+      position={position}
+      draggable
+      eventHandlers={{
+        dragend: (e) => {
+          const marker = e.target
+          const newPos = [marker.getLatLng().lat, marker.getLatLng().lng]
+          setPosition(newPos)
+          setFormData({
+            ...formData,
+            location: newPos,
+            mapLink: `https://www.google.com/maps?q=${newPos[0]},${newPos[1]}`,
+          })
+        },
+      }}
+    />
+  )}
+
+  <LocationEvents />
+</MapContainer>
+
   )
 }
