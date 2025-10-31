@@ -162,7 +162,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 cursor-pointer rounded-lg hover:opacity-90 transition font-semibold shadow-lg disabled:opacity-70"
+            className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-3 cursor-pointer rounded-lg hover:opacity-90 transition font-semibold shadow-lg disabled:opacity-70"
           >
             {loading && (
               <svg
@@ -190,12 +190,12 @@ export default function LoginPage() {
           </button>
 
           
-          <button
+          {/* <button
             type="button"
             className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-lg hover:opacity-90 cursor-pointer transition font-semibold shadow-lg"
           >
             Login with Password
-          </button>
+          </button> */}
 
          
           <p className="text-center text-sm text-gray-600 mt-3">
@@ -228,7 +228,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 rounded-lg hover:opacity-90 transition font-semibold shadow-lg"
+            className="w-full bg-gradient-to-r from-green-600 cursor-pointer to-emerald-600 text-white py-3 rounded-lg hover:opacity-90 transition font-semibold shadow-lg"
           >
             {loading ? "Verifying..." : "Verify OTP"}
           </button>

@@ -41,24 +41,24 @@ export default function Navbar({ onMenuClick }) {
             <Menu className="h-6 w-6 text-gray-600" />
           </button>
 
-          <div className="hidden sm:flex items-center w-full bg-gray-100 rounded-lg px-3 py-2">
+          {/* <div className="hidden sm:flex items-center w-full bg-gray-100 rounded-lg px-3 py-2">
             <Search className="h-5 w-5 text-gray-400" />
             <input
               type="text"
               placeholder="Search orders, vendors, users..."
               className="ml-2 w-full bg-transparent outline-none text-sm"
             />
-          </div>
+          </div> */}
         </div>
 
         
         <div className="flex items-center gap-4 sm:gap-6 relative">
-          <button className="relative">
+          {/* <button className="relative">
             <Bell className="h-6 w-6 text-gray-600" />
             <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-white text-[10px]">
               3
             </span>
-          </button>
+          </button> */}
 
           
           <div className="relative" ref={dropdownRef}>

@@ -14,7 +14,7 @@ const RecentOrders = forwardRef(({ filter, search }, ref) => {
  
   
   const { data, error, isLoading, mutate } = useSWR(
-    `http://localhost:8001/src/orders/get_order.php?role=admin`,
+    `https://namami-infotech.com/DROP/src/orders/get_order.php?role=admin`,
     fetcher,
     { refreshInterval: 10000 } 
   )
