@@ -141,9 +141,9 @@ export default function AddVendorMultiStep() {
     cuisines: [],
     avgCost: "",
     gst: "",
-    gstProof: null,   
+    gstProof: null,
     fssai: "",
-    fssaiProof: null, 
+    fssaiProof: null,
     address: "",
     city: "",
     state: "West Bengal",
@@ -156,46 +156,10 @@ export default function AddVendorMultiStep() {
     accountName: "",
     accountNumber: "",
     ifsc: "",
-    bankProof: null, 
+    bankProof: null,
     upi: "",
-  })
-  
-  const resetAll = () => {
-    setFormData({
-      email: "",
-      restaurantName: "",
-      ownerName: "",
-      phone: "",
-      password: "",
-      type: "Both",
-      cuisines: [],
-      avgCost: "",
-      gst: "",
-      gstProof: null,
-      fssai: "",
-      fssaiProof: null,
-      address: "",
-      city: "",
-      state: "West Bengal",
-      pincode: "",
-      mapLink: "",
-      openingHours: "",
-      closingHours: "",
-      daysOpen: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-      delivery: false,
-      accountName: "",
-      accountNumber: "",
-      ifsc: "",
-      bankProof: null,
-      upi: "",
-    });
-    setEmail("");
-    setOtp("");
-    setError("");
-    setEmailVerified(false);
-    resetEmailForm(); 
-    resetOtpForm();
-  };
+    email: "",
+  });
 
   const API_URL = "https://namami-infotech.com/DROPRIDER/src/auth/login.php"
   const REGISTER_URL ="https://namami-infotech.com/DROP/src/restaurants/add_restaurant.php"
