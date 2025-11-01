@@ -27,10 +27,11 @@ export default function Sidebar({ open, setOpen }) {
   return (
     <>
       <aside
-        className={`fixed top-0 left-0 h-screen w-64 bg-gradient-to-b from-blue-600 to-blue-800 shadow-lg flex flex-col text-white z-30
+        className={`fixed top-0 left-0 h-screen w-64 shadow-lg flex flex-col text-white z-30
           transform transition-transform duration-300
           ${open ? "translate-x-0" : "-translate-x-full"}
           md:translate-x-0`}
+        style={{ backgroundColor: "#06a8edff" }}
       >
         <div className="flex items-center justify-between p-6 font-bold text-2xl tracking-wide border-b border-blue-500">
           Drop Admin
@@ -41,8 +42,8 @@ export default function Sidebar({ open, setOpen }) {
 
         <nav className="flex-1 mt-4">
           {menuItems.map((item) => {
-            const Icon = item.icon
-            const isActive = pathname.startsWith(item.href)
+            const Icon = item.icon;
+            const isActive = pathname.startsWith(item.href);
 
             return (
               <Link
@@ -50,15 +51,20 @@ export default function Sidebar({ open, setOpen }) {
                 href={item.href}
                 onClick={() => setOpen(false)}
                 className={`flex items-center gap-3 px-6 py-3 rounded-lg mx-4 mb-2 text-sm font-medium transition-all
-                  ${isActive 
-                    ? "bg-white text-blue-700 shadow-md" 
-                    : "hover:bg-white/20 hover:text-white"}`
-                }
+                  ${
+                    isActive
+                      ? "bg-white text-blue-700 shadow-md"
+                      : "hover:bg-white/20 hover:text-white"
+                  }`}
               >
-                <Icon className={`h-5 w-5 ${isActive ? "text-blue-700" : "text-white"}`} />
+                <Icon
+                  className={`h-5 w-5 ${
+                    isActive ? "text-blue-700" : "text-white"
+                  }`}
+                />
                 {item.name}
               </Link>
-            )
+            );
           })}
         </nav>
       </aside>
@@ -70,5 +76,5 @@ export default function Sidebar({ open, setOpen }) {
         />
       )}
     </>
-  )
+  );
 }
