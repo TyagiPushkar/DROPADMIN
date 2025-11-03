@@ -7,6 +7,7 @@ import {
 } from "react"
 import { Eye, FileText, MapPin } from "lucide-react"
 import useSWR from "swr"
+import Link from "next/link"
 
 const fetcher = (url) => fetch(url).then((res) => res.json())
 
@@ -160,15 +161,19 @@ const RecentOrders = forwardRef(({ filter, search }, ref) => {
                 </td>
                 <td className="px-6 py-4 text-gray-500">{order.created_at}</td>
                 <td className="px-6 py-4 flex gap-2">
-                  <button className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200">
-                    <Eye className="h-4 w-4 text-gray-600" />
-                  </button>
-                  <button className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200">
+                <Link
+  href={`/orders/${order.order_id}`}
+  className="text-blue-600 hover:text-blue-800 flex justify-center"
+>
+  <Eye className="w-5 h-5" />
+</Link>
+
+                  {/* <button className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200">
                     <FileText className="h-4 w-4 text-gray-600" />
                   </button>
                   <button className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200">
                     <MapPin className="h-4 w-4 text-gray-600" />
-                  </button>
+                  </button> */}
                 </td>
               </tr>
             ))}
@@ -215,12 +220,12 @@ const RecentOrders = forwardRef(({ filter, search }, ref) => {
               <button className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200">
                 <Eye className="h-4 w-4 text-gray-600" />
               </button>
-              <button className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200">
+              {/* <button className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200">
                 <FileText className="h-4 w-4 text-gray-600" />
               </button>
               <button className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200">
                 <MapPin className="h-4 w-4 text-gray-600" />
-              </button>
+              </button> */}
             </div>
           </div>
         ))}

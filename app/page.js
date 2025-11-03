@@ -162,7 +162,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-3 cursor-pointer rounded-lg hover:opacity-90 transition font-semibold shadow-lg disabled:opacity-70"
+            className="w-full flex items-center justify-center gap-2 bg-cyan-100 text-black py-3 cursor-pointer rounded-lg hover:opacity-90 transition font-semibold shadow-lg disabled:opacity-70"
           >
             {loading && (
               <svg

@@ -8,6 +8,8 @@ import {
   useImperativeHandle
 } from "react"
 import Link from "next/link"
+import { Eye } from "lucide-react"
+
 
 const RecentVendors = forwardRef(({ filter, search }, ref) => {
   const [vendors, setVendors] = useState([])
@@ -135,12 +137,13 @@ const RecentVendors = forwardRef(({ filter, search }, ref) => {
                 <td className="px-6 py-4">{v.address || "-"}</td>
                 <td className="px-6 py-4">{v.city || "-"}</td>
                 <td className="px-6 py-4 text-center">
-                  <Link
-                    href={`/vendors/${v.restaurant_id}`}
-                    className="text-blue-600 underline hover:text-blue-800"
-                  >
-                    View
-                  </Link>
+                <Link
+  href={`/vendors/${v.restaurant_id}`}
+  className=" p-2 rounded-lg bg-gray-100 hover:bg-gray-200"
+>
+<Eye className="h-4 w-4 text-gray-600" />
+</Link>
+
                 </td>
               </tr>
             ))}
@@ -164,11 +167,12 @@ const RecentVendors = forwardRef(({ filter, search }, ref) => {
               <p><strong>Area:</strong> {v.address || "-"}</p>
             </div>
             <Link
-              href={`/vendors/${v.restaurant_id}`}
-              className="text-blue-600 underline text-sm mt-2 inline-block"
-            >
-              View Details →
-            </Link>
+  href={`/vendors/${v.restaurant_id}`}
+  className="text-blue-600 hover:text-blue-800 p-2 inline-flex items-center justify-center rounded-full hover:bg-blue-50 transition"
+>
+  <Eye className="w-5 h-5" />
+</Link>
+
           </div>
         ))}
       </div>

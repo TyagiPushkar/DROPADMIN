@@ -1,17 +1,30 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { Bell, Search, Menu, LogOut, User } from "lucide-react"
+import { Menu, LogOut, User } from "lucide-react"
 import Cookies from "js-cookie"
 import { useRouter } from "next/navigation"
 
-
 export default function Navbar({ onMenuClick }) {
   const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [user, setUser] = useState(null)
   const dropdownRef = useRef(null)
   const router = useRouter()
 
-  
+  // 🟢 Load user from cookie
+  useEffect(() => {
+    const userCookie = Cookies.get("user")
+    if (userCookie) {
+      try {
+        const parsedUser = JSON.parse(userCookie)
+        setUser(parsedUser)
+      } catch (error) {
+        console.error("Error parsing user cookie:", error)
+      }
+    }
+  }, [])
+
+  // 🟡 Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -19,9 +32,7 @@ export default function Navbar({ onMenuClick }) {
       }
     }
     document.addEventListener("mousedown", handleClickOutside)
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
+    return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
   const handleLogout = () => {
@@ -29,10 +40,20 @@ export default function Navbar({ onMenuClick }) {
     router.push("/")
   }
 
+  // 🟢 Get user initials dynamically
+  const getInitials = (name) => {
+    if (!name) return "U"
+    return name
+      .split(" ")
+      .map((n) => n[0]?.toUpperCase())
+      .join("")
+      .slice(0, 2)
+  }
+
   return (
     <header className="sticky top-0 z-10 bg-white border-b border-gray-200 shadow-sm w-full">
       <div className="flex items-center justify-between px-4 sm:px-6 py-3">
-        
+        {/* Left side: menu button */}
         <div className="flex items-center gap-3 w-full max-w-lg">
           <button
             onClick={onMenuClick}
@@ -40,58 +61,49 @@ export default function Navbar({ onMenuClick }) {
           >
             <Menu className="h-6 w-6 text-gray-600" />
           </button>
-
-          {/* <div className="hidden sm:flex items-center w-full bg-gray-100 rounded-lg px-3 py-2">
-            <Search className="h-5 w-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search orders, vendors, users..."
-              className="ml-2 w-full bg-transparent outline-none text-sm"
-            />
-          </div> */}
         </div>
 
-        
+        {/* Right side: profile */}
         <div className="flex items-center gap-4 sm:gap-6 relative">
-          {/* <button className="relative">
-            <Bell className="h-6 w-6 text-gray-600" />
-            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-white text-[10px]">
-              3
-            </span>
-          </button> */}
-
-          
           <div className="relative" ref={dropdownRef}>
+            {/* Avatar button */}
             <button
               onClick={() => setDropdownOpen((prev) => !prev)}
-              className="h-9 w-9 rounded-full bg-blue-500 text-white flex items-center justify-center font-semibold focus:outline-none hover:ring-2 hover:ring-blue-400 transition"
+              className="h-9 w-9 rounded-full bg-cyan-100 text-black cursor-pointer flex items-center justify-center font-semibold focus:outline-none hover:ring-2 hover:ring-blue-400 transition"
             >
-              AD
+              {getInitials(user?.FullName)}
             </button>
 
+            {/* Dropdown */}
             {dropdownOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden animate-fadeIn">
-               
+              <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden animate-fadeIn z-50">
+                {/* Top user info */}
                 <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
                   <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full cursor-pointer bg-blue-500 text-white flex items-center justify-center font-semibold">
-                      AD
+                    <div className="h-10 w-10 rounded-full bg-cyan-100 text-black flex items-center justify-center font-semibold">
+                      {getInitials(user?.FullName)}
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-900">Admin User</p>
-                      <p className="text-xs text-gray-500">admin@example.com</p>
+                      <p className="text-sm font-medium text-gray-900">
+                        {user?.FullName || "User"}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {user?.Email || "example@example.com"}
+                      </p>
                     </div>
                   </div>
                 </div>
 
-               
+                {/* Menu options */}
                 <div className="py-2">
-                  <button 
-                  onClick={() => router.push("/settings")}
-                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition">
+                  <button
+                    onClick={() => router.push("/settings")}
+                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"
+                  >
                     <User className="h-4 w-4 text-gray-500" />
                     Profile
                   </button>
+
                   <button
                     onClick={handleLogout}
                     className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition"

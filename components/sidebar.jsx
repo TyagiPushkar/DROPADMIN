@@ -27,7 +27,7 @@ export default function Sidebar({ open, setOpen }) {
   return (
     <>
       <aside
-        className={`fixed top-0 left-0 h-screen w-64 bg-gradient-to-b from-blue-600 to-blue-800 shadow-lg flex flex-col text-white z-30
+        className={`fixed top-0 left-0 h-screen w-64 bg-cyan-100 shadow-lg flex flex-col text-black z-30
           transform transition-transform duration-300
           ${open ? "translate-x-0" : "-translate-x-full"}
           md:translate-x-0`}
@@ -52,10 +52,10 @@ export default function Sidebar({ open, setOpen }) {
                 className={`flex items-center gap-3 px-6 py-3 rounded-lg mx-4 mb-2 text-sm font-medium transition-all
                   ${isActive 
                     ? "bg-white text-blue-700 shadow-md" 
-                    : "hover:bg-white/20 hover:text-white"}`
+                    : "hover:bg-white/20 hover:text-gray-800"}`
                 }
               >
-                <Icon className={`h-5 w-5 ${isActive ? "text-blue-700" : "text-white"}`} />
+                <Icon className={`h-5 w-5 ${isActive ? "text-blue-700" : "text-black"}`} />
                 {item.name}
               </Link>
             )
