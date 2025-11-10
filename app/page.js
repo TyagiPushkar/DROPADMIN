@@ -162,7 +162,8 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 bg-cyan-100 text-black py-3 cursor-pointer rounded-lg hover:opacity-90 transition font-semibold shadow-lg disabled:opacity-70"
+            style={{backgroundColor:"#06a8edff"}}
+            className="w-full flex items-center justify-center gap-2 text-white py-3 cursor-pointer rounded-lg hover:opacity-90 transition font-semibold shadow-lg disabled:opacity-70"
           >
             {loading && (
               <svg
@@ -228,7 +229,8 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-green-600 cursor-pointer to-emerald-600 text-white py-3 rounded-lg hover:opacity-90 transition font-semibold shadow-lg"
+            style={{backgroundColor:"#06a8edff"}}
+            className="w-full cursor-pointer text-white py-3 rounded-lg hover:opacity-90 transition font-semibold shadow-lg"
           >
             {loading ? "Verifying..." : "Verify OTP"}
           </button>

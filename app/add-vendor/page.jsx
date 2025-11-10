@@ -368,8 +368,8 @@ export default function VendorRegistration() {
 
       const res = await fetch(REGISTER_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        // Don't set Content-Type header - let browser set it with boundary
+        body: formDataToSend,
       });
 
       const data = await res.json();
