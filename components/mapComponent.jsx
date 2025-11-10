@@ -5,7 +5,6 @@ import L from "leaflet"
 import { useState, useEffect } from "react"
 import "leaflet/dist/leaflet.css"
 
-
 delete L.Icon.Default.prototype._getIconUrl
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
@@ -14,10 +13,14 @@ L.Icon.Default.mergeOptions({
 })
 
 export default function MapComponent({ formData, setFormData }) {
-  const [position, setPosition] = useState(formData.location || [20.5937, 78.9629]) 
+  const [position, setPosition] = useState(
+    formData.latitude && formData.longitude
+      ? [formData.latitude, formData.longitude]
+      : [20.5937, 78.9629] 
+  )
+
   const [mapReady, setMapReady] = useState(false)
 
-  
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -27,28 +30,27 @@ export default function MapComponent({ formData, setFormData }) {
           setPosition(newPos)
           setFormData({
             ...formData,
-            location: newPos,
-            mapLink: `https://www.google.com/maps?q=${latitude},${longitude}`,
+            latitude,
+            longitude,
           })
           setMapReady(true)
         },
-        () => setMapReady(true) 
+        () => setMapReady(true)
       )
     } else {
       setMapReady(true)
     }
   }, [])
 
-  
   function LocationEvents() {
     useMapEvents({
       click(e) {
-        const newPos = [e.latlng.lat, e.latlng.lng]
-        setPosition(newPos)
+        const { lat, lng } = e.latlng
+        setPosition([lat, lng])
         setFormData({
           ...formData,
-          location: newPos,
-          mapLink: `https://www.google.com/maps?q=${newPos[0]},${newPos[1]}`,
+          latitude: lat,
+          longitude: lng,
         })
       },
     })
@@ -58,37 +60,32 @@ export default function MapComponent({ formData, setFormData }) {
   if (!mapReady) return <p className="p-4 text-gray-500">Detecting your location...</p>
 
   return (
-    <MapContainer
-  center={position}
-  zoom={14}
-  style={{ height: "300px", width: "100%" }}
->
-  <TileLayer
-    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-    attribution='&copy; OpenStreetMap contributors'
-  />
+    <MapContainer center={position} zoom={14} style={{ height: "300px", width: "100%" }}>
+      <TileLayer
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        attribution='&copy; OpenStreetMap contributors'
+      />
 
-  {position && (
-    <Marker
-      position={position}
-      draggable
-      eventHandlers={{
-        dragend: (e) => {
-          const marker = e.target
-          const newPos = [marker.getLatLng().lat, marker.getLatLng().lng]
-          setPosition(newPos)
-          setFormData({
-            ...formData,
-            location: newPos,
-            mapLink: `https://www.google.com/maps?q=${newPos[0]},${newPos[1]}`,
-          })
-        },
-      }}
-    />
-  )}
+      {position && (
+        <Marker
+          position={position}
+          draggable
+          eventHandlers={{
+            dragend: (e) => {
+              const marker = e.target
+              const { lat, lng } = marker.getLatLng()
+              setPosition([lat, lng])
+              setFormData({
+                ...formData,
+                latitude: lat,
+                longitude: lng,
+              })
+            },
+          }}
+        />
+      )}
 
-  <LocationEvents />
-</MapContainer>
-
+      <LocationEvents />
+    </MapContainer>
   )
 }
