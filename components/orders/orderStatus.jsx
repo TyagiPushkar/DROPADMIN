@@ -22,7 +22,7 @@ export default function OrderStatus() {
 
   if (error) return <div className="text-red-600 p-2 text-sm">Failed to load status</div>
   if (isLoading) return <div className="text-gray-500 p-2 text-sm">Loading...</div>
-
+console.log("data",data);
   const counts = {}
   if (data?.success && Array.isArray(data.data)) {
     data.data.forEach(order => {

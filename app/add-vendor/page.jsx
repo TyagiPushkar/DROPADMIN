@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { ChevronRight, ChevronLeft, Check } from "lucide-react";
 import LocationPicker from "@/components/locationPicker";
+
 // Validation schemas
 const emailSchema = z.object({
   email: z.string().min(1, "Email is required").email("Enter a valid email"),
@@ -35,29 +36,31 @@ const restaurantDetailsSchema = z.object({
     .refine((num) => num > 0, {
       message: "Average cost must be greater than 0.",
     }),
-  gst: z
+    gst: z
     .string()
-    .nonempty("Enter GST number.")
-    .regex(
-      /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/,
+    .optional()
+    .refine(
+      (val) =>
+        !val || /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/.test(val),
       "Enter a valid GST number (15 characters, e.g., 22AAAAA0000A1Z5)"
     )
-    .refine((val) => val.length === 15, {
+    .refine((val) => !val || val.length === 15, {
       message: "GST number must be exactly 15 characters.",
     }),
+
   gstProof: z
     .any()
-    .refine((file) => file instanceof File, "Upload GST proof.")
+    .optional()
     .refine(
       (file) =>
-        file &&
-        ["image/jpeg", "image/png", "application/pdf"].includes(file.type),
+        !file ||
+        (file instanceof File &&
+          ["image/jpeg", "image/png", "application/pdf"].includes(file.type)),
       "Only PDF, PNG, or JPG files are allowed for GST proof."
     )
-    .refine(
-      (file) => file && file.size <= 2 * 1024 * 1024,
-      "File size must be under 2MB."
-    ),
+    .refine((file) => !file || file.size <= 2 * 1024 * 1024, {
+      message: "File size must be under 2MB.",
+    }),
   fssai: z
     .string()
     .nonempty("Enter FSSAI number.")
@@ -66,9 +69,7 @@ const restaurantDetailsSchema = z.object({
     .any()
     .refine((file) => file instanceof File, "Upload FSSAI proof.")
     .refine(
-      (file) =>
-        file &&
-        ["image/jpeg", "image/png", "application/pdf"].includes(file.type),
+      (file) => file && ["image/jpeg", "image/png", "application/pdf"].includes(file.type),
       "Only PDF, PNG, or JPG files are allowed for FSSAI proof."
     )
     .refine(
@@ -122,6 +123,8 @@ const locationOperationalSchema = z.object({
   closingHours: z.string().min(1, "Closing hours required"),
   daysOpen: z.array(z.string()).min(1, "Select at least one day"),
 });
+
+
 
 const steps = [
   "Email",
@@ -201,13 +204,13 @@ export default function VendorRegistration() {
     setOtp("");
     setError("");
     setEmailVerified(false);
-    resetEmailForm();
+    resetEmailForm(); 
     resetOtpForm();
   };
 
+
   const API_URL = "https://namami-infotech.com/DROPRIDER/src/auth/login.php";
-  const REGISTER_URL =
-    "https://namami-infotech.com/DROP/src/restaurants/add_restaurant.php";
+  const REGISTER_URL = "https://namami-infotech.com/DROP/src/restaurants/add_restaurant.php";
 
   const {
     register: registerEmail,
@@ -230,6 +233,7 @@ export default function VendorRegistration() {
   });
 
   const handleSendOtp = async (data) => {
+
     setLoading(true);
     setError("");
 
@@ -324,56 +328,43 @@ export default function VendorRegistration() {
         return;
       }
 
-      // Create FormData instead of JSON
-      const formDataToSend = new FormData();
-
-      // Append all text fields
-      formDataToSend.append("restaurantName", formData.restaurantName);
-      formDataToSend.append("ownerName", formData.ownerName);
-      formDataToSend.append("phone", formData.phone);
-      formDataToSend.append("email", email);
-      formDataToSend.append("password", formData.phone); // Using phone as password
-      formDataToSend.append("type", formData.type);
-      formDataToSend.append("avgCost", formData.avgCost);
-      formDataToSend.append("gst", formData.gst);
-      formDataToSend.append("fssai", formData.fssai);
-      formDataToSend.append("address", formData.address);
-      formDataToSend.append("city", formData.city);
-      formDataToSend.append("state", formData.state);
-      formDataToSend.append("pincode", formData.pincode);
-      formDataToSend.append("mapLink", formData.mapLink);
-      formDataToSend.append("openingHours", formData.openingHours + ":00");
-      formDataToSend.append("closingHours", formData.closingHours + ":00");
-      formDataToSend.append("delivery", formData.delivery ? "1" : "0");
-      formDataToSend.append("accountName", formData.accountName);
-      formDataToSend.append("accountNumber", formData.accountNumber);
-      formDataToSend.append("ifsc", formData.ifsc);
-      formDataToSend.append("upi", formData.upi || "");
-      formDataToSend.append("description", formData.description || "");
-      formDataToSend.append("price_range", formData.price_range || "");
-      formDataToSend.append(
-        "avg_cost_for_two",
-        formData.avg_cost_for_two || "0"
-      );
-
-      // Append arrays as JSON strings
-      if (formData.cuisines && formData.cuisines.length > 0) {
-        formDataToSend.append("cuisines", JSON.stringify(formData.cuisines));
-      }
-      if (formData.daysOpen && formData.daysOpen.length > 0) {
-        formDataToSend.append("daysOpen", JSON.stringify(formData.daysOpen));
-      }
-
-      // Append files if they exist
-      if (formData.gstProof instanceof File) {
-        formDataToSend.append("gstProof", formData.gstProof);
-      }
-      if (formData.fssaiProof instanceof File) {
-        formDataToSend.append("fssaiProof", formData.fssaiProof);
-      }
-      if (formData.bankProof instanceof File) {
-        formDataToSend.append("bankProof", formData.bankProof);
-      }
+      const payload = {
+        restaurantName: formData.restaurantName,
+        ownerName: formData.ownerName,
+        phone: formData.phone,
+        email: email,
+        password: formData.phone,
+        type: formData.type,
+        cuisines: formData.cuisines,
+        avgCost: Number.parseFloat(formData.avgCost) || 0,
+        gst: formData.gst,
+        gstProof: formData.gstProof
+          ? `uploads/gst/${formData.gstProof.name}`
+          : null,
+        fssai: formData.fssai,
+        fssaiProof: formData.fssaiProof
+          ? `uploads/fssai/${formData.fssaiProof.name}`
+          : null,
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        pincode: formData.pincode,
+        mapLink: formData.mapLink,
+        openingHours: formData.openingHours + ":00",
+        closingHours: formData.closingHours + ":00",
+        daysOpen: formData.daysOpen,
+        delivery: formData.delivery,
+        accountName: formData.accountName,
+        accountNumber: formData.accountNumber,
+        ifsc: formData.ifsc,
+        bankProof: formData.bankProof
+          ? `uploads/bank/${formData.bankProof.name}`
+          : null,
+        upi: formData.upi,
+        description: formData.description || "",
+        price_range: formData.price_range || "",
+        avg_cost_for_two: Number.parseFloat(formData.avg_cost_for_two) || 0,
+      };
 
       const res = await fetch(REGISTER_URL, {
         method: "POST",
@@ -427,10 +418,10 @@ export default function VendorRegistration() {
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-400 to-cyan-500 flex items-center justify-center text-white font-bold shadow-lg">
-              <img src="/images/droplogo.jpg" alt="DROP" />
+              DR
             </div>
             <h1 className="text-xl font-bold text-cyan-900 hidden sm:block">
-              DROP
+              ddrop
             </h1>
           </div>
           <div className="text-sm text-cyan-700 font-medium">
@@ -452,7 +443,7 @@ export default function VendorRegistration() {
                 >
                   <div>
                     <h2 className="text-3xl sm:text-4xl font-bold text-cyan-900 mb-2">
-                      Welcome Onboard !
+                      Welcome Back
                     </h2>
                     <p className="text-cyan-700">
                       Enter your email to continue with registration
@@ -701,7 +692,7 @@ export default function VendorRegistration() {
                       value={formData.city}
                       onChange={handleChange}
                     />
-
+                    
                     {/* State Field - Readonly */}
                     <div>
                       <label className="text-sm font-medium text-cyan-900 block mb-2">
@@ -725,10 +716,7 @@ export default function VendorRegistration() {
 
                     {/* Location Picker Component */}
                     <div className="col-span-full">
-                      <LocationPicker
-                        formData={formData}
-                        setFormData={setFormData}
-                      />
+                      <LocationPicker formData={formData} setFormData={setFormData} />
                     </div>
 
                     {/* Operational Details */}
@@ -818,7 +806,7 @@ export default function VendorRegistration() {
                     />
                     <div className="col-span-full">
                       <label className="text-sm font-medium text-cyan-900 block mb-2">
-                        Bank Proof
+                       Scanned Copy of Cancelled Cheque
                       </label>
                       <input
                         type="file"

@@ -51,17 +51,12 @@ export default function Sidebar({ open, setOpen }) {
                 href={item.href}
                 onClick={() => setOpen(false)}
                 className={`flex items-center gap-3 px-6 py-3 rounded-lg mx-4 mb-2 text-sm font-medium transition-all
-                  ${
-                    isActive
-                      ? "bg-white text-blue-700 shadow-md"
-                      : "hover:bg-white/20 hover:text-white"
-                  }`}
+                  ${isActive 
+                    ? "bg-white text-blue-700 shadow-md" 
+                    : "hover:bg-white/20 hover:text-gray-800"}`
+                }
               >
-                <Icon
-                  className={`h-5 w-5 ${
-                    isActive ? "text-blue-700" : "text-white"
-                  }`}
-                />
+                <Icon className={`h-5 w-5 ${isActive ? "text-blue-700" : "text-black"}`} />
                 {item.name}
               </Link>
             );
