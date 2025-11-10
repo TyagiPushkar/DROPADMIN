@@ -368,8 +368,8 @@ export default function VendorRegistration() {
 
       const res = await fetch(REGISTER_URL, {
         method: "POST",
-        // Don't set Content-Type header - let browser set it with boundary
-        body: formDataToSend,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
@@ -417,9 +417,7 @@ export default function VendorRegistration() {
       <div className="bg-white/80 backdrop-blur border-b border-cyan-200 px-4 sm:px-6 lg:px-8 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-400 to-cyan-500 flex items-center justify-center text-white font-bold shadow-lg">
-              <img src="/images/droplogo.jpg" alt="DROP" className="w-8 h-8" />
-            </div>
+            <img src="/images/droplogo.jpg" alt="DROP" className="w-10 h-10" />
             <h1 className="text-xl font-bold text-cyan-900 hidden sm:block">
               DROP
             </h1>
