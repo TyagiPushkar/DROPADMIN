@@ -50,13 +50,13 @@ export default function RestaurantDetailsPage() {
   if (!restaurant)
     return <div className="p-8 text-gray-600 text-center">No data found</div>
 
-  
+ 
   
 
   return (
     <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-2xl p-8 mt-8">
       <h1 className="text-3xl font-bold text-gray-900 mb-4">
-        {restaurant.restaurant_name}
+        {restaurant.name}
       </h1>
 
       <div className="text-gray-700 space-y-3">
@@ -64,10 +64,10 @@ export default function RestaurantDetailsPage() {
         <p><strong>Email:</strong> {restaurant.email || "N/A"}</p>
         <p><strong>Phone:</strong> {restaurant.phone || "N/A"}</p>
         <p><strong>Type:</strong> {restaurant.type || "N/A"}</p>
-        <p><strong>Average Cost for Two:</strong> ₹{restaurant.avg_cost || "N/A"}</p>
+        <p><strong>Average Cost for Two:</strong> ₹{restaurant.avg_cost_for_two || "N/A"}</p>
         <p><strong>GST:</strong> {restaurant.gst || "N/A"}</p>
         <p><strong>FSSAI:</strong> {restaurant.fssai || "N/A"}</p>
-        <p><strong>Address:</strong> {restaurant.address}</p>
+        <p><strong>Address:</strong> {restaurant.address_line1}</p>
        
       </div>
 

@@ -23,7 +23,7 @@ const RecentVendors = forwardRef(({ filter, search }, ref) => {
       const res = await fetch("https://namami-infotech.com/DROP/src/restaurants/get_restaurants.php")
       if (!res.ok) throw new Error(`HTTP Error ${res.status}`)
       const data = await res.json()
-      console.log("API Response:", data)
+     
       if (data.success && Array.isArray(data.data)) setVendors(data.data)
       else setError(data.message || "Invalid API response")
     } catch (err) {
@@ -120,34 +120,79 @@ const RecentVendors = forwardRef(({ filter, search }, ref) => {
               <th className="px-6 py-3">Owner</th>
               <th className="px-6 py-3">Phone</th>
               <th className="px-6 py-3">Price for Two</th>
-              <th className="px-6 py-3">Area</th>
               <th className="px-6 py-3">City</th>
-              <th className="px-6 py-3 text-center">Action</th>
+              <th className="px-6 py-3">Verified</th>
+               <th className="px-6 py-3 text-center">Action</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {filteredVendors.map((v) => (
-              <tr key={v.restaurant_id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 font-medium text-gray-900">{v.restaurant_name}</td>
-                <td className="px-6 py-4">{v.type || "-"}</td>
-                <td className="px-6 py-4">{v.email || "-"}</td>
-                <td className="px-6 py-4">{v.owner_name || "-"}</td>
-                <td className="px-6 py-4">{v.phone || "-"}</td>
-                <td className="px-6 py-4">{v.avg_cost_for_two || "-"}</td>
-                <td className="px-6 py-4">{v.address || "-"}</td>
-                <td className="px-6 py-4">{v.city || "-"}</td>
-                <td className="px-6 py-4 text-center">
-                <Link
-  href={`/vendors/${v.restaurant_id}`}
-  className=" p-2 rounded-lg bg-gray-100 hover:bg-gray-200"
->
-<Eye className="h-4 w-4 text-gray-600" />
-</Link>
+  {filteredVendors.map((v) => (
+    <tr key={v.restaurant_id} className="hover:bg-gray-50">
+      <td className="px-6 py-4 font-medium text-gray-900">{v.name}</td>
+      <td className="px-6 py-4">{v.type || "-"}</td>
+      <td className="px-6 py-4">{v.email || "-"}</td>
+      <td className="px-6 py-4">{v.owner_name || "-"}</td>
+      <td className="px-6 py-4">{v.phone || "-"}</td>
+      <td className="px-6 py-4">{v.avg_cost_for_two || "-"}</td>
+      <td className="px-6 py-4">{v.city || "-"}</td>
 
-                </td>
-              </tr>
-            ))}
-          </tbody>
+      <td className="px-6 py-4 text-center">
+        <label className="inline-flex items-center cursor-pointer">
+          <input
+            type="checkbox"
+            checked={v.is_verified == 1}
+            onChange={async (e) => {
+              const newStatus = e.target.checked ? 1 : 0
+
+              // Optimistically update UI
+              setVendors((prev) =>
+                prev.map((x) =>
+                  x.restaurant_id === v.restaurant_id
+                    ? { ...x, is_verified: newStatus }
+                    : x
+                )
+              )
+
+              try {
+                const res = await fetch(
+                  "https://namami-infotech.com/DROP/src/restaurants/update_verification.php",
+                  {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      restaurant_id: v.restaurant_id,
+                      is_verified: newStatus,
+                    }),
+                  }
+                )
+                const data = await res.json()
+                if (!data.success) {
+                  alert("Failed: " + data.message)
+                }
+              } catch (err) {
+                console.error("Update failed:", err)
+                alert("Error updating verification.")
+              }
+            }}
+            className="sr-only peer"
+          />
+          <div className="w-10 h-5 bg-gray-300 peer-checked:bg-green-500 rounded-full relative transition">
+            <div className="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
+          </div>
+        </label>
+      </td>
+      <td className="px-6 py-4 text-center">
+        <Link
+          href={`/vendors/${v.restaurant_id}`}
+          className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200"
+        >
+          <Eye className="h-4 w-4 text-gray-600" />
+        </Link>
+      </td>
+    </tr>
+  ))}
+</tbody>
+
         </table>
       </div>
 
