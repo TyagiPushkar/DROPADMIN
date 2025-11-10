@@ -418,10 +418,10 @@ export default function VendorRegistration() {
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-400 to-cyan-500 flex items-center justify-center text-white font-bold shadow-lg">
-              DR
+              <img src="/images/droplogo.jpg" alt="DROP" className="w-8 h-8" />
             </div>
             <h1 className="text-xl font-bold text-cyan-900 hidden sm:block">
-              ddrop
+              DROP
             </h1>
           </div>
           <div className="text-sm text-cyan-700 font-medium">
@@ -692,7 +692,7 @@ export default function VendorRegistration() {
                       value={formData.city}
                       onChange={handleChange}
                     />
-                    
+
                     {/* State Field - Readonly */}
                     <div>
                       <label className="text-sm font-medium text-cyan-900 block mb-2">
@@ -716,7 +716,10 @@ export default function VendorRegistration() {
 
                     {/* Location Picker Component */}
                     <div className="col-span-full">
-                      <LocationPicker formData={formData} setFormData={setFormData} />
+                      <LocationPicker
+                        formData={formData}
+                        setFormData={setFormData}
+                      />
                     </div>
 
                     {/* Operational Details */}
@@ -806,7 +809,7 @@ export default function VendorRegistration() {
                     />
                     <div className="col-span-full">
                       <label className="text-sm font-medium text-cyan-900 block mb-2">
-                       Scanned Copy of Cancelled Cheque
+                        Scanned Copy of Cancelled Cheque
                       </label>
                       <input
                         type="file"
