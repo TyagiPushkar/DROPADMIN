@@ -38,7 +38,7 @@ const RecentVendors = forwardRef(({ filter, search }, ref) => {
     fetchVendors()
   }, [])
 
-  // 🔍 Filter & Search
+  
   const filteredVendors = useMemo(() => {
     let result = vendors
     if (filter && filter !== "All Vendors") {
