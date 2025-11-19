@@ -9,9 +9,11 @@ export default function ClientLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
 
-  
-  const noLayoutRoutes = ["/", "/add-vendor","/drop"]
-  const isNoLayoutPage = noLayoutRoutes.includes(pathname)
+  const noLayoutRoutes = ["/", "/add-vendor", "/drop"]
+
+  const isNoLayoutPage =
+    noLayoutRoutes.includes(pathname) ||
+    pathname.startsWith("/vendor-dashboard/")
 
   if (isNoLayoutPage) {
     return <main className="min-h-screen">{children}</main>
