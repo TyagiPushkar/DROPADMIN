@@ -12,9 +12,22 @@ export default function MenuPage() {
   const [loading, setLoading] = useState(true)
   const [open, setOpen] = useState(false)
   const [debugInfo, setDebugInfo] = useState("")
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [newItem, setNewItem] = useState({
+  item_name: "",
+  description: "",
+  price: "",
+  category: "",
+  is_veg: "1",
+  is_available: "1",
+})
+  const [portions, setPortions] = useState([
+  { portion_type: "unit", portion_price: "" },
+])
 
-  const RESTAURANT_API = "http://localhost:8000/src/restaurants/get_restaurants.php"
-  const MENU_API = "http://localhost:8000/src/restaurants/get_menu.php"
+
+  const RESTAURANT_API = "https://namami-infotech.com/DROP/src/restaurants/get_restaurants.php"
+  const MENU_API = "https://namami-infotech.com/DROP/src/restaurants/get_menu.php"
 
   useEffect(() => {
     const data = Cookies.get("user")
@@ -144,6 +157,57 @@ export default function MenuPage() {
 
     loadMenu()
   }, [restaurantId])
+  async function handleAddMenuItem() {
+    if (!restaurantId) {
+      alert("Restaurant not loaded yet.")
+      return
+    }
+  
+    const payload = {
+      restaurant_id: restaurantId,
+      ...newItem,
+      portions: portions.filter(p => p.portion_price !== "")
+    }
+  
+    try {
+      const response = await fetch(
+        "http://localhost:8000/src/restaurants/add_menu.php",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      )
+  
+      const data = await response.json()
+  
+      if (data.success) {
+        alert("Menu item added successfully!")
+        setShowAddModal(false)
+        setNewItem({
+          item_name: "",
+          description: "",
+          price: "",
+          category: "",
+          is_veg: "1",
+          is_available: "1",
+        })
+        setPortions([{ portion_type: "unit", portion_price: "" }])
+  
+        // Reload menu
+        const menuRes = await fetch(
+          `${MENU_API}?restaurant_id=${restaurantId}`
+        )
+        const menuData = await menuRes.json()
+        setMenu(menuData.data || [])
+      } else {
+        alert(data.message)
+      }
+    } catch (err) {
+      alert("Error adding item: " + err.message)
+    }
+  }
+  
 
   return (
     <div className="flex min-h-screen bg-gray-100">
@@ -159,8 +223,210 @@ export default function MenuPage() {
             Restaurant ID: {restaurantId ?? "Not found"}
           </p>
 
-          {/* Debug Info */}
+         
+          {showAddModal && (
+  <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50 p-4">
+    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 rounded-t-2xl">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-bold text-white">Add New Menu Item</h2>
+          <button
+            onClick={() => setShowAddModal(false)}
+            className="text-white/80 hover:text-white transition-colors text-lg cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
+        <p className="text-blue-100 text-sm mt-1">Fill in the details below to add a new item to your menu</p>
+      </div>
 
+      {/* Form Content */}
+      <div className="p-6 space-y-4">
+        {/* Item Name */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Item Name <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            placeholder="e.g., Margherita Pizza"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            value={newItem.item_name}
+            onChange={(e) => setNewItem({ ...newItem, item_name: e.target.value })}
+          />
+        </div>
+
+        {/* Description */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Description
+          </label>
+          <textarea
+            placeholder="Describe your menu item..."
+            rows={3}
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+            value={newItem.description}
+            onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
+          />
+        </div>
+
+        {/* Category and Base Price */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Category <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              placeholder="e.g., Main Course"
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              value={newItem.category}
+              onChange={(e) => setNewItem({ ...newItem, category: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Base Price (₹) <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="number"
+              placeholder="0.00"
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              value={newItem.price}
+              onChange={(e) => setNewItem({ ...newItem, price: e.target.value })}
+            />
+          </div>
+        </div>
+
+        {/* Food Type and Availability */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Food Type
+            </label>
+            <select
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white cursor-pointer"
+              value={newItem.is_veg}
+              onChange={(e) => setNewItem({ ...newItem, is_veg: e.target.value })}
+            >
+              <option value="1">🟢 Vegetarian</option>
+              <option value="0">🔴 Non-Vegetarian</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Availability
+            </label>
+            <select
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white cursor-pointer"
+              value={newItem.is_available}
+              onChange={(e) => setNewItem({ ...newItem, is_available: e.target.value })}
+            >
+              <option value="1">✅ Available</option>
+              <option value="0">❌ Unavailable</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Portions Section */}
+        <div className="border-t pt-4">
+          <div className="flex justify-between items-center mb-3">
+            <label className="block text-sm font-medium text-gray-700">
+              Portion Sizes & Prices
+            </label>
+            <button
+              type="button"
+              className="text-sm bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1 rounded-lg transition-colors font-medium cursor-pointer"
+              onClick={() =>
+                setPortions([
+                  ...portions,
+                  { portion_type: "unit", portion_price: "" },
+                ])
+              }
+            >
+              + Add Portion
+            </button>
+          </div>
+
+          <div className="space-y-3 max-h-48 overflow-y-auto pr-2">
+            {portions.map((p, index) => (
+              <div key={index} className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border">
+                <select
+                  className="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white text-sm cursor-pointer"
+                  value={p.portion_type}
+                  onChange={(e) => {
+                    const updated = [...portions]
+                    updated[index].portion_type = e.target.value
+                    setPortions(updated)
+                  }}
+                >
+                  <option value="unit">Unit</option>
+                  <option value="half">Half</option>
+                  <option value="full">Full</option>
+                  <option value="piece">Piece</option>
+                  <option value="kg">Kilogram</option>
+                  <option value="litre">Litre</option>
+                  <option value="pack">Pack</option>
+                  <option value="family">Family Pack</option>
+                </select>
+
+                <input
+                  className="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
+                  type="number"
+                  placeholder="Price"
+                  value={p.portion_price}
+                  onChange={(e) => {
+                    const updated = [...portions]
+                    updated[index].portion_price = e.target.value
+                    setPortions(updated)
+                  }}
+                />
+
+                <button
+                  className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 mr-0 rounded transition-colors  cursor-pointer flex items-center justify-center w-8 h-8"
+                  onClick={() => {
+                    setPortions(portions.filter((_, i) => i !== index))
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+          {portions.length === 0 && (
+            <p className="text-sm text-gray-500 text-center py-4 bg-gray-50 rounded-lg border border-dashed">
+              No portions added yet
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Footer Actions */}
+      <div className="flex justify-end gap-3 p-6 border-t bg-gray-50 rounded-b-2xl">
+        <button
+          className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-medium cursor-pointer"
+          onClick={() => setShowAddModal(false)}
+        >
+          Cancel
+        </button>
+        <button
+          className="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all font-medium shadow-lg shadow-blue-200 cursor-pointer"
+          onClick={handleAddMenuItem}
+        >
+          Add Menu Item
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+          <button
+  onClick={() => setShowAddModal(true)}
+  className="mb-4 cursor-pointer px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700"
+>
+  + Add Menu Item
+</button>
 
           {loading ? (
             <p>Loading menu...</p>
@@ -210,11 +476,17 @@ export default function MenuPage() {
                         {item.portions?.length === 0 ? (
                           <span className="text-gray-500">—</span>
                         ) : (
-                          item.portions.map((p) => (
-                            <div key={p.portion_id} className="text-sm">
-                              {p.portion_type} — ₹{p.portion_price}
-                            </div>
-                          ))
+                          <div className="flex flex-wrap gap-2">
+                          {item.portions.map((p) => (
+                            <span
+                              key={p.portion_id}
+                              className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-md font-medium shadow-sm"
+                            >
+                              {p.portion_type}: ₹{p.portion_price}
+                            </span>
+                          ))}
+                        </div>
+                        
                         )}
                       </td>
                     </tr>

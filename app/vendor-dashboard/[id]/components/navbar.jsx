@@ -11,6 +11,35 @@ export default function Navbar({ onMenuClick }) {
   // ------------------------------------------
   // 🚀 CONNECT TO WEBSOCKET SERVER
   // ------------------------------------------
+  const audioRef = useRef(null);
+
+useEffect(() => {
+  audioRef.current = new Audio("/sounds/notification.wav");
+}, []);
+
+useEffect(() => {
+  const unlockAudio = () => {
+    if (!audioRef.current) return;
+
+    audioRef.current.play()
+      .then(() => {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        console.log("🔓 Audio unlocked");
+      })
+      .catch(() => console.log("💥 Unlock failed"));
+
+    window.removeEventListener("click", unlockAudio);
+  };
+
+  window.addEventListener("click", unlockAudio);
+
+  return () => window.removeEventListener("click", unlockAudio);
+}, []);
+
+
+  
+  
   useEffect(() => {
     let socket = new WebSocket("ws://localhost:8080");
   
@@ -20,15 +49,24 @@ export default function Navbar({ onMenuClick }) {
   
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      console.log("🔔 Notification:", data);
-  
-      if (data.type === "new_order" && data.restaurant_id === 1) {
+    
+      
+    
+      if (data.type === "new_order" && data.restaurant_id ) {
+    
+        // Add to list
         setNotifications(prev => [
           { id: Date.now(), text: data.message },
           ...prev
         ]);
+    
+        // Play sound
+        if (audioRef.current) {
+          audioRef.current.play().catch(err => console.log("Sound blocked:", err));
+        }
       }
     };
+    
   
     socket.onclose = () => {
       console.log("WS Closed");

@@ -12,6 +12,7 @@ export function middleware(request) {
     path.startsWith("/favicon") ||
     path.startsWith("/icons") ||
     path.startsWith("/images") ||
+    path.startsWith("/sounds") ||
     path.startsWith("/api")
   ) {
     return NextResponse.next();
@@ -69,5 +70,5 @@ export function middleware(request) {
 }
 
 export const config = {
-  matcher: ["/((?!_next|api|favicon.ico|icons|images).*)"],
+  matcher: ["/((?!_next|api|favicon.ico|icons|images |sounds).*)"],
 };

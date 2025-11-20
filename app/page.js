@@ -12,7 +12,7 @@ export default function LoginPage() {
   const [error, setError] = useState("")
   const router = useRouter()
 
-  const API_URL = "http://localhost:8000/src/auth/login.php"
+  const API_URL = "https://namami-infotech.com/DROP/src/auth/login.php"
 
   // ---------------------------
   // SEND OTP
