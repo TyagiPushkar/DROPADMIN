@@ -2,6 +2,7 @@
   "name": "dropdashboard",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
@@ -20,6 +21,7 @@
     "react-leaflet": "^5.0.0",
     "recharts": "^3.2.1",
     "swr": "^2.3.6",
+    "ws": "^8.18.3",
     "zod": "^4.1.11"
   },
   "devDependencies": {
