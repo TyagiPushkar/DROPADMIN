@@ -4,6 +4,7 @@ import Cookies from "js-cookie"
 import { useEffect, useState } from "react"
 import Sidebar from "../components/sidebar"
 import Navbar from "../components/navbar"
+import { OrderModalProvider } from "../components/orderModalProvider"
 
 export default function MenuPage() {
   const [user, setUser] = useState(null)
@@ -171,7 +172,7 @@ export default function MenuPage() {
   
     try {
       const response = await fetch(
-        "http://localhost:8000/src/restaurants/add_menu.php",
+        "https://namami-infotech.com/DROP/src/restaurants/add_menu.php",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -210,6 +211,7 @@ export default function MenuPage() {
   
 
   return (
+    <OrderModalProvider>
     <div className="flex min-h-screen bg-gray-100">
       <Sidebar open={open} onClose={() => setOpen(false)} />
 
@@ -497,6 +499,6 @@ export default function MenuPage() {
           )}
         </div>
       </div>
-    </div>
+    </div></OrderModalProvider>
   )
 }

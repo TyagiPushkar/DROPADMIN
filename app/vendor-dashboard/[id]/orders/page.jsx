@@ -5,6 +5,7 @@ import { useEffect, useState } from "react"
 import { Search, Filter, RefreshCw, Clock, CheckCircle, XCircle, Truck, AlertCircle, X, Eye, MoreVertical } from "lucide-react"
 import Sidebar from "../components/sidebar"
 import Navbar from "../components/navbar"
+import { OrderModalProvider } from "../components/orderModalProvider"
 
 export default function OrdersPage() {
   const [user, setUser] = useState(null)
@@ -287,6 +288,7 @@ export default function OrdersPage() {
   }
 
   return (
+    <OrderModalProvider>
     <div className="flex min-h-screen">
       <Sidebar open={open} setOpen={setOpen} />
       <div className="flex-1 flex-col">
@@ -719,6 +721,6 @@ export default function OrdersPage() {
           </>
         )}
       </div>
-    </div>
+    </div> </OrderModalProvider>
   )
 }
