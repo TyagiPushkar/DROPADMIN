@@ -5,6 +5,7 @@ import { useEffect, useState } from "react"
 import Sidebar from "../components/sidebar"
 import Navbar from "../components/navbar"
 import { OrderModalProvider } from "../components/orderModalProvider"
+import { BASE_URL } from "@/app/page"
 
 export default function MenuPage() {
   const [user, setUser] = useState(null)
@@ -27,8 +28,8 @@ export default function MenuPage() {
 ])
 
 
-  const RESTAURANT_API = "https://namami-infotech.com/DROP/src/restaurants/get_restaurants.php"
-  const MENU_API = "https://namami-infotech.com/DROP/src/restaurants/get_menu.php"
+  const RESTAURANT_API = BASE_URL+"restaurants/get_restaurants.php"
+  const MENU_API = BASE_URL+"restaurants/get_menu.php"
 
   useEffect(() => {
     const data = Cookies.get("user")
@@ -172,7 +173,7 @@ export default function MenuPage() {
   
     try {
       const response = await fetch(
-        "https://namami-infotech.com/DROP/src/restaurants/add_menu.php",
+        BASE_URL+"restaurants/add_menu.php",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

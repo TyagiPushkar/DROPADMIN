@@ -33,10 +33,22 @@ export function middleware(request) {
   // CUSTOMER ACCESS
   // --------------------
   if (user.UserType === "Customer") {
-    // They can only access /analytics
-    if (!path.startsWith("/analytics")) {
+    const customerAllowed = [
+      "/analytics",
+      "/orders",
+      "/settings",
+      "/vendors",
+    ];
+
+    // Customer must stay inside allowed routes
+    const isAllowed = customerAllowed.some((route) =>
+      path.startsWith(route)
+    );
+
+    if (!isAllowed) {
       return NextResponse.redirect(new URL("/analytics", request.url));
     }
+
     return NextResponse.next();
   }
 

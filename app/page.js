@@ -12,11 +12,10 @@ export default function LoginPage() {
   const [error, setError] = useState("")
   const router = useRouter()
 
-  const API_URL = "https://namami-infotech.com/DROP/src/auth/login.php"
+  
+  
+  const API_URL = BASE_URL + "auth/login.php";
 
-  // ---------------------------
-  // SEND OTP
-  // ---------------------------
   const handleSendOtp = async (e) => {
     e.preventDefault()
     setLoading(true)
@@ -227,3 +226,7 @@ export default function LoginPage() {
     </div>
   )
 }
+
+
+
+export const BASE_URL = "https://namami-infotech.com/DROP/src/";

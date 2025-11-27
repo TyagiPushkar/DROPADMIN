@@ -82,9 +82,10 @@ useEffect(() => {
         });
     
         
-        if (audioRef.current) {
-          audioRef.current.play().catch(err => console.log("Sound blocked:", err));
-        }
+        // Play fresh audio for every order
+const sound = new Audio("/sounds/notification.wav");
+sound.play().catch(err => console.log("Sound blocked:", err));
+
       }
     };
     

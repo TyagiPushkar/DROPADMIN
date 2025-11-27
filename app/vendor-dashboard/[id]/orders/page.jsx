@@ -6,6 +6,7 @@ import { Search, Filter, RefreshCw, Clock, CheckCircle, XCircle, Truck, AlertCir
 import Sidebar from "../components/sidebar"
 import Navbar from "../components/navbar"
 import { OrderModalProvider } from "../components/orderModalProvider"
+import { BASE_URL } from "@/app/page"
 
 export default function OrdersPage() {
   const [user, setUser] = useState(null)
@@ -22,8 +23,10 @@ export default function OrdersPage() {
   const [selectedOrder, setSelectedOrder] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  const RESTAURANT_API = "https://namami-infotech.com/DROP/src/restaurants/get_restaurants.php"
-  const ORDERS_API_BASE = "https://namami-infotech.com/DROP/src/orders/get_order.php"
+  const RESTAURANT_API = BASE_URL+"restaurants/get_restaurants.php"
+  const ORDERS_API_BASE = BASE_URL+"orders/get_order.php"
+
+  
 
   useEffect(() => {
     console.debug("[Orders] reading cookie 'user'...")
@@ -286,6 +289,54 @@ export default function OrdersPage() {
     ready: orders.filter(o => o.order_status?.toLowerCase() === 'ready').length,
     completed: orders.filter(o => o.order_status?.toLowerCase() === 'completed').length,
   }
+  // Add these functions to your component
+
+// Status update function
+const handleStatusUpdate = async (newStatus) => {
+  try {
+    const orderId = selectedOrder.order_id ?? selectedOrder.id;
+    
+    // Call your API to update the status
+    await updateStatus(orderId, newStatus);
+    
+    // Update the local state to reflect the change
+    const updatedOrder = {
+      ...selectedOrder,
+      order_status: newStatus
+    };
+    
+    // Update the selectedOrder in state
+    setSelectedOrder(updatedOrder);
+    
+    // If you have an orders list, update that too
+    // updateOrdersList(updatedOrder);
+    
+    // Optional: Show success message
+    console.log(`Order status updated to ${newStatus}`);
+    
+  } catch (error) {
+    console.error('Failed to update order status:', error);
+    // Optional: Show error message to user
+  }
+};
+
+// Your existing API function
+async function updateStatus(order_id, status) {
+  const response = await fetch(BASE_URL+"orders/update_order_status.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ order_id, order_status: status }),
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to update status');
+  }
+  
+  return response.json();
+}
+
+
+
 
   return (
     <OrderModalProvider>
@@ -559,167 +610,187 @@ export default function OrdersPage() {
 
         {/* Order Details Modal */}
         {isModalOpen && selectedOrder && (
-          <>
-            {/* Backdrop with blur */}
-            <div 
-              className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-40 transition-opacity"
-              onClick={closeOrderModal}
-            />
-            
-            {/* Modal */}
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-              <div 
-                className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden transform transition-all"
-                onClick={(e) => e.stopPropagation()}
-              >
-                {/* Modal Header */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-900">
-                      Order #{selectedOrder.order_id ?? selectedOrder.id}
-                    </h2>
-                    <p className="text-gray-600 mt-1">
-                      {formatDate(selectedOrder.created_at ?? selectedOrder.created)}
-                    </p>
-                  </div>
-                  <button
-                    onClick={closeOrderModal}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                  >
-                    <X size={24} />
-                  </button>
+  <>
+    {/* Backdrop with blur */}
+    <div 
+      className="fixed inset-0  bg-opacity-50 backdrop-blur-sm z-40 transition-opacity"
+      onClick={closeOrderModal}
+    />
+    
+    {/* Modal */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div 
+        className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden transform transition-all"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Modal Header */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">
+              Order #{selectedOrder.order_id ?? selectedOrder.id}
+            </h2>
+            <p className="text-gray-600 mt-1">
+              {formatDate(selectedOrder.created_at ?? selectedOrder.created)}
+            </p>
+          </div>
+          <button
+            onClick={closeOrderModal}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <X size={24} />
+          </button>
+        </div>
+
+        {/* Modal Content */}
+        <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Customer Information */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Customer Information</h3>
+              <div className="space-y-3">
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Name</label>
+                  <p className="text-gray-900">{selectedOrder.customer_name ?? selectedOrder.name ?? "—"}</p>
                 </div>
-
-                {/* Modal Content */}
-                <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {/* Customer Information */}
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Customer Information</h3>
-                      <div className="space-y-3">
-                        <div>
-                          <label className="text-sm font-medium text-gray-600">Name</label>
-                          <p className="text-gray-900">{selectedOrder.customer_name ?? selectedOrder.name ?? "—"}</p>
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium text-gray-600">Phone</label>
-                          <p className="text-gray-900">{selectedOrder.customer_phone ?? selectedOrder.phone ?? "—"}</p>
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium text-gray-600">Email</label>
-                          <p className="text-gray-900">{selectedOrder.customer_email ?? selectedOrder.email ?? "—"}</p>
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium text-gray-600">Address</label>
-                          <p className="text-gray-900">{selectedOrder.delivery_address ?? selectedOrder.address ?? "—"}</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Order Summary */}
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Summary</h3>
-                      <div className="space-y-3">
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Status</span>
-                          <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(selectedOrder.order_status)}`}>
-                            {selectedOrder.order_status ?? selectedOrder.status ?? "—"}
-                          </div>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Total Amount</span>
-                          <span className="font-semibold text-gray-900">
-                            {formatCurrency(selectedOrder.total_amount ?? selectedOrder.total)}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Payment Method</span>
-                          <span className="text-gray-900">{selectedOrder.payment_method ?? "—"}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Payment Status</span>
-                          <span className="text-gray-900">{selectedOrder.payment_status ?? "—"}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Order Items */}
-                    <div className="lg:col-span-2">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Items</h3>
-                      <div className="border border-gray-200 rounded-lg overflow-hidden">
-                        <table className="w-full">
-                          <thead className="bg-gray-50">
-                            <tr>
-                              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">Item</th>
-                              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">Quantity</th>
-                              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">Price</th>
-                              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">Total</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-gray-200">
-                            {(selectedOrder.items ?? []).map((item, index) => (
-                              <tr key={index}>
-                                <td className="px-4 py-3">
-                                  <div className="text-sm font-medium text-gray-900">
-                                    {item.item_name ?? item.name}
-                                  </div>
-                                  {item.variations && (
-                                    <div className="text-sm text-gray-500 mt-1">
-                                      {item.variations}
-                                    </div>
-                                  )}
-                                  {item.special_instructions && (
-                                    <div className="text-sm text-gray-500 mt-1">
-                                      Note: {item.special_instructions}
-                                    </div>
-                                  )}
-                                </td>
-                                <td className="px-4 py-3 text-sm text-gray-900">
-                                  {item.quantity ?? item.qty ?? 1}
-                                </td>
-                                <td className="px-4 py-3 text-sm text-gray-900">
-                                  {formatCurrency(item.price ?? item.rate)}
-                                </td>
-                                <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                                  {formatCurrency((item.price ?? item.rate) * (item.quantity ?? item.qty ?? 1))}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-
-                    {/* Special Instructions */}
-                    {(selectedOrder.notes || selectedOrder.special_instructions) && (
-                      <div className="lg:col-span-2">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-3">Special Instructions</h3>
-                        <div className="bg-gray-50 rounded-lg p-4">
-                          <p className="text-gray-700">
-                            {selectedOrder.notes ?? selectedOrder.special_instructions}
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Phone</label>
+                  <p className="text-gray-900">{selectedOrder.customer_phone ?? selectedOrder.phone ?? "—"}</p>
                 </div>
-
-                {/* Modal Footer */}
-                <div className="flex justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50">
-                  <button
-                    onClick={closeOrderModal}
-                    className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
-                  >
-                    Close
-                  </button>
-                  <button className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                    Update Status
-                  </button>
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Email</label>
+                  <p className="text-gray-900">{selectedOrder.customer_email ?? selectedOrder.email ?? "—"}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Address</label>
+                  <p className="text-gray-900">{selectedOrder.delivery_address ?? selectedOrder.address ?? "—"}</p>
                 </div>
               </div>
             </div>
-          </>
-        )}
+
+            {/* Order Summary */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Summary</h3>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Status</span>
+                  <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(selectedOrder.order_status)}`}>
+                    {selectedOrder.order_status ?? selectedOrder.status ?? "—"}
+                  </div>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Total Amount</span>
+                  <span className="font-semibold text-gray-900">
+                    {formatCurrency(selectedOrder.total_amount ?? selectedOrder.total)}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Payment Method</span>
+                  <span className="text-gray-900">{selectedOrder.payment_method ?? "—"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Payment Status</span>
+                  <span className="text-gray-900">{selectedOrder.payment_status ?? "—"}</span>
+                </div>
+                
+                {/* Status Update Section */}
+                <div className="pt-4 border-t border-gray-200">
+                  <label className="text-sm font-medium text-gray-600 mb-2 block">
+                    Update Order Status
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {["Placed", "Preparing", "Out for Delivery", "Delivered", "Cancelled"].map((status) => (
+                      <button
+                        key={status}
+                        onClick={() => handleStatusUpdate(status)}
+                        disabled={selectedOrder.order_status === status}
+                        className={`px-3 py-2 cursor-pointer rounded-lg text-sm font-medium transition-colors ${
+                          selectedOrder.order_status === status
+                            ? "bg-blue-600 text-white cursor-not-allowed"
+                            : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                        }`}
+                      >
+                        {status}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Order Items */}
+            <div className="lg:col-span-2">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Items</h3>
+              <div className="border border-gray-200 rounded-lg overflow-hidden">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">Item</th>
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">Quantity</th>
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">Price</th>
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {(selectedOrder.items ?? []).map((item, index) => (
+                      <tr key={index}>
+                        <td className="px-4 py-3">
+                          <div className="text-sm font-medium text-gray-900">
+                            {item.item_name ?? item.name}
+                          </div>
+                          {item.variations && (
+                            <div className="text-sm text-gray-500 mt-1">
+                              {item.variations}
+                            </div>
+                          )}
+                          {item.special_instructions && (
+                            <div className="text-sm text-gray-500 mt-1">
+                              Note: {item.special_instructions}
+                            </div>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-900">
+                          {item.quantity ?? item.qty ?? 1}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-900">
+                          {formatCurrency(item.price ?? item.rate)}
+                        </td>
+                        <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                          {formatCurrency((item.price ?? item.rate) * (item.quantity ?? item.qty ?? 1))}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Special Instructions */}
+            {(selectedOrder.notes || selectedOrder.special_instructions) && (
+              <div className="lg:col-span-2">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Special Instructions</h3>
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <p className="text-gray-700">
+                    {selectedOrder.notes ?? selectedOrder.special_instructions}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Modal Footer */}
+        <div className="flex justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50">
+          <button
+            onClick={closeOrderModal}
+            className="px-6 py-2 border cursor-pointer border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </>
+)}
       </div>
     </div> </OrderModalProvider>
   )

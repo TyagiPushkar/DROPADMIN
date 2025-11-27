@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
+import { BASE_URL } from "@/app/page"
 
 export default function RestaurantDetailsPage() {
   const { id } = useParams()
@@ -15,7 +16,7 @@ export default function RestaurantDetailsPage() {
     const fetchRestaurant = async () => {
       try {
         const res = await fetch(
-          "https://namami-infotech.com/DROP/src/restaurants/get_restaurants.php"
+          BASE_URL+"restaurants/get_restaurants.php"
         )
         const data = await res.json()
        
@@ -84,7 +85,7 @@ export default function RestaurantDetailsPage() {
           <p className="font-semibold">GST Proof:</p>
           {restaurant.gst_proof ? (
             <img
-              src={`https://namami-infotech.com/DROP/src/${restaurant.gst_proof}`}
+              src={BASE_URL+`${restaurant.gst_proof}`}
               alt="GST Proof"
               className="w-40 rounded-lg shadow"
             />
@@ -96,7 +97,7 @@ export default function RestaurantDetailsPage() {
           <p className="font-semibold">FSSAI Proof:</p>
           {restaurant.fssai_proof ? (
             <img
-              src={`https://namami-infotech.com/DROP/src/${restaurant.fssai_proof}`}
+              src={BASE_URL+`${restaurant.fssai_proof}`}
               alt="FSSAI Proof"
               className="w-40 rounded-lg shadow"
             />

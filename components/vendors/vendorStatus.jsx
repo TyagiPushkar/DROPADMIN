@@ -1,5 +1,6 @@
 "use client"
 
+import { BASE_URL } from "@/app/page"
 import { Users, CheckCircle, Clock } from "lucide-react"
 import useSWR from "swr"
 
@@ -13,7 +14,7 @@ const statusConfig = [
 
 export default function VendorStatus() {
   const { data, error, isLoading } = useSWR(
-    `https://namami-infotech.com/DROP/src/restaurants/get_restaurants.php`,
+    BASE_URL+`restaurants/get_restaurants.php`,
     fetcher,
     { refreshInterval: 10000 }
   )

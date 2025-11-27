@@ -8,6 +8,7 @@ import {
 import { Eye, FileText, MapPin } from "lucide-react"
 import useSWR from "swr"
 import Link from "next/link"
+import { BASE_URL } from "@/app/page"
 
 const fetcher = (url) => fetch(url).then((res) => res.json())
 
@@ -15,7 +16,7 @@ const RecentOrders = forwardRef(({ filter, search }, ref) => {
  
   
   const { data, error, isLoading, mutate } = useSWR(
-    `https://namami-infotech.com/DROP/src/orders/get_order.php?role=admin`,
+    BASE_URL+`orders/get_order.php?role=admin`,
     fetcher,
     { refreshInterval: 10000 } 
   )
