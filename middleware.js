@@ -19,7 +19,7 @@ export function middleware(request) {
   }
 
   // Public routes
-  const publicRoutes = ["/", "/add-vendor", "/login"];
+  const publicRoutes = ["/", "/add-vendor", "/login","/add-rider"];
   if (publicRoutes.includes(path)) {
     return NextResponse.next();
   }
