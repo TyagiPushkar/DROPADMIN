@@ -186,6 +186,7 @@ export default function LoginPage() {
                   </a>{" "}
                   to register your restaurant
                 </p>
+                
               </form>
             ) : (
               <form onSubmit={handleVerifyOtp} className="space-y-5">
