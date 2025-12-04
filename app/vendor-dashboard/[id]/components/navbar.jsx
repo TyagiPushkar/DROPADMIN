@@ -58,7 +58,7 @@ useEffect(() => {
   
   
   useEffect(() => {
-    let socket = new WebSocket("ws://localhost:8080");
+    let socket = new WebSocket("ws://139.5.190.143:6010");
   
     socket.onopen = () => {
       console.log("WS Connected");
