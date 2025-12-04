@@ -9,6 +9,7 @@ import {
 } from "react"
 import Link from "next/link"
 import { Eye } from "lucide-react"
+import { BASE_URL } from "@/app/page"
 
 
 const RecentVendors = forwardRef(({ filter, search }, ref) => {
@@ -20,7 +21,7 @@ const RecentVendors = forwardRef(({ filter, search }, ref) => {
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch("https://namami-infotech.com/DROP/src/restaurants/get_restaurants.php")
+      const res = await fetch(BASE_URL+"restaurants/get_restaurants.php")
       if (!res.ok) throw new Error(`HTTP Error ${res.status}`)
       const data = await res.json()
      
@@ -155,7 +156,7 @@ const RecentVendors = forwardRef(({ filter, search }, ref) => {
 
               try {
                 const res = await fetch(
-                  "https://namami-infotech.com/DROP/src/restaurants/update_verification.php",
+                  BASE_URL+"restaurants/update_verification.php",
                   {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },

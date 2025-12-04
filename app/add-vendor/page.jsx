@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { ChevronRight, ChevronLeft, Check } from "lucide-react";
 import LocationPicker from "@/components/locationPicker";
+import { BASE_URL } from "../page";
 
 // Validation schemas
 const emailSchema = z.object({
@@ -209,8 +210,8 @@ export default function VendorRegistration() {
   };
 
 
-  const API_URL = "https://namami-infotech.com/DROPRIDER/src/auth/login.php";
-  const REGISTER_URL = "https://namami-infotech.com/DROP/src/restaurants/add_restaurant.php";
+  const API_URL = BASE_URL+"auth/login.php";
+  const REGISTER_URL =  BASE_URL+"restaurants/add_restaurant.php";
 
   const {
     register: registerEmail,

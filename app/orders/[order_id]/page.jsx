@@ -3,6 +3,7 @@
 import { useParams } from "next/navigation"
 import useSWR from "swr"
 import { Package, Clock, Truck, CheckCircle, XCircle, MapPin } from "lucide-react"
+import { BASE_URL } from "@/app/page"
 
 const fetcher = (url) => fetch(url).then((res) => res.json())
 
@@ -18,7 +19,7 @@ export default function OrderDetailsPage() {
   const { order_id } = useParams()
 
   const { data, error, isLoading } = useSWR(
-    `https://namami-infotech.com/DROP/src/orders/get_order.php?role=admin&order_id=${order_id}`,
+    BASE_URL + `orders/get_order.php?role=admin&order_id=${order_id}`,
     fetcher
   )
   
