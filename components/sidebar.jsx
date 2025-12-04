@@ -9,7 +9,7 @@ const menuItems = [
   { name: "Analytics", href: "/analytics", icon: BarChart3 },
   { name: "Orders", href: "/orders", icon: ShoppingCart },
   { name: "Vendors", href: "/vendors", icon: Package },
-  // { name: "Users", href: "/users", icon: Users },
+   { name: "Riders", href: "/riders", icon: Users },
   { name: "Settings", href: "/settings", icon: Settings },
 ]
 

@@ -38,6 +38,7 @@ export function middleware(request) {
       "/orders",
       "/settings",
       "/vendors",
+      "/riders"
     ];
 
     // Customer must stay inside allowed routes
