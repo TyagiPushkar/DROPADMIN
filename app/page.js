@@ -186,6 +186,16 @@ export default function LoginPage() {
                   </a>{" "}
                   to register your restaurant
                 </p>
+                <p className="text-center text-sm text-gray-600 mt-3">
+                  Click
+                  <a
+                    href="/add-rider"
+                    className="text-blue-600 hover:underline font-medium"
+                  >
+                    &nbsp;here
+                  </a>{" "}
+                  to onboard as rider
+                </p>
                 
               </form>
             ) : (
