@@ -405,24 +405,15 @@ useEffect(() => {
                 <FileText size={20} /> Upload Documents
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <FileInput
-                  label="Profile Picture"
-                  name="profile_picture"
-                  accept="image/*"
-                />
+                <FileInput label="Profile Picture" name="profile_picture" />
                 <FileInput label="Aadhar Front" name="aadhar_front" />
                 <FileInput label="Aadhar Back" name="aadhar_back" />
                 <FileInput label="DL Photo" name="dl_photo" />
                 <FileInput
                   label="Vehicle Plate Photo"
                   name="vehicle_plate_photo"
-                  accept="image/*"
                 />
-                <FileInput
-                  label="Vehicle Image"
-                  name="vehicle_image"
-                  accept="image/*"
-                />
+                <FileInput label="Vehicle Image" name="vehicle_image" />
                 <FileInput label="PAN Image" name="pan_image" />
                 <FileInput label="Insurance Image" name="insurance_image" />
                 <FileInput label="RC Image" name="rc_image" />
