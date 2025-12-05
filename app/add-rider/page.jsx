@@ -234,6 +234,10 @@ useEffect(() => {
       <input
         type={type}
         {...register(name)}
+        onChange={(e) => {
+          e.target.value = e.target.value.toUpperCase();
+          register(name).onChange(e); // keep react-hook-form working
+        }}
         placeholder={placeholder}
         className="w-full bg-white border-2 border-cyan-200 rounded-lg px-4 py-3 text-cyan-900 placeholder-cyan-300 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 outline-none transition"
       />
@@ -241,7 +245,7 @@ useEffect(() => {
     </div>
   );
 
-  const FileInput = ({ label, name, accept = "image/*", onChange }) => {
+  const FileInput = ({ label, name, accept = "image/*,.pdf", onChange }) => {
     const inputRef = useRef(null);
 
     return (
@@ -274,7 +278,6 @@ useEffect(() => {
 
   // Render current step
   const renderStep = useCallback(() => {
-
     switch (step) {
       case 1:
         return (
@@ -351,6 +354,9 @@ useEffect(() => {
                   placeholder="ABCDE1234F"
                   register={register}
                   error={errors.pan_number}
+                  onChange={(e) => {
+                    e.target.value = e.target.value.toUpperCase();
+                  }}
                 />
               </div>
             </div>
