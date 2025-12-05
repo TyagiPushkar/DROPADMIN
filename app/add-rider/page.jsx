@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef ,useMemo,useCallback} from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
@@ -51,7 +51,7 @@ const step3Schema = z.object({
 const step4Schema = z.object({
   dl_number: z
     .string()
-    .regex(/^[A-Z]{2}-[0-9]{2}-[0-9]{4}-[0-9]{4}$/, "Format: DL-04-2023-5566"),
+    .regex(/^[A-Z]{2}[0-9]{10}$/, "Enter valid DL number (no hyphens)"),
   vehicle_number: z
     .string()
     .regex(/^[A-Z]{2}[0-9]{2}[A-Z]{1,2}[0-9]{4}$/, "Format: MH12AB1234"),
@@ -65,6 +65,7 @@ const step4Schema = z.object({
       return expDate >= today;
     }, "Insurance must not be expired"),
 });
+
 
 const steps = [
   { id: 1, title: "Email", icon: <Mail size={16} />, schema: step1Schema },
@@ -104,44 +105,37 @@ export default function RiderOnboarding() {
     rc_image: null,
   });
 
-  // Use react-hook-form for each step
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    control,
-    setValue,
-    reset,
-  } = useForm({
-    resolver: zodResolver(
-      steps.find((s) => s.id === step)?.schema || step1Schema
-    ),
-    mode: "onChange",
+  const currentSchema = useMemo(() => {
+    return steps.find((s) => s.id === step)?.schema || step1Schema;
+  }, [step]);
+  
+  const { register, handleSubmit, formState: { errors }, setValue, reset } = useForm({
+    resolver: zodResolver(currentSchema),
+    mode: "onSubmit",
   });
+  
 
-  // Initialize form values when step changes
-  useEffect(() => {
-    if (step === 1) {
-      reset({ email: formDataRef.current.email });
-    } else if (step === 2) {
-      reset({
-        name: formDataRef.current.name,
-        phone: formDataRef.current.phone,
-        address: formDataRef.current.address,
-      });
-    } else if (step === 3) {
-      reset({
-        aadhar_number: formDataRef.current.aadhar_number,
-        pan_number: formDataRef.current.pan_number,
-      });
-    } else if (step === 4) {
-      reset({
-        dl_number: formDataRef.current.dl_number,
-        vehicle_number: formDataRef.current.vehicle_number,
-        insurance_expiry_date: formDataRef.current.insurance_expiry_date,
-      });
-    }
-  }, [step, reset]);
+
+  
+useEffect(() => {
+  const data = formDataRef.current;
+
+  if (step === 1) {
+    setValue("email", data.email ?? "");
+  } else if (step === 2) {
+    setValue("name", data.name ?? "");
+    setValue("phone", data.phone ?? "");
+    setValue("address", data.address ?? "");
+  } else if (step === 3) {
+    setValue("aadhar_number", data.aadhar_number ?? "");
+    setValue("pan_number", data.pan_number ?? "");
+  } else if (step === 4) {
+    setValue("dl_number", data.dl_number ?? "");
+    setValue("vehicle_number", data.vehicle_number ?? "");
+    setValue("insurance_expiry_date", data.insurance_expiry_date ?? "");
+  }
+}, [step, setValue]); 
+
 
   // Handle form submission for each step
   const onStepSubmit = (data) => {
@@ -247,7 +241,7 @@ export default function RiderOnboarding() {
     </div>
   );
 
-  const FileInput = ({ label, name, accept = "image/*,.pdf", onChange }) => {
+  const FileInput = ({ label, name, accept = "image/*", onChange }) => {
     const inputRef = useRef(null);
 
     return (
@@ -279,7 +273,8 @@ export default function RiderOnboarding() {
   };
 
   // Render current step
-  const renderStep = () => {
+  const renderStep = useCallback(() => {
+
     switch (step) {
       case 1:
         return (
@@ -373,7 +368,7 @@ export default function RiderOnboarding() {
                 <FormInput
                   label="DL Number"
                   name="dl_number"
-                  placeholder="DL-04-2023-5566"
+                  placeholder="DL0420235566"
                   register={register}
                   error={errors.dl_number}
                 />
@@ -433,7 +428,8 @@ export default function RiderOnboarding() {
       default:
         return null;
     }
-  };
+  }, [step, errors, register]);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-blue-50 flex flex-col">
