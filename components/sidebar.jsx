@@ -3,13 +3,16 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { BarChart3, ShoppingCart, Package, Users, Settings, X } from "lucide-react"
+import { BarChart3, ShoppingCart, Package, Users, Settings, X , BikeIcon ,Wallet, Book} from "lucide-react"
 
 const menuItems = [
   { name: "Analytics", href: "/analytics", icon: BarChart3 },
   { name: "Orders", href: "/orders", icon: ShoppingCart },
   { name: "Vendors", href: "/vendors", icon: Package },
    { name: "Riders", href: "/riders", icon: Users },
+   { name: "Rides", href: "/rides", icon: BikeIcon },
+   { name: "Wallet", href: "/rider-ledger", icon: Wallet },
+   { name: "Directory", href: "/rider-directory", icon: Book },
   { name: "Settings", href: "/settings", icon: Settings },
 ]
 
