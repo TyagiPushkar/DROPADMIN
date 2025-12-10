@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef ,useMemo,useCallback} from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
@@ -20,12 +20,8 @@ import {
   IdCard,
 } from "lucide-react";
 
-// Validation schemas for each step
+// Validation schemas - Combined step 1 (email) into step 2 (personal)
 const step1Schema = z.object({
-  email: z.string().min(1, "Email is required").email("Enter a valid email"),
-});
-
-const step2Schema = z.object({
   name: z
     .string()
     .min(3, "Name must be at least 3 characters")
@@ -37,9 +33,10 @@ const step2Schema = z.object({
     .string()
     .min(10, "Address must be at least 10 characters")
     .max(200, "Address too long"),
+  email: z.string().email("Enter a valid email").optional().or(z.literal("")),
 });
 
-const step3Schema = z.object({
+const step2Schema = z.object({
   aadhar_number: z
     .string()
     .regex(/^\d{12}$/, "Aadhar must be exactly 12 digits"),
@@ -48,13 +45,16 @@ const step3Schema = z.object({
     .regex(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, "Enter valid PAN (e.g., ABCDE1234F)"),
 });
 
-const step4Schema = z.object({
+const step3Schema = z.object({
   dl_number: z
     .string()
-    .regex(/^[A-Z]{2}[0-9]{10}$/, "Enter valid DL number (no hyphens)"),
+    .regex(/^[A-Z]{2}[0-9]{13}$/, "Enter valid DL number (no hyphens)"),
   vehicle_number: z
     .string()
-    .regex(/^[A-Z]{2}[0-9]{2}[A-Z]{1,2}[0-9]{4}$/, "Format: MH12AB1234"),
+    .regex(
+      /^[A-Z]{2}[0-9]{2}[A-Z]{1,2}[0-9]{4}$/,
+      "Format: MH12AB1234, Remove spaces/hyphens"
+    ),
   insurance_expiry_date: z
     .string()
     .min(1, "Insurance expiry date is required")
@@ -66,13 +66,11 @@ const step4Schema = z.object({
     }, "Insurance must not be expired"),
 });
 
-
 const steps = [
-  { id: 1, title: "Email", icon: <Mail size={16} />, schema: step1Schema },
-  { id: 2, title: "Personal", icon: <User size={16} />, schema: step2Schema },
-  { id: 3, title: "Identity", icon: <IdCard size={16} />, schema: step3Schema },
-  { id: 4, title: "Vehicle", icon: <Bike size={16} />, schema: step4Schema },
-  { id: 5, title: "Documents", icon: <FileText size={16} /> },
+  { id: 1, title: "Personal", icon: <User size={16} />, schema: step1Schema },
+  { id: 2, title: "Identity", icon: <IdCard size={16} />, schema: step2Schema },
+  { id: 3, title: "Vehicle", icon: <Bike size={16} />, schema: step3Schema },
+  { id: 4, title: "Documents", icon: <FileText size={16} /> },
 ];
 
 const API_URL = "https://namami-infotech.com/DROP/src/rider/onboard.php";
@@ -108,41 +106,42 @@ export default function RiderOnboarding() {
   const currentSchema = useMemo(() => {
     return steps.find((s) => s.id === step)?.schema || step1Schema;
   }, [step]);
-  
-  const { register, handleSubmit, formState: { errors }, setValue, reset } = useForm({
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    reset,
+  } = useForm({
     resolver: zodResolver(currentSchema),
     mode: "onSubmit",
   });
-  
 
+  useEffect(() => {
+    const data = formDataRef.current;
 
-  
-useEffect(() => {
-  const data = formDataRef.current;
-
-  if (step === 1) {
-    setValue("email", data.email ?? "");
-  } else if (step === 2) {
-    setValue("name", data.name ?? "");
-    setValue("phone", data.phone ?? "");
-    setValue("address", data.address ?? "");
-  } else if (step === 3) {
-    setValue("aadhar_number", data.aadhar_number ?? "");
-    setValue("pan_number", data.pan_number ?? "");
-  } else if (step === 4) {
-    setValue("dl_number", data.dl_number ?? "");
-    setValue("vehicle_number", data.vehicle_number ?? "");
-    setValue("insurance_expiry_date", data.insurance_expiry_date ?? "");
-  }
-}, [step, setValue]); 
-
+    if (step === 1) {
+      setValue("name", data.name ?? "");
+      setValue("phone", data.phone ?? "");
+      setValue("address", data.address ?? "");
+      setValue("email", data.email ?? "");
+    } else if (step === 2) {
+      setValue("aadhar_number", data.aadhar_number ?? "");
+      setValue("pan_number", data.pan_number ?? "");
+    } else if (step === 3) {
+      setValue("dl_number", data.dl_number ?? "");
+      setValue("vehicle_number", data.vehicle_number ?? "");
+      setValue("insurance_expiry_date", data.insurance_expiry_date ?? "");
+    }
+  }, [step, setValue]);
 
   // Handle form submission for each step
   const onStepSubmit = (data) => {
     // Update the ref with current step data
     formDataRef.current = { ...formDataRef.current, ...data };
 
-    if (step < 5) {
+    if (step < 4) {
       setStep((prev) => prev + 1);
       setError("");
     }
@@ -226,14 +225,25 @@ useEffect(() => {
     placeholder,
     register,
     error,
+    transform = null,
   }) => (
     <div>
       <label className="block text-sm font-medium text-cyan-900 mb-2">
-        {label} *
+        {label}
       </label>
       <input
         type={type}
         {...register(name)}
+        onChange={(e) => {
+          let value = e.target.value;
+          if (transform === "uppercase") {
+            value = value.toUpperCase();
+          } else if (transform === "email") {
+            value = value.toLowerCase();
+          }
+          e.target.value = value;
+          register(name).onChange(e);
+        }}
         placeholder={placeholder}
         className="w-full bg-white border-2 border-cyan-200 rounded-lg px-4 py-3 text-cyan-900 placeholder-cyan-300 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 outline-none transition"
       />
@@ -274,23 +284,47 @@ useEffect(() => {
 
   // Render current step
   const renderStep = useCallback(() => {
-
     switch (step) {
       case 1:
         return (
           <div className="animate-fadeIn">
             <div className="bg-cyan-50/50 border-2 border-cyan-200 p-6 rounded-xl space-y-4">
               <h2 className="text-xl font-semibold text-cyan-900 flex items-center gap-2">
-                <Mail size={20} /> Email Address
+                <User size={20} /> Personal Information
               </h2>
-              <FormInput
-                label="Email"
-                name="email"
-                type="email"
-                placeholder="rajesh@example.com"
-                register={register}
-                error={errors.email}
-              />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormInput
+                  label="Full Name *"
+                  name="name"
+                  placeholder="Rajesh Kumar"
+                  register={register}
+                  error={errors.name}
+                />
+                <FormInput
+                  label="Phone Number *"
+                  name="phone"
+                  type="tel"
+                  placeholder="9876543210"
+                  register={register}
+                  error={errors.phone}
+                />
+                <FormInput
+                  label="Email Address"
+                  name="email"
+                  type="email"
+                  placeholder="rajesh@example.com"
+                  register={register}
+                  error={errors.email}
+                  transform="email"
+                />
+                <FormInput
+                  label="Address *"
+                  name="address"
+                  placeholder="Pune, Maharashtra"
+                  register={register}
+                  error={errors.address}
+                />
+              </div>
             </div>
           </div>
         );
@@ -300,32 +334,25 @@ useEffect(() => {
           <div className="animate-fadeIn">
             <div className="bg-cyan-50/50 border-2 border-cyan-200 p-6 rounded-xl space-y-4">
               <h2 className="text-xl font-semibold text-cyan-900 flex items-center gap-2">
-                <User size={20} /> Personal Information
+                <IdCard size={20} /> Identity Details
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormInput
-                  label="Full Name"
-                  name="name"
-                  placeholder="Rajesh Kumar"
+                  label="Aadhar Number *"
+                  name="aadhar_number"
+                  placeholder="123456789012"
                   register={register}
-                  error={errors.name}
+                  error={errors.aadhar_number}
                 />
                 <FormInput
-                  label="Phone Number"
-                  name="phone"
-                  type="tel"
-                  placeholder="9876543210"
+                  label="PAN Number *"
+                  name="pan_number"
+                  placeholder="ABCDE1234F"
                   register={register}
-                  error={errors.phone}
+                  error={errors.pan_number}
+                  transform="uppercase"
                 />
               </div>
-              <FormInput
-                label="Address"
-                name="address"
-                placeholder="Pune, Maharashtra"
-                register={register}
-                error={errors.address}
-              />
             </div>
           </div>
         );
@@ -335,53 +362,28 @@ useEffect(() => {
           <div className="animate-fadeIn">
             <div className="bg-cyan-50/50 border-2 border-cyan-200 p-6 rounded-xl space-y-4">
               <h2 className="text-xl font-semibold text-cyan-900 flex items-center gap-2">
-                <IdCard size={20} /> Identity Details
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <FormInput
-                  label="Aadhar Number"
-                  name="aadhar_number"
-                  placeholder="123456789012"
-                  register={register}
-                  error={errors.aadhar_number}
-                />
-                <FormInput
-                  label="PAN Number"
-                  name="pan_number"
-                  placeholder="ABCDE1234F"
-                  register={register}
-                  error={errors.pan_number}
-                />
-              </div>
-            </div>
-          </div>
-        );
-
-      case 4:
-        return (
-          <div className="animate-fadeIn">
-            <div className="bg-cyan-50/50 border-2 border-cyan-200 p-6 rounded-xl space-y-4">
-              <h2 className="text-xl font-semibold text-cyan-900 flex items-center gap-2">
                 <Bike size={20} /> Vehicle Details
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormInput
-                  label="DL Number"
+                  label="DL Number *"
                   name="dl_number"
-                  placeholder="DL0420235566"
+                  placeholder="WB2020255566537"
                   register={register}
                   error={errors.dl_number}
+                  transform="uppercase"
                 />
                 <FormInput
-                  label="Vehicle Number"
+                  label="Smart Card (Bike Number) *"
                   name="vehicle_number"
-                  placeholder="MH12AB1234"
+                  placeholder="WB20AB1234"
                   register={register}
                   error={errors.vehicle_number}
+                  transform="uppercase"
                 />
               </div>
               <FormInput
-                label="Insurance Expiry Date"
+                label="Insurance Expiry Date *"
                 name="insurance_expiry_date"
                 type="date"
                 register={register}
@@ -391,7 +393,7 @@ useEffect(() => {
           </div>
         );
 
-      case 5:
+      case 4:
         return (
           <div className="animate-fadeIn">
             <div className="bg-cyan-50/50 border-2 border-cyan-200 p-6 rounded-xl space-y-4">
@@ -399,27 +401,18 @@ useEffect(() => {
                 <FileText size={20} /> Upload Documents
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FileInput label="Profile Picture *" name="profile_picture" />
+                <FileInput label="Aadhar Front *" name="aadhar_front" />
+                <FileInput label="Aadhar Back *" name="aadhar_back" />
+                <FileInput label="DL Photo *" name="dl_photo" />
                 <FileInput
-                  label="Profile Picture"
-                  name="profile_picture"
-                  
-                />
-                <FileInput label="Aadhar Front" name="aadhar_front" />
-                <FileInput label="Aadhar Back" name="aadhar_back" />
-                <FileInput label="DL Photo" name="dl_photo" />
-                <FileInput
-                  label="Vehicle Plate Photo"
+                  label="Vehicle Plate Photo *"
                   name="vehicle_plate_photo"
-                  accept="image/*"
                 />
-                <FileInput
-                  label="Vehicle Image"
-                  name="vehicle_image"
-                  accept="image/*"
-                />
-                <FileInput label="PAN Image" name="pan_image" />
-                <FileInput label="Insurance Image" name="insurance_image" />
-                <FileInput label="RC Image" name="rc_image" />
+                <FileInput label="Vehicle Image *" name="vehicle_image" />
+                <FileInput label="PAN Image *" name="pan_image" />
+                <FileInput label="Insurance Image *" name="insurance_image" />
+                <FileInput label="RC Image *" name="rc_image" />
               </div>
             </div>
           </div>
@@ -429,7 +422,6 @@ useEffect(() => {
         return null;
     }
   }, [step, errors, register]);
-
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-blue-50 flex flex-col">
@@ -480,7 +472,7 @@ useEffect(() => {
                   </button>
                 )}
 
-                {step < 5 && (
+                {step < 4 && (
                   <button
                     type="submit"
                     className="ml-auto flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white font-medium rounded-lg transition shadow-md"
@@ -489,7 +481,7 @@ useEffect(() => {
                   </button>
                 )}
 
-                {step === 5 && (
+                {step === 4 && (
                   <button
                     type="button"
                     onClick={handleFinalSubmit}
