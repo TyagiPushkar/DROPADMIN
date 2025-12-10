@@ -241,7 +241,7 @@ useEffect(() => {
     </div>
   );
 
-  const FileInput = ({ label, name, accept = "image/*", onChange }) => {
+  const FileInput = ({ label, name, accept = "image/*,.pdf", onChange }) => {
     const inputRef = useRef(null);
 
     return (
@@ -402,7 +402,7 @@ useEffect(() => {
                 <FileInput
                   label="Profile Picture"
                   name="profile_picture"
-                  accept="image/*"
+                  
                 />
                 <FileInput label="Aadhar Front" name="aadhar_front" />
                 <FileInput label="Aadhar Back" name="aadhar_back" />
