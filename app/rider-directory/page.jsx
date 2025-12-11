@@ -135,6 +135,7 @@ export default function Riders() {
                       </div>
                     </th>
                   </tr>
+                  
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {riders.map((rider, index) => (
@@ -244,10 +245,10 @@ export default function Riders() {
                             </div>
                           </div>
                           <div>
-                            <div className="text-xs text-gray-500 mb-1">Last Updated</div>
+                            <div className="text-xs text-gray-500 mb-1">Date Of Leaving</div>
                             <div className="flex items-center gap-2">
                               <Clock className="w-3.5 h-3.5 text-blue-500" />
-                              <span className="font-medium">{formatDate(rider.UpdatedOn)}</span>
+                              <span className="font-medium">{formatDate(rider.DateOfLeaving)}</span>
                             </div>
                           </div>
                         </div>
