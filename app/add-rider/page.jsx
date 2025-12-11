@@ -37,7 +37,7 @@ export default function RiderOnboarding() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  // Use refs for file data
+  // Use refs for file data (stable, won't trigger re-renders)
   const fileDataRef = useRef({
     profile_picture: null,
     aadhar_front: null,
@@ -46,24 +46,33 @@ export default function RiderOnboarding() {
     vehicle_plate_photo: null,
   });
 
+  // UseForm with zod resolver
   const {
     register,
     handleSubmit,
-    formState: { errors },
-    setValue,
-    reset,
+    formState: { errors, isSubmitted },
     watch,
+    reset,
   } = useForm({
     resolver: zodResolver(riderSchema),
-    mode: "onSubmit",
+    mode: "onSubmit", // ⬅️ Important
+    reValidateMode: "onChange",
   });
 
-  // Handle file changes
+  // Handle file changes (store in ref)
   const handleFileChange = (fieldName, file) => {
     fileDataRef.current[fieldName] = file;
   };
 
-  // Form Input Component (matching previous style)
+  //
+  // --- INPUT COMPONENTS (logic-only changes) ---
+  //
+  // Important design:
+  // - Each FormInput keeps its own local state for the visible value/tick so typing doesn't re-render parent.
+  // - We call register(name) once and reuse the returned handlers (field) — then call field.onChange inside our onChange.
+  // - We apply transforms before calling field.onChange.
+  //
+
   const FormInput = ({
     label,
     name,
@@ -72,31 +81,45 @@ export default function RiderOnboarding() {
     transform = null,
     required = true,
   }) => {
-    const value = watch(name); // Watch this specific field
+    // local state used only for this input component (keeps the green tick / "valid" text)
+    const [localValue, setLocalValue] = useState("");
+    // get the register field once
+    const field = register(name);
 
     return (
       <div>
         <label className="block text-sm font-medium text-cyan-900 mb-2">
           {label} {required && "*"}
         </label>
+
         <div className="relative">
           <input
             type={type}
-            {...register(name)}
-            onChange={(e) => {
-              let value = e.target.value;
-              if (transform === "uppercase") {
-                value = value.toUpperCase();
-              } else if (transform === "email") {
-                value = value.toLowerCase();
-              }
-              e.target.value = value;
-              register(name).onChange(e);
-            }}
             placeholder={placeholder}
+            // apply registered props (name, ref, onBlur etc)
+            {...field}
+            onChange={(e) => {
+              // transform value if requested
+              let v = e.target.value;
+              if (transform === "uppercase") v = v.toUpperCase();
+              else if (transform === "email") v = v.toLowerCase();
+
+              // update the DOM value so the input displays transformed text
+              e.target.value = v;
+
+              // update local component state (this re-renders only this input)
+              setLocalValue(v);
+
+              // call react-hook-form's onChange from register
+              if (field && typeof field.onChange === "function") {
+                field.onChange(e);
+              }
+            }}
             className="w-full bg-white border-2 border-cyan-200 rounded-lg px-4 py-3 text-cyan-900 placeholder-cyan-300 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 outline-none transition pr-10"
           />
-          {value && value.length > 0 && (
+
+          {/* green tick if there's local text */}
+          {localValue && localValue.length > 0 && (
             <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
               <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
                 <Check size={14} className="text-green-600" />
@@ -104,9 +127,11 @@ export default function RiderOnboarding() {
             </div>
           )}
         </div>
+
+        {/* Error or Valid message */}
         {errors[name] ? (
           <p className="text-red-500 text-sm mt-1">{errors[name].message}</p>
-        ) : value && value.length > 0 ? (
+        ) : localValue && localValue.length > 0 ? (
           <p className="text-green-600 text-sm mt-1">
             ✓ Valid {label.toLowerCase()}
           </p>
@@ -115,13 +140,13 @@ export default function RiderOnboarding() {
     );
   };
 
-  // File Input Component
   const FileInput = ({
     label,
     name,
     accept = "image/*,.pdf",
     required = true,
   }) => {
+    // local filename to show the uploaded filename (component-level state only)
     const [fileName, setFileName] = useState("");
 
     return (
@@ -133,7 +158,7 @@ export default function RiderOnboarding() {
           type="file"
           accept={accept}
           onChange={(e) => {
-            const file = e.target.files[0];
+            const file = e.target.files?.[0];
             if (file) {
               handleFileChange(name, file);
               setFileName(file.name);
@@ -150,9 +175,11 @@ export default function RiderOnboarding() {
     );
   };
 
-  // Form submission
+  //
+  // --- SUBMIT HANDLER (same robust logic as Form 1) ---
+  //
   const onSubmit = async (data) => {
-    // Check if all required files are uploaded
+    // Required files check (same as before)
     const requiredFiles = [
       "profile_picture",
       "aadhar_front",
@@ -160,22 +187,17 @@ export default function RiderOnboarding() {
       "dl_photo",
       "vehicle_plate_photo",
     ];
-
-    const missingFiles = requiredFiles.filter(
-      (file) => !fileDataRef.current[file]
-    );
+    const missingFiles = requiredFiles.filter((f) => !fileDataRef.current[f]);
 
     if (missingFiles.length > 0) {
-      const fileNames = missingFiles.map((file) => {
-        const names = {
-          profile_picture: "Profile Photo",
-          aadhar_front: "Aadhar Front Image",
-          aadhar_back: "Aadhar Back Image",
-          dl_photo: "Driving License Image",
-          vehicle_plate_photo: "Vehicle Plate Image",
-        };
-        return names[file];
-      });
+      const namesMap = {
+        profile_picture: "Profile Photo",
+        aadhar_front: "Aadhar Front Image",
+        aadhar_back: "Aadhar Back Image",
+        dl_photo: "Driving License Image",
+        vehicle_plate_photo: "Vehicle Plate Image",
+      };
+      const fileNames = missingFiles.map((f) => namesMap[f]);
       setError(`Please upload all required documents: ${fileNames.join(", ")}`);
       return;
     }
@@ -187,14 +209,14 @@ export default function RiderOnboarding() {
     try {
       const formDataToSend = new FormData();
 
-      // Add form data
+      // Append all non-file fields (only append if present)
       Object.entries(data).forEach(([key, value]) => {
         if (value !== null && value !== undefined && value !== "") {
           formDataToSend.append(key, value.toString());
         }
       });
 
-      // Add file data
+      // Append files from ref
       Object.entries(fileDataRef.current).forEach(([key, value]) => {
         if (value instanceof File) {
           formDataToSend.append(key, value);
@@ -210,7 +232,7 @@ export default function RiderOnboarding() {
 
       if (response.ok && responseData.success) {
         setSuccess("✅ Rider onboarded successfully!");
-        // Reset form
+        // Reset form fields and files (same approach as Form 1)
         reset();
         fileDataRef.current = {
           profile_picture: null,
@@ -219,7 +241,7 @@ export default function RiderOnboarding() {
           dl_photo: null,
           vehicle_plate_photo: null,
         };
-        // Reset file inputs by reloading them
+        // Clear file input DOM nodes
         document.querySelectorAll('input[type="file"]').forEach((input) => {
           input.value = "";
         });
@@ -234,6 +256,9 @@ export default function RiderOnboarding() {
     }
   };
 
+  //
+  // --- RENDER (UI kept exactly the same as your Form 2) ---
+  //
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-blue-50 flex flex-col">
       {/* Header */}
@@ -277,7 +302,6 @@ export default function RiderOnboarding() {
                   name="name"
                   placeholder="Rajesh Kumar"
                 />
-
                 <FormInput
                   label="Phone Number"
                   name="phone"
@@ -318,7 +342,6 @@ export default function RiderOnboarding() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
                 <FileInput label="Aadhar Front Image" name="aadhar_front" />
-
                 <FileInput label="Aadhar Back Image" name="aadhar_back" />
               </div>
             </div>
@@ -373,7 +396,6 @@ export default function RiderOnboarding() {
                   {error}
                 </div>
               )}
-
               {success && (
                 <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
                   {success}
