@@ -383,7 +383,7 @@ export default function RiderOnboarding() {
 
               <div className="mt-6">
                 <FileInput
-                  label="Vehicle Number Plate Image"
+                  label="RC/Smart Card Image"
                   name="vehicle_plate_photo"
                 />
               </div>
