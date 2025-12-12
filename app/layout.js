@@ -5,7 +5,7 @@ import "leaflet/dist/leaflet.css"
 
 
 export const metadata = {
-  title: "Drop Admin Dashboard",
+  title: "Drop Dashboard",
   description: "Admin dashboard for Drop food delivery platform",
 }
 

@@ -455,6 +455,7 @@ export default function RiderOnboarding() {
                 <Check size={14} className="mr-2 text-green-600" />
                 Upload clear images of documents
               </li>
+              t
               <li className="flex items-center">
                 <Check size={14} className="mr-2 text-green-600" />
                 Supported formats: JPG, PNG, PDF
