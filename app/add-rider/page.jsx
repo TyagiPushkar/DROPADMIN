@@ -1,11 +1,11 @@
 "use client";
-
+ 
 import { useState, useRef } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { User, Phone, Mail, IdCard, Bike, FileText, Check } from "lucide-react";
-
+ 
 // Validation schema for all fields
 const riderSchema = z.object({
   name: z
@@ -29,14 +29,14 @@ const riderSchema = z.object({
       "Format: MH12AB1234, Remove spaces/hyphens"
     ),
 });
-
+ 
 const API_URL = "https://namami-infotech.com/DROP/src/rider/onboard.php";
-
+ 
 export default function RiderOnboarding() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-
+ 
   // Use refs for file data (stable, won't trigger re-renders)
   const fileDataRef = useRef({
     profile_picture: null,
@@ -45,7 +45,7 @@ export default function RiderOnboarding() {
     dl_photo: null,
     vehicle_plate_photo: null,
   });
-
+ 
   // UseForm with zod resolver
   const {
     register,
@@ -58,12 +58,12 @@ export default function RiderOnboarding() {
     mode: "onSubmit", // ⬅️ Important
     reValidateMode: "onChange",
   });
-
+ 
   // Handle file changes (store in ref)
   const handleFileChange = (fieldName, file) => {
     fileDataRef.current[fieldName] = file;
   };
-
+ 
   //
   // --- INPUT COMPONENTS (logic-only changes) ---
   //
@@ -72,7 +72,7 @@ export default function RiderOnboarding() {
   // - We call register(name) once and reuse the returned handlers (field) — then call field.onChange inside our onChange.
   // - We apply transforms before calling field.onChange.
   //
-
+ 
   const FormInput = ({
     label,
     name,
@@ -85,13 +85,13 @@ export default function RiderOnboarding() {
     const [localValue, setLocalValue] = useState("");
     // get the register field once
     const field = register(name);
-
+ 
     return (
       <div>
         <label className="block text-sm font-medium text-cyan-900 mb-2">
           {label} {required && "*"}
         </label>
-
+ 
         <div className="relative">
           <input
             type={type}
@@ -103,13 +103,13 @@ export default function RiderOnboarding() {
               let v = e.target.value;
               if (transform === "uppercase") v = v.toUpperCase();
               else if (transform === "email") v = v.toLowerCase();
-
+ 
               // update the DOM value so the input displays transformed text
               e.target.value = v;
-
+ 
               // update local component state (this re-renders only this input)
               setLocalValue(v);
-
+ 
               // call react-hook-form's onChange from register
               if (field && typeof field.onChange === "function") {
                 field.onChange(e);
@@ -117,7 +117,7 @@ export default function RiderOnboarding() {
             }}
             className="w-full bg-white border-2 border-cyan-200 rounded-lg px-4 py-3 text-cyan-900 placeholder-cyan-300 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 outline-none transition pr-10"
           />
-
+ 
           {/* green tick if there's local text */}
           {localValue && localValue.length > 0 && (
             <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
@@ -127,7 +127,7 @@ export default function RiderOnboarding() {
             </div>
           )}
         </div>
-
+ 
         {/* Error or Valid message */}
         {errors[name] ? (
           <p className="text-red-500 text-sm mt-1">{errors[name].message}</p>
@@ -139,7 +139,7 @@ export default function RiderOnboarding() {
       </div>
     );
   };
-
+ 
   const FileInput = ({
     label,
     name,
@@ -148,7 +148,7 @@ export default function RiderOnboarding() {
   }) => {
     // local filename to show the uploaded filename (component-level state only)
     const [fileName, setFileName] = useState("");
-
+ 
     return (
       <div>
         <label className="block text-sm font-medium text-cyan-900 mb-2">
@@ -174,7 +174,7 @@ export default function RiderOnboarding() {
       </div>
     );
   };
-
+ 
   //
   // --- SUBMIT HANDLER (same robust logic as Form 1) ---
   //
@@ -188,7 +188,7 @@ export default function RiderOnboarding() {
       "vehicle_plate_photo",
     ];
     const missingFiles = requiredFiles.filter((f) => !fileDataRef.current[f]);
-
+ 
     if (missingFiles.length > 0) {
       const namesMap = {
         profile_picture: "Profile Photo",
@@ -201,35 +201,35 @@ export default function RiderOnboarding() {
       setError(`Please upload all required documents: ${fileNames.join(", ")}`);
       return;
     }
-
+ 
     setLoading(true);
     setError("");
     setSuccess("");
-
+ 
     try {
       const formDataToSend = new FormData();
-
+ 
       // Append all non-file fields (only append if present)
       Object.entries(data).forEach(([key, value]) => {
         if (value !== null && value !== undefined && value !== "") {
           formDataToSend.append(key, value.toString());
         }
       });
-
+ 
       // Append files from ref
       Object.entries(fileDataRef.current).forEach(([key, value]) => {
         if (value instanceof File) {
           formDataToSend.append(key, value);
         }
       });
-
+ 
       const response = await fetch(API_URL, {
         method: "POST",
         body: formDataToSend,
       });
-
+ 
       const responseData = await response.json();
-
+ 
       if (response.ok && responseData.success) {
         setSuccess("✅ Rider onboarded successfully!");
         // Reset form fields and files (same approach as Form 1)
@@ -255,7 +255,7 @@ export default function RiderOnboarding() {
       setLoading(false);
     }
   };
-
+ 
   //
   // --- RENDER (UI kept exactly the same as your Form 2) ---
   //
@@ -275,7 +275,7 @@ export default function RiderOnboarding() {
           </div>
         </div>
       </div>
-
+ 
       {/* Main Content */}
       <div className="flex-1 px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <div className="max-w-4xl mx-auto">
@@ -288,14 +288,14 @@ export default function RiderOnboarding() {
               documents.
             </p>
           </div>
-
+ 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
             {/* Personal Information */}
             <div className="bg-white/80 backdrop-blur border-2 border-cyan-200 rounded-xl p-6 animate-fadeIn">
               <h3 className="text-lg font-semibold text-cyan-900 mb-6 flex items-center gap-2">
                 <User size={20} /> Personal Information
               </h3>
-
+ 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <FormInput
                   label="Full Name"
@@ -309,7 +309,7 @@ export default function RiderOnboarding() {
                   placeholder="9876543210"
                 />
               </div>
-
+ 
               <div className="mt-6">
                 <FormInput
                   label="Email Address"
@@ -320,18 +320,18 @@ export default function RiderOnboarding() {
                   required={false}
                 />
               </div>
-
+ 
               <div className="mt-6">
                 <FileInput label="Profile Photo" name="profile_picture" />
               </div>
             </div>
-
+ 
             {/* Aadhar Card Information */}
             <div className="bg-white/80 backdrop-blur border-2 border-cyan-200 rounded-xl p-6 animate-fadeIn">
               <h3 className="text-lg font-semibold text-cyan-900 mb-6 flex items-center gap-2">
                 <IdCard size={20} /> Aadhar Card Details
               </h3>
-
+ 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <FormInput
                   label="Aadhar Number"
@@ -339,19 +339,19 @@ export default function RiderOnboarding() {
                   placeholder="123456789012"
                 />
               </div>
-
+ 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
                 <FileInput label="Aadhar Front Image" name="aadhar_front" />
                 <FileInput label="Aadhar Back Image" name="aadhar_back" />
               </div>
             </div>
-
+ 
             {/* Driving License */}
             <div className="bg-white/80 backdrop-blur border-2 border-cyan-200 rounded-xl p-6 animate-fadeIn">
               <h3 className="text-lg font-semibold text-cyan-900 mb-6 flex items-center gap-2">
                 <FileText size={20} /> Driving License Details
               </h3>
-
+ 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <FormInput
                   label="DL Number"
@@ -360,18 +360,18 @@ export default function RiderOnboarding() {
                   transform="uppercase"
                 />
               </div>
-
+ 
               <div className="mt-6">
                 <FileInput label="Driving License Image" name="dl_photo" />
               </div>
             </div>
-
+ 
             {/* RC/Smart Card */}
             <div className="bg-white/80 backdrop-blur border-2 border-cyan-200 rounded-xl p-6 animate-fadeIn">
               <h3 className="text-lg font-semibold text-cyan-900 mb-6 flex items-center gap-2">
                 <Bike size={20} /> Vehicle Details (RC/Smart Card)
               </h3>
-
+ 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <FormInput
                   label="Vehicle Number"
@@ -380,7 +380,7 @@ export default function RiderOnboarding() {
                   transform="uppercase"
                 />
               </div>
-
+ 
               <div className="mt-6">
                 <FileInput
                   label="RC/Smart Card Image"
@@ -388,7 +388,7 @@ export default function RiderOnboarding() {
                 />
               </div>
             </div>
-
+ 
             {/* Error/Success Messages */}
             <div className="animate-fadeIn">
               {error && (
@@ -402,7 +402,7 @@ export default function RiderOnboarding() {
                 </div>
               )}
             </div>
-
+ 
             {/* Submit Button */}
             <div className="flex justify-center animate-fadeIn">
               <button
@@ -442,7 +442,7 @@ export default function RiderOnboarding() {
               </button>
             </div>
           </form>
-
+ 
           {/* Form Requirements */}
           <div className="mt-8 bg-cyan-50 border border-cyan-200 rounded-lg p-4 animate-fadeIn">
             <h4 className="font-semibold text-cyan-900 mb-2">Requirements:</h4>
@@ -455,6 +455,7 @@ export default function RiderOnboarding() {
                 <Check size={14} className="mr-2 text-green-600" />
                 Upload clear images of documents
               </li>
+              t
               <li className="flex items-center">
                 <Check size={14} className="mr-2 text-green-600" />
                 Supported formats: JPG, PNG, PDF
@@ -470,3 +471,4 @@ export default function RiderOnboarding() {
     </div>
   );
 }
+ 
