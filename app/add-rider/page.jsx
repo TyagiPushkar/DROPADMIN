@@ -1,11 +1,11 @@
 "use client";
-
+ 
 import { useState, useRef } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { User, Phone, Mail, IdCard, Bike, FileText, Check } from "lucide-react";
-
+ 
 // Validation schema for all fields
 const riderSchema = z.object({
   name: z
@@ -29,14 +29,14 @@ const riderSchema = z.object({
       "Format: MH12AB1234, Remove spaces/hyphens"
     ),
 });
-
+ 
 const API_URL = "https://namami-infotech.com/DROP/src/rider/onboard.php";
-
+ 
 export default function RiderOnboarding() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-
+ 
   // Use refs for file data (stable, won't trigger re-renders)
   const fileDataRef = useRef({
     profile_picture: null,
@@ -45,7 +45,7 @@ export default function RiderOnboarding() {
     dl_photo: null,
     vehicle_plate_photo: null,
   });
-
+ 
   // UseForm with zod resolver
   const {
     register,
@@ -55,16 +55,15 @@ export default function RiderOnboarding() {
     reset,
   } = useForm({
     resolver: zodResolver(riderSchema),
-    mode: "onSubmit",        // ⬅️ Important
+    mode: "onSubmit", // ⬅️ Important
     reValidateMode: "onChange",
   });
-  
-
+ 
   // Handle file changes (store in ref)
   const handleFileChange = (fieldName, file) => {
     fileDataRef.current[fieldName] = file;
   };
-
+ 
   //
   // --- INPUT COMPONENTS (logic-only changes) ---
   //
@@ -73,19 +72,26 @@ export default function RiderOnboarding() {
   // - We call register(name) once and reuse the returned handlers (field) — then call field.onChange inside our onChange.
   // - We apply transforms before calling field.onChange.
   //
-
-  const FormInput = ({ label, name, type = "text", placeholder, transform = null, required = true }) => {
+ 
+  const FormInput = ({
+    label,
+    name,
+    type = "text",
+    placeholder,
+    transform = null,
+    required = true,
+  }) => {
     // local state used only for this input component (keeps the green tick / "valid" text)
     const [localValue, setLocalValue] = useState("");
     // get the register field once
     const field = register(name);
-
+ 
     return (
       <div>
         <label className="block text-sm font-medium text-cyan-900 mb-2">
           {label} {required && "*"}
         </label>
-
+ 
         <div className="relative">
           <input
             type={type}
@@ -97,13 +103,13 @@ export default function RiderOnboarding() {
               let v = e.target.value;
               if (transform === "uppercase") v = v.toUpperCase();
               else if (transform === "email") v = v.toLowerCase();
-
+ 
               // update the DOM value so the input displays transformed text
               e.target.value = v;
-
+ 
               // update local component state (this re-renders only this input)
               setLocalValue(v);
-
+ 
               // call react-hook-form's onChange from register
               if (field && typeof field.onChange === "function") {
                 field.onChange(e);
@@ -111,7 +117,7 @@ export default function RiderOnboarding() {
             }}
             className="w-full bg-white border-2 border-cyan-200 rounded-lg px-4 py-3 text-cyan-900 placeholder-cyan-300 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 outline-none transition pr-10"
           />
-
+ 
           {/* green tick if there's local text */}
           {localValue && localValue.length > 0 && (
             <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
@@ -121,21 +127,28 @@ export default function RiderOnboarding() {
             </div>
           )}
         </div>
-
+ 
         {/* Error or Valid message */}
         {errors[name] ? (
           <p className="text-red-500 text-sm mt-1">{errors[name].message}</p>
         ) : localValue && localValue.length > 0 ? (
-          <p className="text-green-600 text-sm mt-1">✓ Valid {label.toLowerCase()}</p>
+          <p className="text-green-600 text-sm mt-1">
+            ✓ Valid {label.toLowerCase()}
+          </p>
         ) : null}
       </div>
     );
   };
-
-  const FileInput = ({ label, name, accept = "image/*,.pdf", required = true }) => {
+ 
+  const FileInput = ({
+    label,
+    name,
+    accept = "image/*,.pdf",
+    required = true,
+  }) => {
     // local filename to show the uploaded filename (component-level state only)
     const [fileName, setFileName] = useState("");
-
+ 
     return (
       <div>
         <label className="block text-sm font-medium text-cyan-900 mb-2">
@@ -161,15 +174,21 @@ export default function RiderOnboarding() {
       </div>
     );
   };
-
+ 
   //
   // --- SUBMIT HANDLER (same robust logic as Form 1) ---
   //
   const onSubmit = async (data) => {
     // Required files check (same as before)
-    const requiredFiles = ["profile_picture", "aadhar_front", "aadhar_back", "dl_photo", "vehicle_plate_photo"];
+    const requiredFiles = [
+      "profile_picture",
+      "aadhar_front",
+      "aadhar_back",
+      "dl_photo",
+      "vehicle_plate_photo",
+    ];
     const missingFiles = requiredFiles.filter((f) => !fileDataRef.current[f]);
-
+ 
     if (missingFiles.length > 0) {
       const namesMap = {
         profile_picture: "Profile Photo",
@@ -182,35 +201,35 @@ export default function RiderOnboarding() {
       setError(`Please upload all required documents: ${fileNames.join(", ")}`);
       return;
     }
-
+ 
     setLoading(true);
     setError("");
     setSuccess("");
-
+ 
     try {
       const formDataToSend = new FormData();
-
+ 
       // Append all non-file fields (only append if present)
       Object.entries(data).forEach(([key, value]) => {
         if (value !== null && value !== undefined && value !== "") {
           formDataToSend.append(key, value.toString());
         }
       });
-
+ 
       // Append files from ref
       Object.entries(fileDataRef.current).forEach(([key, value]) => {
         if (value instanceof File) {
           formDataToSend.append(key, value);
         }
       });
-
+ 
       const response = await fetch(API_URL, {
         method: "POST",
         body: formDataToSend,
       });
-
+ 
       const responseData = await response.json();
-
+ 
       if (response.ok && responseData.success) {
         setSuccess("✅ Rider onboarded successfully!");
         // Reset form fields and files (same approach as Form 1)
@@ -236,7 +255,7 @@ export default function RiderOnboarding() {
       setLoading(false);
     }
   };
-
+ 
   //
   // --- RENDER (UI kept exactly the same as your Form 2) ---
   //
@@ -247,93 +266,143 @@ export default function RiderOnboarding() {
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img src="/images/droplogo.jpg" alt="DROP" className="w-10 h-10" />
-            <h1 className="text-xl font-bold text-cyan-900 hidden sm:block">DROP Rider Onboarding</h1>
+            <h1 className="text-xl font-bold text-cyan-900 hidden sm:block">
+              DROP Rider Onboarding
+            </h1>
           </div>
-          <div className="text-sm text-cyan-700 font-medium">All Fields Required</div>
+          <div className="text-sm text-cyan-700 font-medium">
+            All Fields Required
+          </div>
         </div>
       </div>
-
+ 
       {/* Main Content */}
       <div className="flex-1 px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-cyan-900 mb-2">Rider Information</h2>
-            <p className="text-cyan-600">Please fill in all required fields and upload the necessary documents.</p>
+            <h2 className="text-2xl font-bold text-cyan-900 mb-2">
+              Rider Information
+            </h2>
+            <p className="text-cyan-600">
+              Please fill in all required fields and upload the necessary
+              documents.
+            </p>
           </div>
-
+ 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
             {/* Personal Information */}
             <div className="bg-white/80 backdrop-blur border-2 border-cyan-200 rounded-xl p-6 animate-fadeIn">
               <h3 className="text-lg font-semibold text-cyan-900 mb-6 flex items-center gap-2">
                 <User size={20} /> Personal Information
               </h3>
-
+ 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <FormInput label="Full Name" name="name" placeholder="Rajesh Kumar" />
-                <FormInput label="Phone Number" name="phone" type="tel" placeholder="9876543210" />
+                <FormInput
+                  label="Full Name"
+                  name="name"
+                  placeholder="Rajesh Kumar"
+                />
+                <FormInput
+                  label="Phone Number"
+                  name="phone"
+                  type="tel"
+                  placeholder="9876543210"
+                />
               </div>
-
+ 
               <div className="mt-6">
-                <FormInput label="Email Address" name="email" type="email" placeholder="rajesh@example.com" transform="email" required={false} />
+                <FormInput
+                  label="Email Address"
+                  name="email"
+                  type="email"
+                  placeholder="rajesh@example.com"
+                  transform="email"
+                  required={false}
+                />
               </div>
-
+ 
               <div className="mt-6">
                 <FileInput label="Profile Photo" name="profile_picture" />
               </div>
             </div>
-
+ 
             {/* Aadhar Card Information */}
             <div className="bg-white/80 backdrop-blur border-2 border-cyan-200 rounded-xl p-6 animate-fadeIn">
               <h3 className="text-lg font-semibold text-cyan-900 mb-6 flex items-center gap-2">
                 <IdCard size={20} /> Aadhar Card Details
               </h3>
-
+ 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <FormInput label="Aadhar Number" name="aadhar_number" placeholder="123456789012" />
+                <FormInput
+                  label="Aadhar Number"
+                  name="aadhar_number"
+                  placeholder="123456789012"
+                />
               </div>
-
+ 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
                 <FileInput label="Aadhar Front Image" name="aadhar_front" />
                 <FileInput label="Aadhar Back Image" name="aadhar_back" />
               </div>
             </div>
-
+ 
             {/* Driving License */}
             <div className="bg-white/80 backdrop-blur border-2 border-cyan-200 rounded-xl p-6 animate-fadeIn">
               <h3 className="text-lg font-semibold text-cyan-900 mb-6 flex items-center gap-2">
                 <FileText size={20} /> Driving License Details
               </h3>
-
+ 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <FormInput label="DL Number" name="dl_number" placeholder="WB2020255566537" transform="uppercase" />
+                <FormInput
+                  label="DL Number"
+                  name="dl_number"
+                  placeholder="WB2020255566537"
+                  transform="uppercase"
+                />
               </div>
-
+ 
               <div className="mt-6">
                 <FileInput label="Driving License Image" name="dl_photo" />
               </div>
             </div>
-
+ 
             {/* RC/Smart Card */}
             <div className="bg-white/80 backdrop-blur border-2 border-cyan-200 rounded-xl p-6 animate-fadeIn">
               <h3 className="text-lg font-semibold text-cyan-900 mb-6 flex items-center gap-2">
                 <Bike size={20} /> Vehicle Details (RC/Smart Card)
               </h3>
-
+ 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <FormInput label="Vehicle Number" name="vehicle_number" placeholder="WB20AB1234" transform="uppercase" />
+                <FormInput
+                  label="Vehicle Number"
+                  name="vehicle_number"
+                  placeholder="WB20AB1234"
+                  transform="uppercase"
+                />
               </div>
-
+ 
               <div className="mt-6">
-                <FileInput label="Vehicle Number Plate Image" name="vehicle_plate_photo" />
+                <FileInput
+                  label="RC/Smart Card Image"
+                  name="vehicle_plate_photo"
+                />
               </div>
             </div>
-
+ 
             {/* Error/Success Messages */}
             <div className="animate-fadeIn">
-              {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">{error}</div>}
-              {success && <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">{success}</div>}
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                  {error}
+                </div>
+              )}
+              {success && (
+                <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+                  {success}
+                </div>
+              )}
             </div>
-
+ 
             {/* Submit Button */}
             <div className="flex justify-center animate-fadeIn">
               <button
@@ -343,9 +412,25 @@ export default function RiderOnboarding() {
               >
                 {loading ? (
                   <>
-                    <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3.5-3.5L12 0v4a8 8 0 010 16v4l3.5-3.5L12 20v4a8 8 0 01-8-8z" />
+                    <svg
+                      className="animate-spin h-5 w-5"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4l3.5-3.5L12 0v4a8 8 0 010 16v4l3.5-3.5L12 20v4a8 8 0 01-8-8z"
+                      />
                     </svg>
                     Submitting...
                   </>
@@ -357,7 +442,7 @@ export default function RiderOnboarding() {
               </button>
             </div>
           </form>
-
+ 
           {/* Form Requirements */}
           <div className="mt-8 bg-cyan-50 border border-cyan-200 rounded-lg p-4 animate-fadeIn">
             <h4 className="font-semibold text-cyan-900 mb-2">Requirements:</h4>
@@ -370,6 +455,7 @@ export default function RiderOnboarding() {
                 <Check size={14} className="mr-2 text-green-600" />
                 Upload clear images of documents
               </li>
+              t
               <li className="flex items-center">
                 <Check size={14} className="mr-2 text-green-600" />
                 Supported formats: JPG, PNG, PDF
@@ -385,3 +471,4 @@ export default function RiderOnboarding() {
     </div>
   );
 }
+ 
