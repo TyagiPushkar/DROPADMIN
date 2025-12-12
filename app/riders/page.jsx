@@ -7,28 +7,22 @@ import {
   User,
   Phone,
   Hash,
-  FileText,
   Car,
-  ShieldCheck,
   Calendar,
-  Clock,
-  IdCard,
-  Car as CarIcon,
-  FileCheck,
   Search,
   Filter,
-  ChevronDown,
-  Download,
   Users,
   CheckCircle,
   XCircle,
-  Clock as ClockIcon,
-  MoreVertical,
+  FileCheck,
   FileWarning,
   AlertCircle,
-  TrendingUp,
-  TrendingDown,
-  Shield
+  Mail,
+  Check,
+  X,
+  FileText,
+  Shield,
+  ChevronRight
 } from "lucide-react";
 
 export default function Riders() {
@@ -40,7 +34,6 @@ export default function Riders() {
   // Search and filter states
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [dateFilter, setDateFilter] = useState("all");
   const [documentFilter, setDocumentFilter] = useState("all");
 
   useEffect(() => {
@@ -55,21 +48,18 @@ export default function Riders() {
 
   // Filter riders based on search and filters
   const filteredRiders = riders.filter(rider => {
-    // Search filter
     const matchesSearch = searchQuery === "" ||
       (rider.Name && rider.Name.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (rider.PhoneNumber && rider.PhoneNumber.includes(searchQuery)) ||
       (rider.AadharCardNumber && rider.AadharCardNumber.includes(searchQuery)) ||
       (rider.VehicleNumber && rider.VehicleNumber.toLowerCase().includes(searchQuery.toLowerCase()));
 
-    // Status filter
     const matchesStatus = statusFilter === "all" ||
       rider.Status === statusFilter ||
       (statusFilter === "pending" && (!rider.Status || rider.Status === "")) ||
       (statusFilter === "approved" && rider.Status === "Approved") ||
       (statusFilter === "rejected" && rider.Status === "Rejected");
 
-    // Document filter
     let matchesDocument = true;
     if (documentFilter !== "all") {
       switch (documentFilter) {
@@ -94,10 +84,7 @@ export default function Riders() {
       }
     }
 
-    // Date filter (if you have date fields)
-    const matchesDate = dateFilter === "all" || true; // Implement date filtering if needed
-
-    return matchesSearch && matchesStatus && matchesDocument && matchesDate;
+    return matchesSearch && matchesStatus && matchesDocument;
   });
 
   const formatDate = (dateString) => {
@@ -105,41 +92,28 @@ export default function Riders() {
     return new Date(dateString).toLocaleDateString("en-IN", {
       day: "2-digit",
       month: "short",
-      year: "numeric",
     });
   };
 
   const getStatusBadge = (status) => {
     if (status === "Approved") return (
-      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-200">
-        <div className="w-2 h-2 rounded-full bg-green-500 mr-2"></div>
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+        <CheckCircle className="w-3.5 h-3.5" />
         Approved
       </span>
     );
     if (status === "Rejected") return (
-      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-700 border border-red-200">
-        <div className="w-2 h-2 rounded-full bg-red-500 mr-2"></div>
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+        <XCircle className="w-3.5 h-3.5" />
         Rejected
       </span>
     );
     return (
-      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-yellow-50 text-yellow-700 border border-yellow-200">
-        <div className="w-2 h-2 rounded-full bg-yellow-500 mr-2"></div>
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+        <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></div>
         Pending
       </span>
     );
-  };
-
-  const getActionButtonColor = (status) => {
-    if (status === "Approved") return "bg-red-100 text-red-800 hover:bg-red-200";
-    if (status === "Rejected") return "bg-green-100 text-green-800 hover:bg-green-200";
-    return "bg-blue-100 text-blue-800 hover:bg-blue-200";
-  };
-
-  const getStatusActionText = (status) => {
-    if (status === "Approved") return "Reject";
-    if (status === "Rejected") return "Approve";
-    return "Approve";
   };
 
   const handleApproveToggle = async (riderId, currentStatus) => {
@@ -176,21 +150,16 @@ export default function Riders() {
     }
   };
 
-  const DocumentBadge = ({ available, text }) => (
-    <div
-      className={`inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium ${
-        available
-          ? "bg-green-100 text-green-800 border border-green-200"
-          : "bg-red-50 text-red-700 border border-red-100"
-      }`}
-    >
-      {available ? (
-        <FileCheck className="w-3 h-3 mr-1.5" />
-      ) : (
-        <FileWarning className="w-3 h-3 mr-1.5" />
-      )}
-      {text}
-    </div>
+  const DocumentIcon = ({ available }) => (
+    available ? (
+      <div className="p-1 rounded bg-emerald-50">
+        <FileCheck className="w-3.5 h-3.5 text-emerald-600" />
+      </div>
+    ) : (
+      <div className="p-1 rounded bg-gray-100">
+        <FileWarning className="w-3.5 h-3.5 text-gray-400" />
+      </div>
+    )
   );
 
   // Calculate statistics
@@ -213,112 +182,131 @@ export default function Riders() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-6">
+    <div className="min-h-screen bg-gray-50 p-6">
       <div className="mx-2">
-        {/* Header Section */}
+        {/* Header */}
         <div className="mb-8">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Rider Management Dashboard</h1>
-              <p className="text-gray-600 mt-2 text-sm md:text-base">Manage rider profiles, documents, and approval status</p>
+              <h1 className="text-2xl font-bold text-gray-900">Rider Management</h1>
+              <p className="text-gray-600 mt-1">Manage rider profiles and approvals</p>
+            </div>
+            <div className="text-sm text-gray-500">
+              {filteredRiders.length} riders
             </div>
           </div>
 
-          {/* Statistics Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-500 mb-1">Total Riders</p>
-                  <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
-                </div>
-                <div className="p-2 bg-blue-50 rounded-lg">
+          {/* Stats Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded bg-blue-50">
                   <Users className="w-5 h-5 text-blue-600" />
                 </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-              <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-500 mb-1">Approved</p>
-                  <p className="text-2xl font-bold text-green-700">{stats.approved}</p>
-                </div>
-                <div className="p-2 bg-green-50 rounded-lg">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  <div className="text-xl font-bold text-gray-900">{stats.total}</div>
+                  <div className="text-sm text-gray-600">Total</div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-500 mb-1">Pending</p>
-                  <p className="text-2xl font-bold text-yellow-700">{stats.pending}</p>
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded bg-emerald-50">
+                  <CheckCircle className="w-5 h-5 text-emerald-600" />
                 </div>
-                <div className="p-2 bg-yellow-50 rounded-lg">
-                  <ClockIcon className="w-5 h-5 text-yellow-600" />
+                <div>
+                  <div className="text-xl font-bold text-emerald-700">{stats.approved}</div>
+                  <div className="text-sm text-gray-600">Approved</div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-500 mb-1">Rejected</p>
-                  <p className="text-2xl font-bold text-red-700">{stats.rejected}</p>
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded bg-amber-50">
+                  <div className="w-5 h-5 rounded-full bg-amber-500 animate-pulse"></div>
                 </div>
-                <div className="p-2 bg-red-50 rounded-lg">
-                  <XCircle className="w-5 h-5 text-red-600" />
+                <div>
+                  <div className="text-xl font-bold text-amber-700">{stats.pending}</div>
+                  <div className="text-sm text-gray-600">Pending</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded bg-rose-50">
+                  <XCircle className="w-5 h-5 text-rose-600" />
+                </div>
+                <div>
+                  <div className="text-xl font-bold text-rose-700">{stats.rejected}</div>
+                  <div className="text-sm text-gray-600">Rejected</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded bg-emerald-50">
+                  <FileCheck className="w-5 h-5 text-emerald-600" />
+                </div>
+                <div>
+                  <div className="text-xl font-bold text-gray-900">{stats.documentsComplete}</div>
+                  <div className="text-sm text-gray-600">Complete</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded bg-rose-50">
+                  <AlertCircle className="w-5 h-5 text-rose-600" />
+                </div>
+                <div>
+                  <div className="text-xl font-bold text-rose-700">{stats.insuranceExpired}</div>
+                  <div className="text-sm text-gray-600">Expired</div>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Search and Filter Bar */}
-          <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm mb-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search by name, phone, Aadhar, or vehicle number..."
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                  placeholder="Search riders..."
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
 
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="relative">
-                  <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <select
-                    className="pl-10 pr-8 py-2.5 border border-gray-300 rounded-lg appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white"
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                  >
-                    <option value="all">All Status</option>
-                    <option value="approved">Approved</option>
-                    <option value="pending">Pending</option>
-                    <option value="rejected">Rejected</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                </div>
+              <div className="flex items-center gap-2">
+                <select
+                  className="px-3 py-2.5 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="all">All Status</option>
+                  <option value="approved">Approved</option>
+                  <option value="pending">Pending</option>
+                  <option value="rejected">Rejected</option>
+                </select>
 
-                <div className="relative">
-                  <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <select
-                    className="pl-10 pr-8 py-2.5 border border-gray-300 rounded-lg appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white"
-                    value={documentFilter}
-                    onChange={(e) => setDocumentFilter(e.target.value)}
-                  >
-                    <option value="all">All Documents</option>
-                    <option value="complete">Documents Complete</option>
-                    <option value="incomplete">Documents Incomplete</option>
-                    <option value="expired">Insurance Expired</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                </div>
+                <select
+                  className="px-3 py-2.5 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                  value={documentFilter}
+                  onChange={(e) => setDocumentFilter(e.target.value)}
+                >
+                  <option value="all">All Docs</option>
+                  <option value="complete">Complete</option>
+                  <option value="incomplete">Incomplete</option>
+                  <option value="expired">Expired</option>
+                </select>
 
                 <button
                   onClick={() => {
@@ -326,229 +314,175 @@ export default function Riders() {
                     setStatusFilter("all");
                     setDocumentFilter("all");
                   }}
-                  className="px-4 py-2.5 text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors duration-200"
+                  className="px-3 py-2.5 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded border border-gray-300"
                 >
-                  Clear Filters
+                  Clear
                 </button>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
-              <div className="text-sm text-gray-600">
-                Showing <span className="font-semibold">{filteredRiders.length}</span> of <span className="font-semibold">{riders.length}</span> riders
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                  <span>{stats.documentsComplete} Complete</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                  <span>{stats.insuranceExpired} Expired</span>
-                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Desktop/Tablet View */}
+        {/* Desktop Table */}
         {loading ? (
-          <div className="flex flex-col items-center justify-center h-64 bg-white rounded-xl border">
-            <div className="animate-spin h-12 w-12 border-2 border-blue-600 border-t-transparent rounded-full mb-4"></div>
-            <p className="text-gray-600">Loading riders...</p>
+          <div className="flex items-center justify-center h-64 bg-white rounded border">
+            <div className="animate-spin h-8 w-8 border-2 border-blue-600 border-t-transparent rounded-full"></div>
           </div>
         ) : (
           <>
-            <div className="hidden md:block">
-              <div className="bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden">
+            <div className="hidden lg:block">
+              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                {/* Table Header */}
+                <div className="bg-gray-900 px-6 py-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-white uppercase tracking-wider">Riders List</h3>
+                    <div className="text-xs text-gray-300">
+                      {filteredRiders.length} records
+                    </div>
+                  </div>
+                </div>
+
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="bg-gradient-to-r from-gray-900 to-gray-800">
-                        <th className="text-left p-6 font-semibold text-gray-100 text-sm uppercase tracking-wider">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 bg-white/10 rounded-lg">
-                              <Hash className="w-4 h-4" />
-                            </div>
-                            <span>SL</span>
-                          </div>
+                      <tr className="bg-gray-50 border-b border-gray-200">
+                        <th className="p-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                          Rider Details
                         </th>
-                        <th className="text-left p-6 font-semibold text-gray-100 text-sm uppercase tracking-wider">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 bg-white/10 rounded-lg">
-                              <User className="w-4 h-4" />
-                            </div>
-                            <span>Rider Info</span>
-                          </div>
+                        <th className="p-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                          Documents
                         </th>
-                        <th className="text-left p-6 font-semibold text-gray-100 text-sm uppercase tracking-wider">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 bg-white/10 rounded-lg">
-                              <FileText className="w-4 h-4" />
-                            </div>
-                            <span>Documents</span>
-                          </div>
+                        <th className="p-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                          Vehicle & Insurance
                         </th>
-                        <th className="text-left p-6 font-semibold text-gray-100 text-sm uppercase tracking-wider">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 bg-white/10 rounded-lg">
-                              <CarIcon className="w-4 h-4" />
-                            </div>
-                            <span>Vehicle</span>
-                          </div>
+                        <th className="p-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                          Status
                         </th>
-                        <th className="text-left p-6 font-semibold text-gray-100 text-sm uppercase tracking-wider">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 bg-white/10 rounded-lg">
-                              <Shield className="w-4 h-4" />
-                            </div>
-                            <span>Insurance</span>
-                          </div>
-                        </th>
-                        <th className="text-left p-6 font-semibold text-gray-100 text-sm uppercase tracking-wider">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 bg-white/10 rounded-lg">
-                              <Calendar className="w-4 h-4" />
-                            </div>
-                            <span>Dates</span>
-                          </div>
-                        </th>
-                        <th className="text-left p-6 font-semibold text-gray-100 text-sm uppercase tracking-wider">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 bg-white/10 rounded-lg">
-                              <ShieldCheck className="w-4 h-4" />
-                            </div>
-                            <span>Status</span>
-                          </div>
+                        <th className="p-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                          Actions
                         </th>
                       </tr>
                     </thead>
 
                     <tbody className="divide-y divide-gray-100">
-                      {filteredRiders.map((rider, index) => (
+                      {filteredRiders.map((rider) => (
                         <tr
                           key={rider.RiderId}
-                          className="hover:bg-gray-50/80 transition-colors duration-150 group cursor-pointer"
+                          className="hover:bg-gray-50 cursor-pointer"
                           onClick={(e) => {
-                            if (e.target.tagName !== "BUTTON") {
+                            if (!e.target.closest('button')) {
                               localStorage.setItem("selectedRider", JSON.stringify(rider));
                               router.push(`/riders/${rider.RiderId}`);
                             }
                           }}
                         >
-                          <td className="p-6">
-                            <span className="font-semibold text-gray-900">{index + 1}</span>
-                          </td>
-
-                          {/* Rider Info */}
-                          <td className="p-6">
-                            <div className="flex items-center gap-3 mb-2">
-                              <div className="p-2 bg-gray-50 rounded-lg group-hover:bg-gray-100 transition-colors duration-150">
-                                <User className="w-4 h-4 text-gray-600" />
+                          {/* Rider Details */}
+                          <td className="p-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded bg-blue-50 flex items-center justify-center">
+                                <User className="w-5 h-5 text-blue-600" />
                               </div>
-                              <span className="font-bold text-gray-900">{rider.Name}</span>
-                            </div>
-                            <div className="text-sm text-gray-600 flex items-center gap-2 mb-1">
-                              <Phone className="w-3.5 h-3.5" />
-                              <span>{rider.PhoneNumber}</span>
-                            </div>
-                            <div className="text-sm text-gray-600 flex items-center gap-2">
-                              <Hash className="w-3.5 h-3.5" />
-                              <span className="font-mono">{rider.AadharCardNumber}</span>
-                            </div>
-                          </td>
-
-                          {/* Docs */}
-                          <td className="p-6">
-                            <div className="flex flex-col gap-2">
-                              <DocumentBadge
-                                available={rider.AadharCardFrontURL}
-                                text="Aadhar"
-                              />
+                              <div>
+                                <div className="font-medium text-gray-900">{rider.Name}</div>
+                                <div className="text-sm text-gray-500 mt-0.5">
+                                  <div className="flex items-center gap-1.5">
+                                    <Phone className="w-3.5 h-3.5" />
+                                    {rider.PhoneNumber}
+                                  </div>
+                                </div>
+                              </div>
                             </div>
                           </td>
 
-                          {/* Vehicle */}
-                          <td className="p-6">
-                            <div className="flex items-center gap-2 mb-2">
-                              <CarIcon className="w-4 h-4 text-gray-600" />
-                              <span className="font-medium text-gray-900">{rider.VehicleNumber}</span>
-                            </div>
-                            <div className="flex flex-wrap gap-2">
-                              <DocumentBadge
-                                available={rider.VehicleNumberPlatePhotoURL}
-                                text="Plate"
-                              />
-                              <DocumentBadge
-                                available={rider.VehicleImageURL}
-                                text="Image"
-                              />
-                            </div>
-                          </td>
-
-                          {/* Insurance */}
-                          <td className="p-6">
-                            <div className={`flex items-center gap-2 mb-2 font-medium ${
-                              rider.INSURANCE_EXPIRY_DATE &&
-                              new Date(rider.INSURANCE_EXPIRY_DATE) < new Date()
-                                ? "text-red-600"
-                                : "text-gray-900"
-                            }`}>
-                              <Calendar className="w-4 h-4" />
-                              <span>{formatDate(rider.INSURANCE_EXPIRY_DATE)}</span>
-                              {rider.INSURANCE_EXPIRY_DATE &&
-                               new Date(rider.INSURANCE_EXPIRY_DATE) < new Date() && (
-                                <AlertCircle className="w-4 h-4 text-red-500" />
-                              )}
-                            </div>
-                            <div className="flex flex-wrap gap-2">
-                              <DocumentBadge
-                                available={rider.INSURANCE_IMAGE}
-                                text="Insurance"
-                              />
-                              <DocumentBadge
-                                available={rider.RC_IMAGE}
-                                text="RC"
-                              />
-                            </div>
-                          </td>
-
-                          {/* Dates */}
-                          <td className="p-6">
-                            <div className="flex flex-col gap-2">
+                          {/* Documents */}
+                          <td className="p-4">
+                            <div className="grid grid-cols-2 gap-2">
                               <div className="flex items-center gap-2">
-                                <TrendingUp className="w-3.5 h-3.5 text-green-600" />
-                                <span className="text-sm text-gray-700">
-                                  Join: <span className="font-medium">{formatDate(rider.AddedOn)}</span>
-                                </span>
+                                <DocumentIcon available={rider.AadharCardFrontURL} />
+                                <span className="text-xs font-medium text-gray-700">Aadhar</span>
                               </div>
                               <div className="flex items-center gap-2">
-                                <TrendingDown className="w-3.5 h-3.5 text-red-600" />
-                                <span className="text-sm text-gray-700">
-                                  Leave: <span className="font-medium">{formatDate(rider.DateOfLeaving)}</span>
-                                </span>
+                                <DocumentIcon available={rider.RC_IMAGE} />
+                                <span className="text-xs font-medium text-gray-700">RC</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <DocumentIcon available={rider.VehicleImageURL} />
+                                <span className="text-xs font-medium text-gray-700">Vehicle</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <DocumentIcon available={rider.INSURANCE_IMAGE} />
+                                <span className="text-xs font-medium text-gray-700">Insurance</span>
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* Vehicle & Insurance */}
+                          <td className="p-4">
+                            <div className="space-y-3">
+                              <div>
+                                <div className="flex items-center gap-2 mb-1">
+                                  <Car className="w-4 h-4 text-gray-500" />
+                                  <span className="font-medium text-gray-900">{rider.VehicleNumber}</span>
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  Aadhar: {rider.AadharCardNumber}
+                                </div>
+                              </div>
+                              <div className={`flex items-center gap-2 ${
+                                rider.INSURANCE_EXPIRY_DATE &&
+                                new Date(rider.INSURANCE_EXPIRY_DATE) < new Date()
+                                  ? "text-rose-600"
+                                  : "text-gray-700"
+                              }`}>
+                                <Calendar className="w-4 h-4" />
+                                <span className="text-sm">Ins: {formatDate(rider.INSURANCE_EXPIRY_DATE)}</span>
                               </div>
                             </div>
                           </td>
 
                           {/* Status */}
-                          <td className="p-6">
-                            <div className="flex flex-col gap-3">
-                              {getStatusBadge(rider.Status)}
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleApproveToggle(rider.RiderId, rider.Status);
-                                }}
-                                disabled={updatingId === rider.RiderId}
-                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${getActionButtonColor(
-                                  rider.Status
-                                )}`}
-                              >
-                                {updatingId === rider.RiderId
-                                  ? "Updating..."
-                                  : getStatusActionText(rider.Status)}
-                              </button>
+                          <td className="p-4">
+                            {getStatusBadge(rider.Status)}
+                          </td>
+
+                          {/* Actions - Tick/Cross Only */}
+                          <td className="p-4">
+                            <div className="flex items-center gap-2">
+                              {rider.Status !== "Approved" && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleApproveToggle(rider.RiderId, rider.Status);
+                                  }}
+                                  disabled={updatingId === rider.RiderId}
+                                  className="p-2 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded border border-emerald-200 transition-colors"
+                                  title="Approve"
+                                >
+                                  {updatingId === rider.RiderId ? (
+                                    <div className="w-4 h-4 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
+                                  ) : (
+                                    <Check className="w-4 h-4" />
+                                  )}
+                                </button>
+                              )}
+                              
+                              {rider.Status !== "Rejected" && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleApproveToggle(rider.RiderId, rider.Status);
+                                  }}
+                                  disabled={updatingId === rider.RiderId}
+                                  className="p-2 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded border border-rose-200 transition-colors"
+                                  title="Reject"
+                                >
+                                  {updatingId === rider.RiderId ? (
+                                    <div className="w-4 h-4 border-2 border-rose-600 border-t-transparent rounded-full animate-spin"></div>
+                                  ) : (
+                                    <X className="w-4 h-4" />
+                                  )}
+                                </button>
+                              )}
                             </div>
                           </td>
                         </tr>
@@ -559,92 +493,118 @@ export default function Riders() {
               </div>
             </div>
 
-            {/* Mobile View */}
-            <div className="md:hidden space-y-4">
-              {filteredRiders.map((rider, index) => (
+            {/* Mobile Cards */}
+            <div className="lg:hidden space-y-3">
+              {filteredRiders.map((rider) => (
                 <div
                   key={rider.RiderId}
-                  className="bg-white rounded-xl border border-gray-200 shadow-lg p-5"
+                  className="bg-white rounded-lg border border-gray-200 p-4"
                   onClick={() => {
                     localStorage.setItem("selectedRider", JSON.stringify(rider));
                     router.push(`/riders/${rider.RiderId}`);
                   }}
                 >
-                  {/* Header Section */}
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="p-1.5 bg-gray-50 rounded-lg">
-                          <User className="w-3.5 h-3.5 text-gray-600" />
-                        </div>
-                        <span className="font-bold text-gray-900">{rider.Name}</span>
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded bg-blue-50 flex items-center justify-center">
+                        <User className="w-5 h-5 text-blue-600" />
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Phone className="w-3 h-3 text-gray-500" />
-                        <span className="text-sm text-gray-600">{rider.PhoneNumber}</span>
+                      <div>
+                        <div className="font-semibold text-gray-900">{rider.Name}</div>
+                        <div className="text-sm text-gray-500">ID: {rider.RiderId}</div>
                       </div>
                     </div>
                     {getStatusBadge(rider.Status)}
                   </div>
 
-                  {/* Rider Info */}
-                  <div className="mb-4">
-                    <div className="text-xs text-gray-500 mb-1 font-medium">Aadhar Number</div>
-                    <div className="flex items-center gap-2 text-sm text-gray-700">
-                      <Hash className="w-3 h-3" />
-                      <span className="font-mono">{rider.AadharCardNumber}</span>
+                  <div className="grid grid-cols-2 gap-4 mb-3">
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Phone</div>
+                      <div className="text-sm font-medium flex items-center gap-1.5">
+                        <Phone className="w-3.5 h-3.5" />
+                        {rider.PhoneNumber}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Vehicle</div>
+                      <div className="text-sm font-medium flex items-center gap-1.5">
+                        <Car className="w-3.5 h-3.5" />
+                        {rider.VehicleNumber}
+                      </div>
                     </div>
                   </div>
 
-                  {/* Documents Grid */}
-                  <div className="mb-4">
-                    <div className="text-xs text-gray-500 mb-2 font-medium">Documents Status</div>
+                  {/* Documents */}
+                  <div className="mb-3">
+                    <div className="text-xs text-gray-500 mb-2">Documents</div>
                     <div className="grid grid-cols-2 gap-2">
-                      <DocumentBadge available={rider.AadharCardFrontURL} text="Aadhar" />
-                      <DocumentBadge available={rider.VehicleNumberPlatePhotoURL} text="Plate" />
-                      <DocumentBadge available={rider.VehicleImageURL} text="Vehicle" />
-                      <DocumentBadge available={rider.INSURANCE_IMAGE} text="Insurance" />
-                      <DocumentBadge available={rider.RC_IMAGE} text="RC" />
+                      <div className="flex items-center gap-2">
+                        <DocumentIcon available={rider.AadharCardFrontURL} />
+                        <span className="text-sm">Aadhar</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <DocumentIcon available={rider.VehicleImageURL} />
+                        <span className="text-sm">Vehicle</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <DocumentIcon available={rider.RC_IMAGE} />
+                        <span className="text-sm">RC</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <DocumentIcon available={rider.INSURANCE_IMAGE} />
+                        <span className="text-sm">Insurance</span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Vehicle Info */}
-                  <div className="mb-4">
-                    <div className="text-xs text-gray-500 mb-1 font-medium">Vehicle</div>
-                    <div className="flex items-center gap-2 text-sm font-medium text-gray-900">
-                      <CarIcon className="w-4 h-4" />
-                      <span>{rider.VehicleNumber}</span>
+                  <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                    <div className={`flex items-center gap-1.5 text-sm ${
+                      rider.INSURANCE_EXPIRY_DATE &&
+                      new Date(rider.INSURANCE_EXPIRY_DATE) < new Date()
+                        ? "text-rose-600"
+                        : "text-gray-600"
+                    }`}>
+                      <Calendar className="w-3.5 h-3.5" />
+                      <span>Ins: {formatDate(rider.INSURANCE_EXPIRY_DATE)}</span>
                     </div>
-                  </div>
-
-                  {/* Dates */}
-                  <div className="grid grid-cols-2 gap-4 border-t pt-4">
-                    <div>
-                      <div className="text-xs text-gray-500 mb-1 font-medium">Join Date</div>
-                      <div className="text-sm font-medium text-gray-900">{formatDate(rider.AddedOn)}</div>
+                    
+                    <div className="flex items-center gap-2">
+                      {rider.Status !== "Approved" && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleApproveToggle(rider.RiderId, rider.Status);
+                          }}
+                          disabled={updatingId === rider.RiderId}
+                          className="p-2 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded border border-emerald-200"
+                          title="Approve"
+                        >
+                          {updatingId === rider.RiderId ? (
+                            <div className="w-4 h-4 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
+                          ) : (
+                            <Check className="w-4 h-4" />
+                          )}
+                        </button>
+                      )}
+                      
+                      {rider.Status !== "Rejected" && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleApproveToggle(rider.RiderId, rider.Status);
+                          }}
+                          disabled={updatingId === rider.RiderId}
+                          className="p-2 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded border border-rose-200"
+                          title="Reject"
+                        >
+                          {updatingId === rider.RiderId ? (
+                            <div className="w-4 h-4 border-2 border-rose-600 border-t-transparent rounded-full animate-spin"></div>
+                          ) : (
+                            <X className="w-4 h-4" />
+                          )}
+                        </button>
+                      )}
                     </div>
-                    <div>
-                      <div className="text-xs text-gray-500 mb-1 font-medium">Leave Date</div>
-                      <div className="text-sm font-medium text-gray-900">{formatDate(rider.DateOfLeaving)}</div>
-                    </div>
-                  </div>
-
-                  {/* Action Button */}
-                  <div className="mt-4 pt-4 border-t">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleApproveToggle(rider.RiderId, rider.Status);
-                      }}
-                      disabled={updatingId === rider.RiderId}
-                      className={`w-full px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${getActionButtonColor(
-                        rider.Status
-                      )}`}
-                    >
-                      {updatingId === rider.RiderId
-                        ? "Updating..."
-                        : getStatusActionText(rider.Status)}
-                    </button>
                   </div>
                 </div>
               ))}
@@ -654,15 +614,15 @@ export default function Riders() {
 
         {/* Empty State */}
         {!loading && filteredRiders.length === 0 && (
-          <div className="text-center py-16 bg-white rounded-xl border border-gray-200 shadow-sm">
-            <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-              <Users className="w-8 h-8 text-gray-400" />
+          <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
+            <div className="w-12 h-12 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
+              <Users className="w-6 h-6 text-gray-400" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No riders found</h3>
-            <p className="text-gray-500 max-w-sm mx-auto mb-6">
+            <h3 className="font-medium text-gray-900 mb-1">No riders found</h3>
+            <p className="text-sm text-gray-500 mb-4">
               {searchQuery || statusFilter !== "all" || documentFilter !== "all"
-                ? "Try adjusting your search or filter to find what you're looking for."
-                : "No riders have been registered yet."}
+                ? "Try adjusting your filters"
+                : "No riders registered"}
             </p>
             {(searchQuery || statusFilter !== "all" || documentFilter !== "all") && (
               <button
@@ -671,9 +631,9 @@ export default function Riders() {
                   setStatusFilter("all");
                   setDocumentFilter("all");
                 }}
-                className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                className="px-4 py-2 text-sm bg-gray-900 text-white font-medium rounded hover:bg-gray-800"
               >
-                Clear all filters
+                Clear filters
               </button>
             )}
           </div>
