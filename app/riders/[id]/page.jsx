@@ -37,7 +37,10 @@ import {
   BadgeCheck,
   Hash,
   CarTaxiFront,
+  Check,
+  X,
 } from "lucide-react";
+import { BASE_URL } from "../../page";
 
 // Professional Status Badge Component
 const StatusBadge = ({ status, size = "md" }) => {
@@ -201,6 +204,7 @@ export default function RiderDetailsPage() {
   const router = useRouter();
   const [rider, setRider] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem("selectedRider");
@@ -216,6 +220,50 @@ export default function RiderDetailsPage() {
     }
     setTimeout(() => setLoading(false), 500);
   }, [id]);
+
+  const handleStatusUpdate = async (newStatus) => {
+    if (!rider || updating) return;
+
+    try {
+      setUpdating(true);
+
+      const response = await fetch(BASE_URL + "rider/update_rider_status.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          RiderId: rider.RiderId,
+          Status: newStatus,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Update local state
+        const updatedRider = { ...rider, Status: newStatus };
+        setRider(updatedRider);
+
+        // Update localStorage
+        localStorage.setItem("selectedRider", JSON.stringify(updatedRider));
+
+        // Refresh the page data after a short delay
+        setTimeout(() => {
+          const freshStored = localStorage.getItem("selectedRider");
+          if (freshStored) {
+            try {
+              setRider(JSON.parse(freshStored));
+            } catch (error) {
+              console.error("Error refreshing rider data:", error);
+            }
+          }
+        }, 100);
+      }
+    } catch (error) {
+      console.error("Error updating status:", error);
+    } finally {
+      setUpdating(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -331,13 +379,6 @@ export default function RiderDetailsPage() {
       ],
     },
     {
-      label: "PAN Card",
-      number: rider.PAN_NUMBER,
-      type: "Tax Identification",
-      icon: CreditCard,
-      urls: [{ label: "PAN Card", url: rider.PAN_IMAGE }],
-    },
-    {
       label: "Driving License",
       number: rider.DrivingLicenseNumber,
       type: "License",
@@ -350,10 +391,7 @@ export default function RiderDetailsPage() {
       type: "Vehicle",
       icon: Car,
       urls: [
-        { label: "Vehicle Photo", url: rider.VehicleImageURL },
-        { label: "Number Plate", url: rider.VehicleNumberPlatePhotoURL },
-        { label: "RC Book", url: rider.RC_IMAGE },
-        { label: "Insurance", url: rider.INSURANCE_IMAGE },
+        { label: "RC (Smart Card)", url: rider.VehicleNumberPlatePhotoURL },
       ],
     },
   ];
@@ -375,7 +413,11 @@ export default function RiderDetailsPage() {
               </button>
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-100 to-emerald-100 flex items-center justify-center">
-                  <img src={rider.ProfilePictureURL} />
+                  <img
+                    src={rider.ProfilePictureURL}
+                    alt={rider.Name}
+                    className="w-12 h-12 rounded-full"
+                  />
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900">
@@ -408,6 +450,53 @@ export default function RiderDetailsPage() {
                   }`}
                 ></div>
               </div>
+
+              {/* Approve/Reject Buttons - Added on right side of Status */}
+              <div className="flex items-center gap-1 ml-2">
+                {rider.Status !== "Approved" && (
+                  <button
+                    onClick={() => handleStatusUpdate("Approved")}
+                    disabled={updating}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${
+                      updating
+                        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                        : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200"
+                    }`}
+                    title="Approve Rider"
+                  >
+                    {updating ? (
+                      <div className="w-4 h-4 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      <>
+                        <Check className="w-4 h-4" />
+                        <span className="text-sm font-medium">Approve</span>
+                      </>
+                    )}
+                  </button>
+                )}
+                {rider.Status !== "Rejected" && (
+                  <button
+                    onClick={() => handleStatusUpdate("Rejected")}
+                    disabled={updating}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${
+                      updating
+                        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                        : "bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200"
+                    }`}
+                    title="Reject Rider"
+                  >
+                    {updating ? (
+                      <div className="w-4 h-4 border-2 border-rose-600 border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      <>
+                        <X className="w-4 h-4" />
+                        <span className="text-sm font-medium">Reject</span>
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
+
               {/* <div className="flex items-center gap-2">
                 <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
                   <Edit className="w-4 h-4" />
@@ -447,19 +536,6 @@ export default function RiderDetailsPage() {
               value={rider.Status || "Pending"}
               subtext={rider.Working ? "Active" : "Inactive"}
               color="purple"
-            />
-            <InfoCard
-              icon={Calendar}
-              label="Insurance"
-              value={isInsuranceValid() ? "Valid" : "Expired"}
-              subtext={
-                rider.INSURANCE_EXPIRY_DATE
-                  ? `Until ${new Date(
-                      rider.INSURANCE_EXPIRY_DATE
-                    ).toLocaleDateString()}`
-                  : "No expiry"
-              }
-              color={isInsuranceValid() ? "emerald" : "rose"}
             />
           </div>
         </div>
@@ -516,15 +592,6 @@ export default function RiderDetailsPage() {
                         {rider.AadharCardNumber}
                       </div>
                     </div>
-                    <div className="md:col-span-2">
-                      <div className="text-sm font-medium text-gray-600 mb-1">
-                        Address
-                      </div>
-                      <div className="text-base font-semibold text-gray-900 flex items-center gap-2">
-                        <MapPin className="w-4 h-4 text-gray-400" />
-                        {rider.Address || "Not provided"}
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -560,25 +627,6 @@ export default function RiderDetailsPage() {
                   </div>
                   <div>
                     <div className="text-sm font-medium text-gray-600 mb-1">
-                      Insurance Expiry
-                    </div>
-                    <div
-                      className={`text-base font-semibold flex items-center gap-2 ${
-                        isInsuranceValid()
-                          ? "text-emerald-600"
-                          : "text-rose-600"
-                      }`}
-                    >
-                      <Calendar className="w-4 h-4" />
-                      {rider.INSURANCE_EXPIRY_DATE
-                        ? new Date(
-                            rider.INSURANCE_EXPIRY_DATE
-                          ).toLocaleDateString()
-                        : "Not available"}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm font-medium text-gray-600 mb-1">
                       Driving License
                     </div>
                     <div className="text-base font-semibold text-gray-900">
@@ -593,70 +641,7 @@ export default function RiderDetailsPage() {
           {/* Right Column: Documents & Stats */}
           <div className="space-y-6">
             {/* Document Summary */}
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <FileText className="w-5 h-5 text-gray-600" />
-                    <h3 className="font-semibold text-gray-900">
-                      Document Status
-                    </h3>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className="text-gray-500">Completion:</span>
-                    <span
-                      className={`font-semibold ${
-                        documentStats.isComplete
-                          ? "text-emerald-600"
-                          : "text-amber-600"
-                      }`}
-                    >
-                      {documentStats.completionRate}%
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="px-6 py-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="p-4 rounded-lg bg-gray-50 border border-gray-200">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="text-sm font-medium text-gray-600">
-                        Total Files
-                      </div>
-                      <FileArchive className="w-4 h-4 text-gray-400" />
-                    </div>
-                    <div className="text-2xl font-bold text-gray-900">
-                      {documentStats.totalFiles}/
-                      {documentStats.totalPossibleFiles}
-                    </div>
-                    <div className="h-2 bg-gray-200 rounded-full mt-2 overflow-hidden">
-                      <div
-                        className={`h-full rounded-full ${
-                          documentStats.isComplete
-                            ? "bg-emerald-500"
-                            : "bg-amber-500"
-                        }`}
-                        style={{ width: `${documentStats.completionRate}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                  <div className="p-4 rounded-lg bg-gray-50 border border-gray-200">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="text-sm font-medium text-gray-600">
-                        Document Categories
-                      </div>
-                      <BookOpen className="w-4 h-4 text-gray-400" />
-                    </div>
-                    <div className="text-2xl font-bold text-gray-900">
-                      {documentStats.totalCategories}
-                    </div>
-                    <div className="text-sm text-gray-500 mt-1">
-                      All categories
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            
 
             {/* Documents Grid */}
             <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
@@ -681,88 +666,6 @@ export default function RiderDetailsPage() {
                 </div>
               </div>
             </div>
-
-            {/* Activity & Timeline */}
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                <div className="flex items-center gap-2">
-                  <Activity className="w-5 h-5 text-gray-600" />
-                  <h3 className="font-semibold text-gray-900">
-                    Recent Activity
-                  </h3>
-                </div>
-              </div>
-              <div className="p-6">
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <div className="p-2 rounded-full bg-emerald-50">
-                      <CheckCircle className="w-4 h-4 text-emerald-600" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-medium text-gray-900">
-                        Profile Approved
-                      </div>
-                      <div className="text-sm text-gray-500 mt-0.5">
-                        Account was approved on{" "}
-                        {new Date(rider.ApprovedOn).toLocaleDateString(
-                          "en-US",
-                          {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          }
-                        )}
-                      </div>
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {new Date(rider.ApprovedOn).toLocaleTimeString("en-US", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="p-2 rounded-full bg-blue-50">
-                      <User className="w-4 h-4 text-blue-600" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-medium text-gray-900">
-                        Account Created
-                      </div>
-                      <div className="text-sm text-gray-500 mt-0.5">
-                        Registered on{" "}
-                        {new Date(rider.AddedOn).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })}
-                      </div>
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {new Date(rider.AddedOn).toLocaleTimeString("en-US", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="p-2 rounded-full bg-purple-50">
-                      <ShieldCheck className="w-4 h-4 text-purple-600" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-medium text-gray-900">
-                        Document Upload
-                      </div>
-                      <div className="text-sm text-gray-500 mt-0.5">
-                        {documentStats.totalFiles} out of{" "}
-                        {documentStats.totalPossibleFiles} documents uploaded
-                      </div>
-                    </div>
-                    <div className="text-xs text-gray-500">Just now</div>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -777,9 +680,6 @@ export default function RiderDetailsPage() {
               className="px-4 py-2.5 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg border border-gray-300 transition-colors"
             >
               Back to List
-            </button>
-            <button className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
-              Download Profile
             </button>
           </div>
         </div>

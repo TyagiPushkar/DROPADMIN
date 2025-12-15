@@ -193,8 +193,7 @@ export default function Riders() {
   const itemsPerPage = 10;
   const router = useRouter();
 
-  // Search and filter states
-  const [searchQuery, setSearchQuery] = useState("");
+  // Filter states only
   const [statusFilter, setStatusFilter] = useState("all");
   const [documentFilter, setDocumentFilter] = useState("all");
 
@@ -215,19 +214,16 @@ export default function Riders() {
     }
   };
 
-  // Filter riders
+  // Filter riders - FIXED: Properly handle pending status
   const filteredRiders = riders.filter((rider) => {
-    const matchesSearch =
-      searchQuery === "" ||
-      rider.Name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      rider.PhoneNumber?.includes(searchQuery) ||
-      rider.AadharCardNumber?.includes(searchQuery) ||
-      rider.VehicleNumber?.toLowerCase().includes(searchQuery.toLowerCase());
-
+    // Handle status filter with proper pending detection
     const matchesStatus =
       statusFilter === "all" ||
       (statusFilter === "approved" && rider.Status === "Approved") ||
-      (statusFilter === "pending" && (!rider.Status || rider.Status === "")) ||
+      (statusFilter === "pending" &&
+        (!rider.Status ||
+          rider.Status === "" ||
+          rider.Status.toLowerCase() === "pending")) ||
       (statusFilter === "rejected" && rider.Status === "Rejected");
 
     let matchesDocument = true;
@@ -257,7 +253,7 @@ export default function Riders() {
       }
     }
 
-    return matchesSearch && matchesStatus && matchesDocument;
+    return matchesStatus && matchesDocument;
   });
 
   // Pagination
@@ -358,32 +354,15 @@ export default function Riders() {
   const handleExport = async () => {
     try {
       setExportLoading(true);
-      // Create CSV content
-      const headers = [
-        "ID",
-        "Name",
-        "Phone",
-        "Vehicle",
-        "Aadhar",
-        "Status",
-        "Insurance Expiry",
-        "Documents Complete",
-      ];
-      const rows = riders.map((rider) => [
+      // Create CSV content - ONLY export what's visible on screen
+      const headers = ["ID", "Name", "Phone", "Vehicle Number", "Status"];
+
+      const rows = paginatedRiders.map((rider) => [
         rider.RiderId,
         `"${rider.Name || ""}"`,
-        rider.PhoneNumber,
-        rider.VehicleNumber,
-        rider.AadharCardNumber,
+        rider.PhoneNumber || "",
+        rider.VehicleNumber || "",
         rider.Status || "Pending",
-        rider.INSURANCE_EXPIRY_DATE || "N/A",
-        rider.AadharCardFrontURL &&
-        rider.VehicleNumberPlatePhotoURL &&
-        rider.VehicleImageURL &&
-        rider.INSURANCE_IMAGE &&
-        rider.RC_IMAGE
-          ? "Yes"
-          : "No",
       ]);
 
       const csvContent = [headers, ...rows]
@@ -395,7 +374,9 @@ export default function Riders() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `riders_${new Date().toISOString().split("T")[0]}.csv`;
+      a.download = `riders_page_${currentPage}_${
+        new Date().toISOString().split("T")[0]
+      }.csv`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -409,14 +390,17 @@ export default function Riders() {
 
   const calculateStats = () => {
     const now = new Date();
-    const expiredInsuranceCount = riders.filter(
-      (r) => r.INSURANCE_EXPIRY_DATE && new Date(r.INSURANCE_EXPIRY_DATE) < now
+
+    // FIXED: Properly count pending riders
+    const pendingCount = riders.filter(
+      (r) =>
+        !r.Status || r.Status === "" || r.Status.toLowerCase() === "pending"
     ).length;
 
     return {
       total: riders.length,
       approved: riders.filter((r) => r.Status === "Approved").length,
-      pending: riders.filter((r) => !r.Status || r.Status === "").length,
+      pending: pendingCount, // Fixed this line
       rejected: riders.filter((r) => r.Status === "Rejected").length,
       completeDocs: riders.filter(
         (r) =>
@@ -426,7 +410,10 @@ export default function Riders() {
           r.INSURANCE_IMAGE &&
           r.RC_IMAGE
       ).length,
-      expiredInsurance: expiredInsuranceCount,
+      expiredInsurance: riders.filter(
+        (r) =>
+          r.INSURANCE_EXPIRY_DATE && new Date(r.INSURANCE_EXPIRY_DATE) < now
+      ).length,
     };
   };
 
@@ -458,7 +445,7 @@ export default function Riders() {
                 onClick={handleExport}
                 disabled={exportLoading || riders.length === 0}
                 className="p-2.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
-                title="Export Data"
+                title="Export Current Page"
               >
                 {exportLoading ? (
                   <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
@@ -476,150 +463,66 @@ export default function Riders() {
             </div>
           </div>
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
-            <StatsCard
-              icon={Users}
-              label="Total Riders"
-              value={stats.total}
-              color="blue"
-            />
-            <StatsCard
-              icon={CheckCircle}
-              label="Approved"
-              value={stats.approved}
-              color="emerald"
-            />
-            <StatsCard
-              icon={Clock}
-              label="Pending"
-              value={stats.pending}
-              color="amber"
-            />
-            <StatsCard
-              icon={XCircle}
-              label="Rejected"
-              value={stats.rejected}
-              color="rose"
-            />
-            <StatsCard
-              icon={ShieldCheck}
-              label="Complete Docs"
-              value={stats.completeDocs}
-              color="purple"
-            />
-            <StatsCard
-              icon={AlertCircle}
-              label="Expired Insurance"
-              value={stats.expiredInsurance}
-              color="rose"
-            />
-          </div>
+          {/* Stats Grid with Dropdown Filters on the right */}
+          <div className="grid grid-cols-1 md:grid-cols-8 gap-4 mb-8">
+            {/* Stats Cards - 6 columns */}
+            <div className="md:col-span-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+              <StatsCard
+                icon={Users}
+                label="Total Registrations"
+                value={stats.total}
+                color="blue"
+              />
+              <StatsCard
+                icon={CheckCircle}
+                label="Active Riders"
+                value={stats.approved}
+                color="emerald"
+              />
+              <StatsCard
+                icon={Clock}
+                label="Pending"
+                value={stats.pending}
+                color="amber"
+              />
+              <StatsCard
+                icon={XCircle}
+                label="Rejected"
+                value={stats.rejected}
+                color="rose"
+              />
+             
+             
+            </div>
 
-          {/* Search and Filter Bar */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6 shadow-sm">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-              <div className="flex-1">
-                <div className="relative">
-                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Search riders by name, phone, vehicle, or Aadhar..."
-                    className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3">
+            {/* Dropdown Filters - 2 columns on the right */}
+            <div className="md:col-span-2 flex flex-col gap-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Filter by Status
+                </label>
                 <select
-                  className="px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                   value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
+                  onChange={(e) => {
+                    setStatusFilter(e.target.value);
+                    setCurrentPage(1);
+                  }}
                 >
                   <option value="all">All Status</option>
                   <option value="approved">Approved</option>
                   <option value="pending">Pending</option>
                   <option value="rejected">Rejected</option>
                 </select>
-
-                <select
-                  className="px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                  value={documentFilter}
-                  onChange={(e) => setDocumentFilter(e.target.value)}
-                >
-                  <option value="all">All Documents</option>
-                  <option value="complete">Complete</option>
-                  <option value="incomplete">Incomplete</option>
-                  <option value="expired">Insurance Expired</option>
-                </select>
-
-                <button
-                  onClick={() => {
-                    setSearchQuery("");
-                    setStatusFilter("all");
-                    setDocumentFilter("all");
-                    setCurrentPage(1);
-                  }}
-                  className="px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 rounded-lg border border-gray-300 transition-colors"
-                >
-                  Clear All
-                </button>
               </div>
+
+             
             </div>
           </div>
         </div>
 
         {/* Selection Actions */}
-        {selectedRiders.length > 0 && (
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                  <Users className="w-4 h-4 text-blue-600" />
-                </div>
-                <div>
-                  <div className="font-medium text-blue-900">
-                    {selectedRiders.length} riders selected
-                  </div>
-                  <div className="text-sm text-blue-700">
-                    Bulk actions available
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handleBulkApprove}
-                  disabled={updatingId === "bulk"}
-                  className="px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-100 rounded-lg transition-colors disabled:opacity-50"
-                >
-                  {updatingId === "bulk" ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
-                      Processing...
-                    </div>
-                  ) : (
-                    "Approve All"
-                  )}
-                </button>
-                <button
-                  onClick={handleBulkReject}
-                  disabled={updatingId === "bulk"}
-                  className="px-4 py-2 text-sm font-medium text-rose-700 hover:bg-rose-100 rounded-lg transition-colors disabled:opacity-50"
-                >
-                  Reject All
-                </button>
-                <button
-                  onClick={() => setSelectedRiders([])}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg border border-gray-300 transition-colors"
-                >
-                  Clear Selection
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        
 
         {/* Professional Table */}
         {loading ? (
@@ -661,7 +564,7 @@ export default function Riders() {
                     onClick={handleExport}
                     disabled={exportLoading || filteredRiders.length === 0}
                     className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
-                    title="Export Results"
+                    title="Export Current Page"
                   >
                     {exportLoading ? (
                       <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
@@ -680,12 +583,12 @@ export default function Riders() {
                   <tr>
                     <th className="py-4 px-6 text-left">
                       <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        Rider Details
+                        Rider
                       </span>
                     </th>
                     <th className="py-4 px-6 text-left">
                       <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        Documents
+                        Rider Number
                       </span>
                     </th>
                     <th className="py-4 px-6 text-left">
@@ -696,11 +599,6 @@ export default function Riders() {
                     <th className="py-4 px-6 text-left">
                       <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
                         Status
-                      </span>
-                    </th>
-                    <th className="py-4 px-6 text-left">
-                      <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        Actions
                       </span>
                     </th>
                   </tr>
@@ -733,23 +631,26 @@ export default function Riders() {
                             }}
                           >
                             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center">
-                              <img src={rider.ProfilePictureURL} className="w-10 h-10" style={{borderRadius:"50%"}} />
+                              <img
+                                src={rider.ProfilePictureURL}
+                                className="w-10 h-10"
+                                style={{ borderRadius: "50%" }}
+                                alt={rider.Name}
+                              />
                             </div>
                             <div>
                               <div className="font-semibold text-gray-900">
                                 {rider.Name}
                               </div>
-                              <div className="text-sm text-gray-500 flex items-center gap-2 mt-1">
-                                <Phone className="w-3 h-3" />
-                                {rider.PhoneNumber}
-                              </div>
-                            
                             </div>
                           </div>
                         </div>
                       </td>
                       <td className="py-4 px-6">
-                        <DocumentStatus rider={rider} />
+                        <div className="text-sm text-gray-500 flex items-center gap-2 mt-1">
+                          <Phone className="w-3 h-3" />
+                          {rider.PhoneNumber}
+                        </div>
                       </td>
                       <td className="py-4 px-6">
                         <div className="space-y-3">
@@ -759,75 +660,10 @@ export default function Riders() {
                               {rider.VehicleNumber}
                             </span>
                           </div>
-                         
                         </div>
                       </td>
                       <td className="py-4 px-6">
                         <StatusBadge status={rider.Status} />
-                      </td>
-                      <td className="py-4 px-6">
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              localStorage.setItem(
-                                "selectedRider",
-                                JSON.stringify(rider)
-                              );
-                              router.push(`/riders/${rider.RiderId}`);
-                            }}
-                            className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                            title="View Details"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
-                          {rider.Status !== "Approved" && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleApproveToggle(
-                                  rider.RiderId,
-                                  rider.Status
-                                );
-                              }}
-                              disabled={updatingId === rider.RiderId}
-                              className="p-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors disabled:opacity-50"
-                              title="Approve"
-                            >
-                              {updatingId === rider.RiderId ? (
-                                <div className="w-4 h-4 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
-                              ) : (
-                                <Check className="w-4 h-4" />
-                              )}
-                            </button>
-                          )}
-                          {rider.Status !== "Rejected" && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleApproveToggle(
-                                  rider.RiderId,
-                                  rider.Status
-                                );
-                              }}
-                              disabled={updatingId === rider.RiderId}
-                              className="p-2 text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors disabled:opacity-50"
-                              title="Reject"
-                            >
-                              {updatingId === rider.RiderId ? (
-                                <div className="w-4 h-4 border-2 border-rose-600 border-t-transparent rounded-full animate-spin"></div>
-                              ) : (
-                                <X className="w-4 h-4" />
-                              )}
-                            </button>
-                          )}
-                          <button
-                            className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-                            title="More Options"
-                          >
-                            <MoreVertical className="w-4 h-4" />
-                          </button>
-                        </div>
                       </td>
                     </tr>
                   ))}
@@ -845,18 +681,13 @@ export default function Riders() {
                   No riders found
                 </h3>
                 <p className="text-gray-600 mb-6">
-                  {searchQuery ||
-                  statusFilter !== "all" ||
-                  documentFilter !== "all"
-                    ? "Try adjusting your search or filters"
+                  {statusFilter !== "all" || documentFilter !== "all"
+                    ? "Try adjusting your filters"
                     : "No riders have been registered yet"}
                 </p>
-                {(searchQuery ||
-                  statusFilter !== "all" ||
-                  documentFilter !== "all") && (
+                {(statusFilter !== "all" || documentFilter !== "all") && (
                   <button
                     onClick={() => {
-                      setSearchQuery("");
                       setStatusFilter("all");
                       setDocumentFilter("all");
                     }}
@@ -930,57 +761,6 @@ export default function Riders() {
             )}
           </div>
         )}
-
-        {/* Quick Actions Footer */}
-        {/* <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div
-            className="bg-white rounded-xl border border-gray-200 p-4 cursor-pointer hover:border-blue-300 hover:bg-blue-50 transition-all"
-            onClick={() => router.push("/riders/new")}
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm font-medium text-gray-700">
-                  Add New Rider
-                </div>
-                <div className="text-xs text-gray-500 mt-1">
-                  Register a new rider
-                </div>
-              </div>
-              <Plus className="w-5 h-5 text-blue-500" />
-            </div>
-          </div>
-
-          <div
-            className="bg-white rounded-xl border border-gray-200 p-4 cursor-pointer hover:border-emerald-300 hover:bg-emerald-50 transition-all"
-            onClick={handleExport}
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm font-medium text-gray-700">
-                  Export Data
-                </div>
-                <div className="text-xs text-gray-500 mt-1">
-                  Download CSV/Excel
-                </div>
-              </div>
-              <Download className="w-5 h-5 text-emerald-500" />
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl border border-gray-200 p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm font-medium text-gray-700">
-                  Recent Activity
-                </div>
-                <div className="text-xs text-gray-500 mt-1">
-                  View audit logs
-                </div>
-              </div>
-              <FileText className="w-5 h-5 text-gray-400" />
-            </div>
-          </div>
-        </div> */}
       </div>
     </div>
   );
