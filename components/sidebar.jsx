@@ -26,9 +26,8 @@ const menuItems = [
   { name: "Riders", href: "/riders", icon: Users, badge: null },
   { name: "Rides", href: "/rides", icon: Bike, badge: null },
   { name: "Wallet", href: "/rider-ledger", icon: Wallet, badge: null },
-  { name: "Directory", href: "/rider-directory", icon: Book, badge: null },
-  { name: "Settings", href: "/settings", icon: Settings, badge: null },
   { name: "Fares", href: "/fares", icon: Calculator, badge: null },
+  { name: "Settings", href: "/settings", icon: Settings, badge: null },
 ];
 
 export default function Sidebar({ open, setOpen }) {
