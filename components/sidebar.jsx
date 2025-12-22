@@ -101,7 +101,6 @@ export default function Sidebar({ open, setOpen }) {
           [&::-webkit-scrollbar-thumb]:rounded-full
           [&::-webkit-scrollbar-thumb:hover]:bg-white/20
           [&::-webkit-scrollbar]:hidden
-          [&::-webkit-scrollbar]:hover:block
           scrollbar-width: thin
           scrollbar-color: rgba(255,255,255,0.1) transparent
           hover:[&::-webkit-scrollbar]:block"
