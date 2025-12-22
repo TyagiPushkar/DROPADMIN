@@ -19,7 +19,7 @@ export function middleware(request) {
   }
 
   // Public routes
-  const publicRoutes = ["/", "/add-vendor", "/login","/add-rider"];
+  const publicRoutes = ["/", "/login","/add-rider"];
   if (publicRoutes.includes(path)) {
     return NextResponse.next();
   }
@@ -29,29 +29,28 @@ export function middleware(request) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  // --------------------
-  // CUSTOMER ACCESS
-  // --------------------
-  if (user.UserType === "Customer") {
-    const customerAllowed = [
-      "/analytics",
-      "/orders",
+ 
+  if (user.UserType === "SuperAdmin") {
+    const superAdminAllowed = [
+      // "/analytics",
+      // "/orders",
       "/settings",
-      "/vendors",
+      // "/vendors",
       "/riders",
       "/rides",
       "/rider-ledger",
       "/rider-directory",
-      "/fares"
+      "/fares",
+      "/transactions"
     ];
 
     // Customer must stay inside allowed routes
-    const isAllowed = customerAllowed.some((route) =>
+    const isAllowed = superAdminAllowed.some((route) =>
       path.startsWith(route)
     );
 
     if (!isAllowed) {
-      return NextResponse.redirect(new URL("/analytics", request.url));
+      return NextResponse.redirect(new URL("/settings", request.url));
     }
 
     return NextResponse.next();

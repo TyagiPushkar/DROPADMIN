@@ -15,7 +15,7 @@ export default function SettingsPage() {
 
   useEffect(() => {
     const userCookie = Cookies.get("user")
-    console.log("Raw cookie value:", userCookie)
+    
     if (!userCookie) {
       router.push("/") // redirect to login if not logged in
       return

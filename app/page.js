@@ -5,18 +5,18 @@ import { useRouter } from "next/navigation"
 import Cookies from "js-cookie"
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("")
-  const [otp, setOtp] = useState("")
-  const [step, setStep] = useState(1)
+  const [identifier, setIdentifier] = useState("")
+  const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const router = useRouter()
 
-  
-  
-  const API_URL = BASE_URL + "auth/login.php";
+  const API_URL = BASE_URL + "auth/login.php"
 
-  const handleSendOtp = async (e) => {
+  // ---------------------------
+  // PASSWORD LOGIN
+  // ---------------------------
+  const handleLogin = async (e) => {
     e.preventDefault()
     setLoading(true)
     setError("")
@@ -25,49 +25,16 @@ export default function LoginPage() {
       const res = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identifier: email, send_otp: true }),
+        body: JSON.stringify({
+          identifier: identifier,
+          password: password,
+        }),
       })
 
       const data = await res.json()
+      console.log("Login response:", data)
 
       if (data.success) {
-        setStep(2)
-      } else {
-        setError(data.message || "Failed to send OTP")
-      }
-    } catch {
-      setError("Something went wrong")
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // ---------------------------
-  // VERIFY OTP
-  // ---------------------------
-  const handleVerifyOtp = async (e) => {
-    e.preventDefault()
-
-    if (!otp || otp.length < 6) {
-      setError("Please enter a valid 6-digit OTP")
-      return
-    }
-
-    setLoading(true)
-    setError("")
-
-    try {
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identifier: email, otp, verify_otp: true }),
-      })
-
-      const data = await res.json()
-      console.log("Verify response:", data)
-
-      if (data.success) {
-        // Store user data as cookie
         Cookies.set("user", JSON.stringify(data.data), {
           expires: 1, // 1 day
         })
@@ -75,16 +42,15 @@ export default function LoginPage() {
         const userType = data.data.UserType
         const userId = data.data.UserId
 
-        // ---------------------------
-        // REDIRECT BASED ON USERTYPE
-        // ---------------------------
         if (userType === "Restaurant") {
           router.push(`/vendor-dashboard/${userId}`)
+        } else if (userType === "Rider") {
+          router.push(`/rider-dashboard/${userId}`)
         } else {
-          router.push("/analytics")
+          router.push("/settings")
         }
       } else {
-        setError(data.message || "Invalid OTP")
+        setError(data.message || "Invalid credentials")
       }
     } catch (err) {
       console.error(err)
@@ -94,11 +60,31 @@ export default function LoginPage() {
     }
   }
 
+  // =====================================================
+  // OTP LOGIN (COMMENTED OUT FOR NOW)
+  // =====================================================
+
+  /*
+  const [otp, setOtp] = useState("")
+  const [step, setStep] = useState(1)
+
+  const handleSendOtp = async (e) => {
+    e.preventDefault()
+    ...
+  }
+
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault()
+    ...
+  }
+  */
+
   // ---------------------------
   // UI
   // ---------------------------
   return (
     <div className="flex h-screen">
+      {/* LEFT IMAGE */}
       <div className="hidden md:flex md:w-2/3 relative text-white">
         <img
           src="/images/delivery.jpg"
@@ -106,42 +92,26 @@ export default function LoginPage() {
           className="absolute inset-0 w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-black/60" />
-        <div className="relative z-10 flex flex-col justify-between w-full p-10">
-          <div className="absolute top-6 left-6">
-            <img
-              src="/images/droplogo.jpg"
-              alt="App Logo"
-              className="w-16 h-16 object-contain bg-white p-2 rounded-full shadow-xl ring-2 ring-indigo-500"
-            />
-          </div>
-          <div className="flex flex-col items-center text-center space-y-6 mb-12 mt-auto">
-            <p className="text-lg opacity-90 max-w-sm">
-              Welcome back! Sign in securely with your email OTP.
-            </p>
-          </div>
-        </div>
       </div>
 
-      {/* Right side - form */}
+      {/* RIGHT FORM */}
       <div className="flex-1 flex items-center justify-center bg-gray-50 p-6">
         <div className="w-full max-w-md space-y-6">
           <div className="flex justify-center">
             <img
               src="/images/droplogo.jpg"
               alt="App Logo"
-              className="mx-auto w-28 h-28 object-contain bg-white p-3 rounded-full shadow-2xl ring-4 ring-indigo-500"
+              className="w-28 h-28 object-contain bg-white p-3 rounded-full shadow-2xl ring-4 ring-indigo-500"
             />
           </div>
 
-          <div className="w-full bg-white/80 backdrop-blur-lg shadow-xl rounded-2xl p-8 space-y-6">
+          <div className="bg-white shadow-xl rounded-2xl p-8 space-y-6">
             <div className="text-center">
               <h2 className="text-3xl font-bold text-gray-900">
-                {step === 1 ? "Sign in to Continue" : "Verify Your OTP"}
+                Sign in to Continue
               </h2>
               <p className="text-gray-600 text-sm mt-2">
-                {step === 1
-                  ? "Enter your email to receive a one-time login code."
-                  : "Check your email and enter the OTP below."}
+                Login using your email or phone and password
               </p>
             </div>
 
@@ -151,86 +121,64 @@ export default function LoginPage() {
               </div>
             )}
 
-            {step === 1 ? (
-              <form onSubmit={handleSendOtp} className="space-y-5">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    placeholder="you@example.com"
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 shadow-sm"
-                  />
-                </div>
+            <form onSubmit={handleLogin} className="space-y-5">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email or Phone
+                </label>
+                <input
+                  type="text"
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
+                  required
+                  placeholder="email or phone"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+              </div>
 
-                <button
-                  type="submit"
-                  disabled={loading}
-                  style={{ backgroundColor: "#06a8edff" }}
-                  className="w-full flex items-center justify-center gap-2 text-white py-3 cursor-pointer rounded-lg hover:opacity-90 transition font-semibold shadow-lg disabled:opacity-70"
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  placeholder="********"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                style={{ backgroundColor: "#06a8edff" }}
+                className="w-full text-white py-3 rounded-lg hover:opacity-90 transition font-semibold shadow-lg disabled:opacity-70"
+              >
+                {loading ? "Signing in..." : "Sign In"}
+              </button>
+
+             
+              {/*
+              <p
+                className="text-sm text-blue-600 hover:underline cursor-pointer text-center"
+                onClick={() => setStep(1)}
+              >
+                Login with OTP
+              </p>
+              */}
+
+              <p className="text-center text-sm text-gray-600 mt-3">
+                New Rider?
+                <a
+                  href="/add-rider"
+                  className="text-blue-600 hover:underline font-medium"
                 >
-                  {loading ? "Sending OTP..." : "Send OTP"}
-                </button>
-
-                <p className="text-center text-sm text-gray-600 mt-3">
-                  Click
-                  <a
-                    href="/add-vendor"
-                    className="text-blue-600 hover:underline font-medium"
-                  >
-                    &nbsp;here
-                  </a>{" "}
-                  to register your restaurant
-                </p>
-                <p className="text-center text-sm text-gray-600 mt-3">
-                  Click
-                  <a
-                    href="/add-rider"
-                    className="text-blue-600 hover:underline font-medium"
-                  >
-                    &nbsp;here
-                  </a>{" "}
-                  to onboard as rider
-                </p>
-                
-              </form>
-            ) : (
-              <form onSubmit={handleVerifyOtp} className="space-y-5">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    OTP
-                  </label>
-                  <input
-                    type="text"
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value)}
-                    required
-                    placeholder="6-digit OTP"
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 outline-none text-gray-900 shadow-sm"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  style={{ backgroundColor: "#06a8edff" }}
-                  className="w-full cursor-pointer text-white py-3 rounded-lg hover:opacity-90 transition font-semibold shadow-lg"
-                >
-                  {loading ? "Verifying..." : "Verify OTP"}
-                </button>
-
-                <p
-                  className="text-sm text-blue-600 hover:underline cursor-pointer text-center"
-                  onClick={() => setStep(1)}
-                >
-                  Resend OTP
-                </p>
-              </form>
-            )}
+                  &nbsp;Onboard here
+                </a>
+              </p>
+            </form>
           </div>
         </div>
       </div>
@@ -238,6 +186,4 @@ export default function LoginPage() {
   )
 }
 
-
-
-export const BASE_URL = "https://namami-infotech.com/DROP/src/";
+export const BASE_URL = "https://namami-infotech.com/DROP/src/"
