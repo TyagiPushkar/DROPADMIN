@@ -39,6 +39,12 @@ import {
   CarTaxiFront,
   Check,
   X,
+  Wallet,
+  IndianRupee,
+  ArrowUpRight,
+  ArrowDownRight,
+  RefreshCw,
+  History,
 } from "lucide-react";
 import { BASE_URL } from "../../page";
 
@@ -199,12 +205,87 @@ const DocumentCard = ({ document }) => {
   );
 };
 
+// Transaction Item Component
+const TransactionItem = ({ transaction }) => {
+  const isCredit = ["RECHARGE", "REFUND", "CREDIT"].includes(
+    transaction.TransactionType
+  );
+  
+  const getTransactionIcon = (type) => {
+    switch (type) {
+      case "RIDE_DEBIT":
+      case "DEBIT":
+        return ArrowDownRight;
+      case "RECHARGE":
+      case "REFUND":
+      case "CREDIT":
+        return ArrowUpRight;
+      default:
+        return ArrowUpRight;
+    }
+  };
+
+  const getTransactionColor = (type) => {
+    switch (type) {
+      case "RIDE_DEBIT":
+      case "DEBIT":
+        return "text-rose-600 bg-rose-50";
+      case "RECHARGE":
+      case "REFUND":
+      case "CREDIT":
+        return "text-emerald-600 bg-emerald-50";
+      default:
+        return "text-gray-600 bg-gray-50";
+    }
+  };
+
+  const Icon = getTransactionIcon(transaction.TransactionType);
+  const colorClass = getTransactionColor(transaction.TransactionType);
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+  return (
+    <div className="flex items-center justify-between py-3 px-1 hover:bg-gray-50 rounded-lg transition-colors">
+      <div className="flex items-center gap-3">
+        <div className={`p-2 rounded-lg ${colorClass}`}>
+          <Icon className="w-4 h-4" />
+        </div>
+        <div>
+          <div className="font-medium text-gray-900 text-sm">
+            {transaction.Description}
+          </div>
+          <div className="text-xs text-gray-500 mt-0.5">
+            {formatDate(transaction.CreatedAt)} • {transaction.TransactionType}
+          </div>
+        </div>
+      </div>
+      <div className="text-right">
+        <div className={`font-semibold ${isCredit ? "text-emerald-700" : "text-rose-700"}`}>
+          {isCredit ? "+" : "-"}₹{parseFloat(transaction.Amount).toFixed(2)}
+        </div>
+        <div className={`text-xs mt-0.5 ${transaction.Status === "SUCCESS" ? "text-emerald-600" : "text-amber-600"}`}>
+          {transaction.Status}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function RiderDetailsPage() {
   const { id } = useParams();
   const router = useRouter();
   const [rider, setRider] = useState(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
+  const [walletData, setWalletData] = useState(null);
+  const [loadingWallet, setLoadingWallet] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem("selectedRider");
@@ -213,6 +294,8 @@ export default function RiderDetailsPage() {
         const parsed = JSON.parse(stored);
         if (String(parsed.RiderId) === String(id)) {
           setRider(parsed);
+          
+          fetchWalletData(parsed.RiderId);
         }
       } catch (error) {
         console.error("Error parsing rider data:", error);
@@ -220,6 +303,38 @@ export default function RiderDetailsPage() {
     }
     setTimeout(() => setLoading(false), 500);
   }, [id]);
+
+  const fetchWalletData = async (riderId) => {
+    if (!riderId) return;
+    console.log('r',riderId);
+    
+    try {
+      setLoadingWallet(true);
+      const response = await fetch(BASE_URL+`wallets/get_wallet.php?rider_id=${riderId}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setWalletData(data);
+      } else {
+        console.error("Failed to fetch wallet data:", data.message);
+      }
+    } catch (error) {
+      console.error("Error fetching wallet data:", error);
+    } finally {
+      setLoadingWallet(false);
+    }
+  };
+
+  const handleRefreshWallet = () => {
+    if (rider?.RiderId) {
+      fetchWalletData(rider.RiderId);
+    }
+  };
 
   const handleStatusUpdate = async (newStatus) => {
     if (!rider || updating) return;
@@ -496,21 +611,6 @@ export default function RiderDetailsPage() {
                   </button>
                 )}
               </div>
-
-              {/* <div className="flex items-center gap-2">
-                <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
-                  <Edit className="w-4 h-4" />
-                </button>
-                <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
-                  <Printer className="w-4 h-4" />
-                </button>
-                <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
-                  <Share2 className="w-4 h-4" />
-                </button>
-                <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
-                  <MoreVertical className="w-4 h-4" />
-                </button>
-              </div> */}
             </div>
           </div>
 
@@ -537,6 +637,51 @@ export default function RiderDetailsPage() {
               subtext={rider.Working ? "Active" : "Inactive"}
               color="purple"
             />
+            {/* Wallet Balance Card - Added to Quick Stats */}
+            <div className="p-4 rounded-xl bg-gradient-to-br from-blue-50 to-emerald-50 border border-blue-100 hover:border-blue-200 transition-colors">
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-lg bg-gradient-to-br from-blue-100 to-emerald-100">
+                  <Wallet className="w-5 h-5 text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <div className="text-sm font-medium text-gray-600">
+                    Wallet Balance
+                  </div>
+                  {loadingWallet ? (
+                    <div className="h-7 w-24 bg-gray-200 rounded animate-pulse mt-1"></div>
+                  ) : (
+                    <div className="text-lg font-bold text-gray-900 mt-1 flex items-center">
+                      <IndianRupee className="w-4 h-4 mr-1" />
+                      {walletData?.wallet?.balance
+                        ? parseFloat(walletData.wallet.balance).toFixed(2)
+                        : "0.00"}
+                    </div>
+                  )}
+                  <div className="text-xs text-gray-500 mt-1">
+                    {loadingWallet
+                      ? "Loading..."
+                      : walletData?.wallet
+                      ? `Updated: ${new Date(
+                          walletData.wallet.updated_at
+                        ).toLocaleTimeString("en-IN", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}`
+                      : "No wallet data"}
+                  </div>
+                </div>
+                <button
+                  onClick={handleRefreshWallet}
+                  disabled={loadingWallet}
+                  className="p-2 text-gray-500 hover:text-blue-600 hover:bg-white rounded-lg transition-colors"
+                  title="Refresh wallet"
+                >
+                  <RefreshCw
+                    className={`w-4 h-4 ${loadingWallet ? "animate-spin" : ""}`}
+                  />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -640,8 +785,100 @@ export default function RiderDetailsPage() {
 
           {/* Right Column: Documents & Stats */}
           <div className="space-y-6">
-            {/* Document Summary */}
-            
+            {/* Wallet Details Section - Added above Documents */}
+            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Wallet className="w-5 h-5 text-gray-600" />
+                    <h3 className="font-semibold text-gray-900">
+                      Wallet Details
+                    </h3>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {walletData?.wallet && (
+                      <span className="text-xs px-2 py-1 bg-blue-50 text-blue-600 rounded">
+                        ID: {walletData.wallet.wallet_id}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="p-6">
+                {/* Wallet Balance */}
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <div className="text-sm text-gray-600 mb-1">
+                        Current Balance
+                      </div>
+                      {loadingWallet ? (
+                        <div className="h-10 w-32 bg-gray-200 rounded animate-pulse"></div>
+                      ) : (
+                        <div className="text-3xl font-bold text-gray-900 flex items-center">
+                          <IndianRupee className="w-6 h-6 mr-1" />
+                          {walletData?.wallet?.balance
+                            ? parseFloat(walletData.wallet.balance).toFixed(2)
+                            : "0.00"}
+                        </div>
+                      )}
+                    </div>
+                    
+                  </div>
+
+                  {/* Recent Transactions */}
+                  {walletData?.transactions && walletData.transactions.length > 0 && (
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="text-sm font-medium text-gray-900">
+                          Recent Transactions
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          Last {Math.min(5, walletData.transactions.length)} transactions
+                        </div>
+                      </div>
+                      <div className="space-y-1 max-h-64 overflow-y-auto">
+                        {walletData.transactions.slice(0, 5).map((transaction) => (
+                          <TransactionItem
+                            key={transaction.TransactionId}
+                            transaction={transaction}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {loadingWallet && (
+                    <div className="space-y-3">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="flex items-center justify-between py-3">
+                          <div className="space-y-2">
+                            <div className="h-4 bg-gray-200 rounded w-32 animate-pulse"></div>
+                            <div className="h-3 bg-gray-200 rounded w-24 animate-pulse"></div>
+                          </div>
+                          <div className="space-y-2">
+                            <div className="h-4 bg-gray-200 rounded w-16 animate-pulse"></div>
+                            <div className="h-3 bg-gray-200 rounded w-12 animate-pulse"></div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {!loadingWallet && (!walletData?.transactions || walletData.transactions.length === 0) && (
+                    <div className="text-center py-8">
+                      <div className="w-12 h-12 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
+                        <Wallet className="w-6 h-6 text-gray-400" />
+                      </div>
+                      <div className="text-gray-600 mb-2">No transactions yet</div>
+                      <div className="text-sm text-gray-500">
+                        Transactions will appear here when available
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
 
             {/* Documents Grid */}
             <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">

@@ -17,17 +17,19 @@ import {
   Home,
   Shield,
   Calculator,
+  IndianRupee
 } from "lucide-react";
 
 const menuItems = [
-  { name: "Dashboard", href: "/analytics", icon: Home, badge: null },
-  { name: "Orders", href: "/orders", icon: ShoppingCart, badge: null },
-  { name: "Vendors", href: "/vendors", icon: Package, badge: null },
+  // { name: "Dashboard", href: "/analytics", icon: Home, badge: null },
+  // { name: "Orders", href: "/orders", icon: ShoppingCart, badge: null },
+  // { name: "Vendors", href: "/vendors", icon: Package, badge: null },
   { name: "Riders", href: "/riders", icon: Users, badge: null },
   { name: "Rides", href: "/rides", icon: Bike, badge: null },
   { name: "Wallet", href: "/rider-ledger", icon: Wallet, badge: null },
   { name: "Fares", href: "/fares", icon: Calculator, badge: null },
   { name: "Settings", href: "/settings", icon: Settings, badge: null },
+  { name: "Transactions", href: "/transactions", icon: IndianRupee, badge: null },
 ];
 
 export default function Sidebar({ open, setOpen }) {
@@ -99,7 +101,6 @@ export default function Sidebar({ open, setOpen }) {
           [&::-webkit-scrollbar-thumb]:rounded-full
           [&::-webkit-scrollbar-thumb:hover]:bg-white/20
           [&::-webkit-scrollbar]:hidden
-          [&::-webkit-scrollbar]:hover:block
           scrollbar-width: thin
           scrollbar-color: rgba(255,255,255,0.1) transparent
           hover:[&::-webkit-scrollbar]:block"
