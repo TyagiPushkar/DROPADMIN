@@ -2,7 +2,7 @@
 
 import Cookies from "js-cookie"
 import { useEffect, useState } from "react"
-import { Search, Filter, RefreshCw, Clock, CheckCircle, XCircle, Truck, AlertCircle, X, Eye, MoreVertical } from "lucide-react"
+import { Search, Filter, RefreshCw, Clock, CheckCircle, XCircle, Truck, AlertCircle, X, MoreVertical } from "lucide-react"
 import Sidebar from "../components/sidebar"
 import Navbar from "../components/navbar"
 import { OrderModalProvider } from "../components/orderModalProvider"
@@ -26,19 +26,17 @@ export default function OrdersPage() {
   const RESTAURANT_API = BASE_URL+"restaurants/get_restaurants.php"
   const ORDERS_API_BASE = BASE_URL+"orders/get_order.php"
 
-  
-
   useEffect(() => {
-    console.debug("[Orders] reading cookie 'user'...")
+   
     const data = Cookies.get("user")
-    console.debug("[Orders] raw cookie value:", data)
+    
     if (data) {
       try {
         const parsed = JSON.parse(data)
-        console.debug("[Orders] parsed cookie:", parsed)
+        
         setUser(parsed)
       } catch (e) {
-        console.error("[Orders] Failed to parse cookie 'user':", e)
+        
         setError("Failed to parse user cookie")
       }
     } else {
@@ -135,7 +133,7 @@ export default function OrdersPage() {
     try {
       const params = new URLSearchParams({ role: "admin", restaurant_id: String(restaurantId) })
       const url = `${ORDERS_API_BASE}?${params.toString()}`
-      console.debug("[Orders] orders fetch url:", url)
+      
 
       const response = await fetch(url, { cache: "no-store" })
       const data = await response.json()
@@ -289,54 +287,50 @@ export default function OrdersPage() {
     ready: orders.filter(o => o.order_status?.toLowerCase() === 'ready').length,
     completed: orders.filter(o => o.order_status?.toLowerCase() === 'completed').length,
   }
-  // Add these functions to your component
 
-// Status update function
-const handleStatusUpdate = async (newStatus) => {
-  try {
-    const orderId = selectedOrder.order_id ?? selectedOrder.id;
+  // Status update function
+  const handleStatusUpdate = async (newStatus) => {
+    try {
+      const orderId = selectedOrder.order_id ?? selectedOrder.id;
+      
+      // Call your API to update the status
+      await updateStatus(orderId, newStatus);
+      
+      // Update the local state to reflect the change
+      const updatedOrder = {
+        ...selectedOrder,
+        order_status: newStatus
+      };
+      
+      // Update the selectedOrder in state
+      setSelectedOrder(updatedOrder);
+      
+      // If you have an orders list, update that too
+      // updateOrdersList(updatedOrder);
+      
+      // Optional: Show success message
+      console.log(`Order status updated to ${newStatus}`);
+      
+    } catch (error) {
+      console.error('Failed to update order status:', error);
+      // Optional: Show error message to user
+    }
+  };
+
+  // Your existing API function
+  async function updateStatus(order_id, status) {
+    const response = await fetch(BASE_URL+"orders/update_order_status.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ order_id, order_status: status }),
+    });
     
-    // Call your API to update the status
-    await updateStatus(orderId, newStatus);
+    if (!response.ok) {
+      throw new Error('Failed to update status');
+    }
     
-    // Update the local state to reflect the change
-    const updatedOrder = {
-      ...selectedOrder,
-      order_status: newStatus
-    };
-    
-    // Update the selectedOrder in state
-    setSelectedOrder(updatedOrder);
-    
-    // If you have an orders list, update that too
-    // updateOrdersList(updatedOrder);
-    
-    // Optional: Show success message
-    console.log(`Order status updated to ${newStatus}`);
-    
-  } catch (error) {
-    console.error('Failed to update order status:', error);
-    // Optional: Show error message to user
+    return response.json();
   }
-};
-
-// Your existing API function
-async function updateStatus(order_id, status) {
-  const response = await fetch(BASE_URL+"orders/update_order_status.php", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ order_id, order_status: status }),
-  });
-  
-  if (!response.ok) {
-    throw new Error('Failed to update status');
-  }
-  
-  return response.json();
-}
-
-
-
 
   return (
     <OrderModalProvider>
@@ -364,7 +358,7 @@ async function updateStatus(order_id, status) {
           <button
             onClick={handleRefresh}
             disabled={refreshing}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+            className="flex cursor-pointer items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
           >
             <RefreshCw size={18} className={refreshing ? "animate-spin" : ""} />
             {refreshing ? "Refreshing..." : "Refresh"}
@@ -418,7 +412,7 @@ async function updateStatus(order_id, status) {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-4 py-3 border cursor-pointer border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="all">All Status</option>
                 <option value="pending">Pending</option>
@@ -506,7 +500,7 @@ async function updateStatus(order_id, status) {
                   setSearchTerm("")
                   setStatusFilter("all")
                 }}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="px-4 py-2 cursor-pointer bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Clear filters and show all orders
               </button>
@@ -539,9 +533,6 @@ async function updateStatus(order_id, status) {
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                       Date
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                      Actions
-                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -551,7 +542,11 @@ async function updateStatus(order_id, status) {
                     const totalItems = items.reduce((sum, item) => sum + (item.quantity ?? item.qty ?? 1), 0)
                     
                     return (
-                      <tr key={order.order_id ?? order.id} className="hover:bg-gray-50 transition-colors">
+                      <tr 
+                        key={order.order_id ?? order.id} 
+                        onClick={() => openOrderModal(order)}
+                        className="hover:bg-gray-50 transition-colors cursor-pointer"
+                      >
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-gray-900">
                             #{order.order_id ?? order.id}
@@ -590,15 +585,6 @@ async function updateStatus(order_id, status) {
                             {formatDate(order.created_at ?? order.created)}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <button
-                            onClick={() => openOrderModal(order)}
-                            className="inline-flex cursor-pointer items-center gap-2 px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
-                          >
-                            <Eye size={16} />
-                            View Details
-                          </button>
-                        </td>
                       </tr>
                     )
                   })}
@@ -613,7 +599,7 @@ async function updateStatus(order_id, status) {
   <>
     {/* Backdrop with blur */}
     <div 
-      className="fixed inset-0  bg-opacity-50 backdrop-blur-sm z-40 transition-opacity"
+      className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-40 transition-opacity"
       onClick={closeOrderModal}
     />
     
@@ -703,10 +689,10 @@ async function updateStatus(order_id, status) {
                         key={status}
                         onClick={() => handleStatusUpdate(status)}
                         disabled={selectedOrder.order_status === status}
-                        className={`px-3 py-2 cursor-pointer rounded-lg text-sm font-medium transition-colors ${
+                        className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                           selectedOrder.order_status === status
                             ? "bg-blue-600 text-white cursor-not-allowed"
-                            : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                            : "bg-gray-200 text-gray-700 hover:bg-gray-300 cursor-pointer"
                         }`}
                       >
                         {status}
@@ -782,7 +768,7 @@ async function updateStatus(order_id, status) {
         <div className="flex justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50">
           <button
             onClick={closeOrderModal}
-            className="px-6 py-2 border cursor-pointer border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
+            className="px-6 py-2 cursor-pointer border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
           >
             Close
           </button>

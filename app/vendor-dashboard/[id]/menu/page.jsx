@@ -18,7 +18,6 @@ export default function MenuPage() {
   const [newItem, setNewItem] = useState({
   item_name: "",
   description: "",
-  price: "",
   category: "",
   is_veg: "1",
   is_available: "1",
@@ -27,6 +26,27 @@ export default function MenuPage() {
   { portion_type: "unit", portion_price: "" },
 ])
 
+  // Predefined categories for dropdown
+  const categories = [
+    "Appetizers",
+    "Main Course",
+    "Rice Dishes",
+    "Breads",
+    "Curries",
+    "Tandoori",
+    "Seafood",
+    "Chinese",
+    "Italian",
+    "Burgers & Sandwiches",
+    "Pizza",
+    "Salads",
+    "Desserts",
+    "Beverages",
+    "Breakfast",
+    "Combo Meals",
+    "Specials",
+    "Kids Menu"
+  ]
 
   const RESTAURANT_API = BASE_URL+"restaurants/get_restaurants.php"
   const MENU_API = BASE_URL+"restaurants/get_menu.php"
@@ -159,15 +179,49 @@ export default function MenuPage() {
 
     loadMenu()
   }, [restaurantId])
+
+  // Helper function to get minimum price from portions
+  const getMinimumPrice = (portionsArray) => {
+    if (!portionsArray || portionsArray.length === 0) return "0";
+    
+    const validPrices = portionsArray
+      .filter(p => p.portion_price && !isNaN(parseFloat(p.portion_price)))
+      .map(p => parseFloat(p.portion_price));
+    
+    if (validPrices.length === 0) return "0";
+    
+    return Math.min(...validPrices).toString();
+  }
+
+  // Helper to get display price - SHOWS ONLY MINIMUM PRICE
+  const getDisplayPrice = (item) => {
+    if (!item.portions || item.portions.length === 0) {
+      return item.price ? `₹${item.price}` : "₹0";
+    }
+    
+    const prices = item.portions
+      .filter(p => p.portion_price)
+      .map(p => parseFloat(p.portion_price));
+    
+    if (prices.length === 0) return "₹0";
+    
+    const minPrice = Math.min(...prices);
+    return `₹${minPrice}`;
+  }
+
   async function handleAddMenuItem() {
     if (!restaurantId) {
       alert("Restaurant not loaded yet.")
       return
     }
   
+    // Get minimum price from portions
+    const minPrice = getMinimumPrice(portions.filter(p => p.portion_price !== ""));
+    
     const payload = {
       restaurant_id: restaurantId,
       ...newItem,
+      price: minPrice, // Use minimum price from portions
       portions: portions.filter(p => p.portion_price !== "")
     }
   
@@ -189,7 +243,6 @@ export default function MenuPage() {
         setNewItem({
           item_name: "",
           description: "",
-          price: "",
           category: "",
           is_veg: "1",
           is_available: "1",
@@ -274,69 +327,59 @@ export default function MenuPage() {
           />
         </div>
 
-        {/* Category and Base Price */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Category <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              placeholder="e.g., Main Course"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              value={newItem.category}
-              onChange={(e) => setNewItem({ ...newItem, category: e.target.value })}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Base Price (₹) <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="number"
-              placeholder="0.00"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              value={newItem.price}
-              onChange={(e) => setNewItem({ ...newItem, price: e.target.value })}
-            />
-          </div>
+        {/* Category dropdown */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Category <span className="text-red-500">*</span>
+          </label>
+          <select
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white cursor-pointer"
+            value={newItem.category}
+            onChange={(e) => setNewItem({ ...newItem, category: e.target.value })}
+          >
+            <option value="">Select a category</option>
+            {categories.map((cat) => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
         </div>
 
-        {/* Food Type and Availability */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Food Type
-            </label>
-            <select
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white cursor-pointer"
-              value={newItem.is_veg}
-              onChange={(e) => setNewItem({ ...newItem, is_veg: e.target.value })}
-            >
-              <option value="1">🟢 Vegetarian</option>
-              <option value="0">🔴 Non-Vegetarian</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Availability
-            </label>
-            <select
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white cursor-pointer"
-              value={newItem.is_available}
-              onChange={(e) => setNewItem({ ...newItem, is_available: e.target.value })}
-            >
-              <option value="1">✅ Available</option>
-              <option value="0">❌ Unavailable</option>
-            </select>
-          </div>
+        {/* Food Type - Veg, Non-Veg, Egg */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Food Type
+          </label>
+          <select
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white cursor-pointer"
+            value={newItem.is_veg}
+            onChange={(e) => setNewItem({ ...newItem, is_veg: e.target.value })}
+          >
+            <option value="1">🟢 Vegetarian</option>
+            <option value="0">🔴 Non-Vegetarian</option>
+            <option value="2">🥚 Egg</option>
+          </select>
+        </div>
+
+        {/* Availability */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Availability
+          </label>
+          <select
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white cursor-pointer"
+            value={newItem.is_available}
+            onChange={(e) => setNewItem({ ...newItem, is_available: e.target.value })}
+          >
+            <option value="1">✅ Available</option>
+            <option value="0">❌ Unavailable</option>
+          </select>
         </div>
 
         {/* Portions Section */}
         <div className="border-t pt-4">
           <div className="flex justify-between items-center mb-3">
             <label className="block text-sm font-medium text-gray-700">
-              Portion Sizes & Prices
+              Portion Sizes & Prices <span className="text-red-500">*</span>
             </label>
             <button
               type="button"
@@ -460,12 +503,14 @@ export default function MenuPage() {
                         <p className="text-sm text-gray-500">{item.description}</p>
                       </td>
                       <td className="p-3">{item.category}</td>
-                      <td className="p-3 font-semibold">₹{item.price}</td>
+                      <td className="p-3 font-semibold">{getDisplayPrice(item)}</td>
                       <td className="p-3">
-                        {item.is_veg ? (
+                        {item.is_veg === "1" ? (
                           <span className="text-green-600 font-bold">Veg</span>
-                        ) : (
+                        ) : item.is_veg === "0" ? (
                           <span className="text-red-600 font-bold">Non-Veg</span>
+                        ) : (
+                          <span className="text-orange-600 font-bold">Egg</span>
                         )}
                       </td>
                       <td className="p-3">
