@@ -1,27 +1,3 @@
-// "use client";
-
-// import Navbar from "./Navbar";
-// import HeroSection from "./HeroSection";
-// import ServicesSection from "./ServicesSection";
-// import HowItWorks from "./HowItWorks";
-// import DownloadApp from "./DownloadApp";
-// import Footer from "./Footer";
-// import "bootstrap/dist/css/bootstrap.min.css";
-
-// export default function Home() {
-//   return (
-//     <main>
-//       <Navbar />
-//       <HeroSection />
-//       <ServicesSection />
-//       <HowItWorks />
-//       <DownloadApp />
-//       <Footer />
-//     </main>
-//   );
-// }
-
-// export const BASE_URL = "https://namami-infotech.com/DROP/src/";
 "use client"
 
 import { useState } from "react"

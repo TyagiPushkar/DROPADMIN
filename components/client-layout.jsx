@@ -9,7 +9,7 @@ export default function ClientLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
 
-  const noLayoutRoutes = ["/", "/add-vendor", "/drop","/add-rider"]
+  const noLayoutRoutes = ["/", "/add-vendor", "/drop", "/add-rider", "/login"];
 
   const isNoLayoutPage =
     noLayoutRoutes.includes(pathname) ||
