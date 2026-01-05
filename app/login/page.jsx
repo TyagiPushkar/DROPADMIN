@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Cookies from "js-cookie"
+import { BASE_URL } from "../page"
 
 export default function LoginPage() {
   const [identifier, setIdentifier] = useState("")
@@ -185,5 +186,3 @@ export default function LoginPage() {
     </div>
   )
 }
-
-export const BASE_URL = "https://namami-infotech.com/DROP/src/"
