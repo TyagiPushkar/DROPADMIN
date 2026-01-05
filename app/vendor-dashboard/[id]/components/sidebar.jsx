@@ -1,7 +1,7 @@
 "use client"
 import Link from "next/link"
 import { useParams, usePathname } from "next/navigation"
-import { Home, ShoppingCart, Utensils, X } from "lucide-react"
+import { Home, ShoppingCart, Utensils, X,HomeIcon } from "lucide-react"
 import { useEffect, useState } from "react"
 import Cookies from "js-cookie"
 
@@ -27,9 +27,10 @@ export default function Sidebar({ isOpen, onClose }) {
     { name: "Dashboard", href: `/vendor-dashboard/${id}`, icon: Home },
     { name: "Orders", href: `/vendor-dashboard/${id}/orders`, icon: ShoppingCart },
     { name: "Menu", href: `/vendor-dashboard/${id}/menu`, icon: Utensils },
+    { name: "Profile", href: `/vendor-dashboard/${id}/restaurantProfile`, icon: HomeIcon },
   ]
 
-  // Fix active state: Dashboard should only be active on exact match
+  
   const isActive = (href) => {
     if (href === `/vendor-dashboard/${id}`) {
       return pathname === href
