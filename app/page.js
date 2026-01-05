@@ -1,6 +1,5 @@
 "use client"
-"use client"
-// Homepage.jsx - Complete All-in-One Component
+
 import React, { useState } from 'react';
 import { 
   Truck, 
