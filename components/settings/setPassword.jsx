@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from "react"
-import { BASE_URL } from "@/app/login/page";
+import { BASE_URL } from "@/app/page"
 import Cookies from "js-cookie"
 
 export default function SetPassword({ userId }) {
