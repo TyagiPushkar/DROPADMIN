@@ -464,45 +464,52 @@ export default function Riders() {
           </div>
 
           {/* Stats Grid with Dropdown Filters on the right */}
-          <div className="grid grid-cols-1 md:grid-cols-8 gap-4 mb-8">
-            {/* Stats Cards - 6 columns */}
-            <div className="md:col-span-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
-              <StatsCard
-                icon={Users}
-                label="Total Registrations"
-                value={stats.total}
-                color="blue"
-              />
-              <StatsCard
-                icon={CheckCircle}
-                label="Active Riders"
-                value={stats.approved}
-                color="emerald"
-              />
-              <StatsCard
-                icon={Clock}
-                label="Pending"
-                value={stats.pending}
-                color="amber"
-              />
-              <StatsCard
-                icon={XCircle}
-                label="Rejected"
-                value={stats.rejected}
-                color="rose"
-              />
-             
-             
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-6">
+            {/* Stats Cards - 10 columns */}
+            <div className="lg:col-span-10">
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+                <StatsCard
+                  icon={Users}
+                  label="Total Registrations"
+                  value={stats.total}
+                  color="blue"
+                  compact={true}
+                />
+                <StatsCard
+                  icon={CheckCircle}
+                  label="Active Riders"
+                  value={stats.approved}
+                  color="emerald"
+                  compact={true}
+                />
+                <StatsCard
+                  icon={Clock}
+                  label="Pending"
+                  value={stats.pending}
+                  color="amber"
+                  compact={true}
+                />
+                <StatsCard
+                  icon={XCircle}
+                  label="Rejected"
+                  value={stats.rejected}
+                  color="rose"
+                  compact={true}
+                />
+                {/* Only show these on larger screens */}
+                
+                
+              </div>
             </div>
 
-            {/* Dropdown Filters - 2 columns on the right */}
-            <div className="md:col-span-2 flex flex-col gap-3">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+            {/* Status Filter Only - 2 columns */}
+            <div className="lg:col-span-2">
+              <div className="h-full flex flex-col justify-center">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Filter by Status
                 </label>
                 <select
-                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all hover:border-gray-400"
                   value={statusFilter}
                   onChange={(e) => {
                     setStatusFilter(e.target.value);
@@ -515,14 +522,9 @@ export default function Riders() {
                   <option value="rejected">Rejected</option>
                 </select>
               </div>
-
-             
             </div>
           </div>
         </div>
-
-        {/* Selection Actions */}
-        
 
         {/* Professional Table */}
         {loading ? (

@@ -1,11 +1,20 @@
 "use client";
- 
-import { useState, useRef } from "react";
+
+import { useState, useRef, useEffect } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { User, Phone, Mail, IdCard, Bike, FileText, Check } from "lucide-react";
- 
+import {
+  User,
+  Phone,
+  Mail,
+  IdCard,
+  Bike,
+  FileText,
+  Check,
+  Building,
+} from "lucide-react";
+
 // Validation schema for all fields
 const riderSchema = z.object({
   name: z
@@ -28,15 +37,20 @@ const riderSchema = z.object({
       /^[A-Z]{2}[0-9]{2}[A-Z]{1,2}[0-9]{4}$/,
       "Format: MH12AB1234, Remove spaces/hyphens"
     ),
+  agency_name: z.string().optional().or(z.literal("")), // Agency name is optional
 });
- 
+
 const API_URL = "https://namami-infotech.com/DROP/src/rider/onboard.php";
- 
+const AGENCIES_API =
+  "https://namami-infotech.com/DROP/src/rider/get_agencies.php"; // Add your API endpoint
+
 export default function RiderOnboarding() {
   const [loading, setLoading] = useState(false);
+  const [loadingAgencies, setLoadingAgencies] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
- 
+  const [agencies, setAgencies] = useState([]);
+
   // Use refs for file data (stable, won't trigger re-renders)
   const fileDataRef = useRef({
     profile_picture: null,
@@ -45,7 +59,7 @@ export default function RiderOnboarding() {
     dl_photo: null,
     vehicle_plate_photo: null,
   });
- 
+
   // UseForm with zod resolver
   const {
     register,
@@ -53,26 +67,58 @@ export default function RiderOnboarding() {
     formState: { errors, isSubmitted },
     watch,
     reset,
+    setValue,
   } = useForm({
     resolver: zodResolver(riderSchema),
-    mode: "onSubmit", // ⬅️ Important
+    mode: "onSubmit",
     reValidateMode: "onChange",
+    defaultValues: {
+      agency_name: "", // Default to empty
+    },
   });
- 
+
+  // Fetch agencies on component mount
+  useEffect(() => {
+    fetchAgencies();
+  }, []);
+
+  const fetchAgencies = async () => {
+    setLoadingAgencies(true);
+    try {
+      const response = await fetch(AGENCIES_API);
+      const data = await response.json();
+
+      if (data.success) {
+        setAgencies(data.data || []);
+      } else {
+        console.error("Failed to fetch agencies:", data.message);
+        // Set default agencies if API fails
+        setAgencies([
+          { id: 1, name: "Agency 1" },
+          { id: 2, name: "Agency 2" },
+          { id: 3, name: "Agency 3" },
+          { id: 4, name: "No Agency" },
+        ]);
+      }
+    } catch (err) {
+      console.error("Error fetching agencies:", err);
+      // Set default agencies on error
+      setAgencies([
+        { id: 1, name: "Agency 1" },
+        { id: 2, name: "Agency 2" },
+        { id: 3, name: "Agency 3" },
+        { id: 4, name: "No Agency" },
+      ]);
+    } finally {
+      setLoadingAgencies(false);
+    }
+  };
+
   // Handle file changes (store in ref)
   const handleFileChange = (fieldName, file) => {
     fileDataRef.current[fieldName] = file;
   };
- 
-  //
-  // --- INPUT COMPONENTS (logic-only changes) ---
-  //
-  // Important design:
-  // - Each FormInput keeps its own local state for the visible value/tick so typing doesn't re-render parent.
-  // - We call register(name) once and reuse the returned handlers (field) — then call field.onChange inside our onChange.
-  // - We apply transforms before calling field.onChange.
-  //
- 
+
   const FormInput = ({
     label,
     name,
@@ -81,44 +127,35 @@ export default function RiderOnboarding() {
     transform = null,
     required = true,
   }) => {
-    // local state used only for this input component (keeps the green tick / "valid" text)
     const [localValue, setLocalValue] = useState("");
-    // get the register field once
     const field = register(name);
- 
+
     return (
       <div>
         <label className="block text-sm font-medium text-cyan-900 mb-2">
           {label} {required && "*"}
         </label>
- 
+
         <div className="relative">
           <input
             type={type}
             placeholder={placeholder}
-            // apply registered props (name, ref, onBlur etc)
             {...field}
             onChange={(e) => {
-              // transform value if requested
               let v = e.target.value;
               if (transform === "uppercase") v = v.toUpperCase();
               else if (transform === "email") v = v.toLowerCase();
- 
-              // update the DOM value so the input displays transformed text
+
               e.target.value = v;
- 
-              // update local component state (this re-renders only this input)
               setLocalValue(v);
- 
-              // call react-hook-form's onChange from register
+
               if (field && typeof field.onChange === "function") {
                 field.onChange(e);
               }
             }}
             className="w-full bg-white border-2 border-cyan-200 rounded-lg px-4 py-3 text-cyan-900 placeholder-cyan-300 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 outline-none transition pr-10"
           />
- 
-          {/* green tick if there's local text */}
+
           {localValue && localValue.length > 0 && (
             <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
               <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
@@ -127,8 +164,7 @@ export default function RiderOnboarding() {
             </div>
           )}
         </div>
- 
-        {/* Error or Valid message */}
+
         {errors[name] ? (
           <p className="text-red-500 text-sm mt-1">{errors[name].message}</p>
         ) : localValue && localValue.length > 0 ? (
@@ -139,16 +175,82 @@ export default function RiderOnboarding() {
       </div>
     );
   };
- 
+
+  const FormSelect = ({
+    label,
+    name,
+    options = [],
+    placeholder = "Select an option",
+    required = false,
+  }) => {
+    const [localValue, setLocalValue] = useState("");
+    const field = register(name);
+
+    return (
+      <div>
+        <label className="block text-sm font-medium text-cyan-900 mb-2">
+          {label} {required && "*"}
+        </label>
+
+        <div className="relative">
+          <select
+            {...field}
+            onChange={(e) => {
+              const v = e.target.value;
+              setLocalValue(v);
+
+              if (field && typeof field.onChange === "function") {
+                field.onChange(e);
+              }
+            }}
+            className="w-full bg-white border-2 border-cyan-200 rounded-lg px-4 py-3 text-cyan-900 placeholder-cyan-300 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 outline-none transition appearance-none pr-10"
+          >
+            <option value="">{placeholder}</option>
+            {options.map((option) => (
+              <option key={option.id || option} value={option.name || option}>
+                {option.name || option}
+              </option>
+            ))}
+          </select>
+
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-cyan-700">
+            <svg
+              className="fill-current h-4 w-4"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+            >
+              <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+            </svg>
+          </div>
+
+          {localValue && localValue.length > 0 && (
+            <div className="absolute right-8 top-1/2 transform -translate-y-1/2">
+              <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                <Check size={14} className="text-green-600" />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {errors[name] ? (
+          <p className="text-red-500 text-sm mt-1">{errors[name].message}</p>
+        ) : localValue && localValue.length > 0 ? (
+          <p className="text-green-600 text-sm mt-1">
+            ✓ {label.toLowerCase()} selected
+          </p>
+        ) : null}
+      </div>
+    );
+  };
+
   const FileInput = ({
     label,
     name,
     accept = "image/*,.pdf",
     required = true,
   }) => {
-    // local filename to show the uploaded filename (component-level state only)
     const [fileName, setFileName] = useState("");
- 
+
     return (
       <div>
         <label className="block text-sm font-medium text-cyan-900 mb-2">
@@ -174,12 +276,9 @@ export default function RiderOnboarding() {
       </div>
     );
   };
- 
-  //
-  // --- SUBMIT HANDLER (same robust logic as Form 1) ---
-  //
+
   const onSubmit = async (data) => {
-    // Required files check (same as before)
+    // Required files check
     const requiredFiles = [
       "profile_picture",
       "aadhar_front",
@@ -188,7 +287,7 @@ export default function RiderOnboarding() {
       "vehicle_plate_photo",
     ];
     const missingFiles = requiredFiles.filter((f) => !fileDataRef.current[f]);
- 
+
     if (missingFiles.length > 0) {
       const namesMap = {
         profile_picture: "Profile Photo",
@@ -201,38 +300,46 @@ export default function RiderOnboarding() {
       setError(`Please upload all required documents: ${fileNames.join(", ")}`);
       return;
     }
- 
+
     setLoading(true);
     setError("");
     setSuccess("");
- 
+
     try {
       const formDataToSend = new FormData();
- 
-      // Append all non-file fields (only append if present)
+
+      // Append all non-file fields
       Object.entries(data).forEach(([key, value]) => {
         if (value !== null && value !== undefined && value !== "") {
           formDataToSend.append(key, value.toString());
         }
       });
- 
+
       // Append files from ref
       Object.entries(fileDataRef.current).forEach(([key, value]) => {
         if (value instanceof File) {
           formDataToSend.append(key, value);
         }
       });
- 
+
+      // Log form data for debugging
+      console.log("Submitting form data:", {
+        ...data,
+        files: Object.keys(fileDataRef.current).filter(
+          (key) => fileDataRef.current[key]
+        ),
+      });
+
       const response = await fetch(API_URL, {
         method: "POST",
         body: formDataToSend,
       });
- 
+
       const responseData = await response.json();
- 
+
       if (response.ok && responseData.success) {
         setSuccess("✅ Rider onboarded successfully!");
-        // Reset form fields and files (same approach as Form 1)
+        // Reset form
         reset();
         fileDataRef.current = {
           profile_picture: null,
@@ -241,7 +348,7 @@ export default function RiderOnboarding() {
           dl_photo: null,
           vehicle_plate_photo: null,
         };
-        // Clear file input DOM nodes
+        // Clear file inputs
         document.querySelectorAll('input[type="file"]').forEach((input) => {
           input.value = "";
         });
@@ -255,10 +362,7 @@ export default function RiderOnboarding() {
       setLoading(false);
     }
   };
- 
-  //
-  // --- RENDER (UI kept exactly the same as your Form 2) ---
-  //
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-blue-50 flex flex-col">
       {/* Header */}
@@ -275,7 +379,7 @@ export default function RiderOnboarding() {
           </div>
         </div>
       </div>
- 
+
       {/* Main Content */}
       <div className="flex-1 px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <div className="max-w-4xl mx-auto">
@@ -288,14 +392,14 @@ export default function RiderOnboarding() {
               documents.
             </p>
           </div>
- 
+
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
             {/* Personal Information */}
             <div className="bg-white/80 backdrop-blur border-2 border-cyan-200 rounded-xl p-6 animate-fadeIn">
               <h3 className="text-lg font-semibold text-cyan-900 mb-6 flex items-center gap-2">
                 <User size={20} /> Personal Information
               </h3>
- 
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <FormInput
                   label="Full Name"
@@ -309,7 +413,7 @@ export default function RiderOnboarding() {
                   placeholder="9876543210"
                 />
               </div>
- 
+
               <div className="mt-6">
                 <FormInput
                   label="Email Address"
@@ -320,18 +424,65 @@ export default function RiderOnboarding() {
                   required={false}
                 />
               </div>
- 
+
               <div className="mt-6">
                 <FileInput label="Profile Photo" name="profile_picture" />
               </div>
             </div>
- 
+
+            {/* Agency Information */}
+            <div className="bg-white/80 backdrop-blur border-2 border-cyan-200 rounded-xl p-6 animate-fadeIn">
+              <h3 className="text-lg font-semibold text-cyan-900 mb-6 flex items-center gap-2">
+                <Building size={20} /> Agency Information
+              </h3>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <FormSelect
+                  label="Agency Name"
+                  name="agency_name"
+                  placeholder="Select Agency"
+                  options={agencies}
+                  required={false}
+                />
+                {loadingAgencies && (
+                  <div className="flex items-center text-cyan-600">
+                    <svg
+                      className="animate-spin h-5 w-5 mr-2"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4l3.5-3.5L12 0v4a8 8 0 010 16v4l3.5-3.5L12 20v4a8 8 0 01-8-8z"
+                      />
+                    </svg>
+                    Loading agencies...
+                  </div>
+                )}
+              </div>
+
+              <p className="text-sm text-cyan-600 mt-2">
+                Note: Agency selection is optional. Select "No Agency" if rider
+                is independent.
+              </p>
+            </div>
+
             {/* Aadhar Card Information */}
             <div className="bg-white/80 backdrop-blur border-2 border-cyan-200 rounded-xl p-6 animate-fadeIn">
               <h3 className="text-lg font-semibold text-cyan-900 mb-6 flex items-center gap-2">
                 <IdCard size={20} /> Aadhar Card Details
               </h3>
- 
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <FormInput
                   label="Aadhar Number"
@@ -339,19 +490,19 @@ export default function RiderOnboarding() {
                   placeholder="123456789012"
                 />
               </div>
- 
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
                 <FileInput label="Aadhar Front Image" name="aadhar_front" />
                 <FileInput label="Aadhar Back Image" name="aadhar_back" />
               </div>
             </div>
- 
+
             {/* Driving License */}
             <div className="bg-white/80 backdrop-blur border-2 border-cyan-200 rounded-xl p-6 animate-fadeIn">
               <h3 className="text-lg font-semibold text-cyan-900 mb-6 flex items-center gap-2">
                 <FileText size={20} /> Driving License Details
               </h3>
- 
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <FormInput
                   label="DL Number"
@@ -360,18 +511,18 @@ export default function RiderOnboarding() {
                   transform="uppercase"
                 />
               </div>
- 
+
               <div className="mt-6">
                 <FileInput label="Driving License Image" name="dl_photo" />
               </div>
             </div>
- 
+
             {/* RC/Smart Card */}
             <div className="bg-white/80 backdrop-blur border-2 border-cyan-200 rounded-xl p-6 animate-fadeIn">
               <h3 className="text-lg font-semibold text-cyan-900 mb-6 flex items-center gap-2">
                 <Bike size={20} /> Vehicle Details (RC/Smart Card)
               </h3>
- 
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <FormInput
                   label="Vehicle Number"
@@ -380,7 +531,7 @@ export default function RiderOnboarding() {
                   transform="uppercase"
                 />
               </div>
- 
+
               <div className="mt-6">
                 <FileInput
                   label="RC/Smart Card Image"
@@ -388,7 +539,7 @@ export default function RiderOnboarding() {
                 />
               </div>
             </div>
- 
+
             {/* Error/Success Messages */}
             <div className="animate-fadeIn">
               {error && (
@@ -402,7 +553,7 @@ export default function RiderOnboarding() {
                 </div>
               )}
             </div>
- 
+
             {/* Submit Button */}
             <div className="flex justify-center animate-fadeIn">
               <button
@@ -442,7 +593,7 @@ export default function RiderOnboarding() {
               </button>
             </div>
           </form>
- 
+
           {/* Form Requirements */}
           <div className="mt-8 bg-cyan-50 border border-cyan-200 rounded-lg p-4 animate-fadeIn">
             <h4 className="font-semibold text-cyan-900 mb-2">Requirements:</h4>
@@ -455,7 +606,6 @@ export default function RiderOnboarding() {
                 <Check size={14} className="mr-2 text-green-600" />
                 Upload clear images of documents
               </li>
-              t
               <li className="flex items-center">
                 <Check size={14} className="mr-2 text-green-600" />
                 Supported formats: JPG, PNG, PDF
@@ -464,6 +614,10 @@ export default function RiderOnboarding() {
                 <Check size={14} className="mr-2 text-green-600" />
                 Maximum file size: 5MB per document
               </li>
+              <li className="flex items-center">
+                <Check size={14} className="mr-2 text-green-600" />
+                Agency selection is optional
+              </li>
             </ul>
           </div>
         </div>
@@ -471,4 +625,3 @@ export default function RiderOnboarding() {
     </div>
   );
 }
- 
