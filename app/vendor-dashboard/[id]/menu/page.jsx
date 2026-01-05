@@ -1160,7 +1160,7 @@ export default function MenuPage() {
                         return (
                           <tr key={item.menu_id} className="border-b hover:bg-gray-50/50 transition-colors">
                             <td className="p-4">
-                              {item.image_url ? (
+                              {item.image ? (
                                 <img 
                                   src={item.image} 
                                   alt={item.item_name}
