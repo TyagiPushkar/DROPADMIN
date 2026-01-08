@@ -23,12 +23,12 @@ export default function Navbar({ currentPath = '/' }) {
             <Link href="/" className="flex items-center space-x-3 group">
               {/* Logo image */}
               <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl blur-sm group-hover:blur-md transition-all duration-300"></div>
-                <div className="relative w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:scale-105 overflow-hidden">
+                
+                <div className="relative w-12 h-12   flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:scale-105 overflow-hidden">
                   <img
                     src="/images/droplogo.jpg"
                     alt="DROP Logo"
-                    className="w-full h-full object-cover p-1"
+                    className="w-full h-full object-cover "
                   />
                 </div>
               </div>
