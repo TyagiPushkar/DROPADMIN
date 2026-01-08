@@ -39,7 +39,7 @@ export default function About() {
                   <div className="relative group/year">
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-2xl blur-sm group-hover/year:blur-md transition-all duration-300"></div>
                     <div className="relative bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-md border border-gray-200/60">
-                      <div className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">2023</div>
+                      <div className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">2025</div>
                       <div className="text-gray-700">Founded with a vision</div>
                     </div>
                   </div>
