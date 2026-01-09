@@ -42,7 +42,7 @@ export default function Services() {
         "Increased online visibility",
         "Simple order management",
         "Reliable delivery support",
-        "Customer analytics and insights"
+       
       ],
       color: "from-blue-600 to-purple-600",
       bgColor: "bg-white/80 backdrop-blur-sm"
@@ -55,7 +55,7 @@ export default function Services() {
         "Flexible working hours",
         "Fair earning opportunities",
         "Easy-to-use platform",
-        "Weekly payments and incentives"
+        
       ],
       color: "from-blue-600 to-purple-600",
       bgColor: "bg-white/80 backdrop-blur-sm"
@@ -135,128 +135,7 @@ export default function Services() {
           </div>
 
           {/* How It Works */}
-          <div className="relative mb-16">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-3xl blur-2xl"></div>
-            <div className="relative bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl shadow-blue-500/10 p-8 md:p-12 border border-gray-200/60">
-              <h2 className="text-3xl font-bold text-center text-gray-900 mb-12 flex items-center justify-center">
-                <div className="w-3 h-12 bg-gradient-to-b from-blue-600 to-purple-600 rounded-full mr-4"></div>
-                How DROP Works
-                <div className="w-3 h-12 bg-gradient-to-b from-blue-600 to-purple-600 rounded-full ml-4"></div>
-              </h2>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {[
-                  { number: "1", title: "Order", description: "Browse services and place your order through our app or website" },
-                  { number: "2", title: "Match", description: "Our system instantly matches your order with the nearest available rider" },
-                  { number: "3", title: "Deliver", description: "Track your delivery in real-time and receive your items at your doorstep" }
-                ].map((step, index) => (
-                  <div key={index} className="text-center p-6 group/step">
-                    <div className="relative w-16 h-16 mx-auto mb-6">
-                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full blur-sm group-hover/step:blur-md transition-all duration-300"></div>
-                      <div className="relative w-full h-full bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center shadow-md group-hover/step:shadow-lg group-hover/step:scale-110 transition-all duration-300">
-                        <span className="text-2xl font-bold text-white">{step.number}</span>
-                      </div>
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-800 mb-3">{step.title}</h3>
-                    <div className="text-gray-600">{step.description}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Benefits Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
-            {/* For Customers */}
-            <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-3xl blur-sm group-hover:blur-md transition-all duration-300"></div>
-              <div className="relative bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl shadow-blue-500/10 p-8 border border-blue-200/60">
-                <div className="flex items-center mb-6">
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl blur-sm"></div>
-                    <div className="relative w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center mr-4 shadow-md">
-                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                    </div>
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900">For Customers</h3>
-                </div>
-                <ul className="space-y-4">
-                  {[
-                    "Wide selection of restaurants and services",
-                    "Real-time order tracking",
-                    "Secure payment options",
-                    "24/7 customer support"
-                  ].map((item, idx) => (
-                    <li key={idx} className="flex items-center group/item">
-                      <div className="relative w-8 h-8 mr-3 flex-shrink-0">
-                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full blur-sm group-hover/item:blur-md transition-all duration-300"></div>
-                        <div className="relative w-full h-full bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center shadow-sm">
-                          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                        </div>
-                      </div>
-                      <span className="text-gray-700 group-hover/item:text-gray-900 transition-colors duration-200">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-
-            {/* For Partners */}
-            <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-3xl blur-sm group-hover:blur-md transition-all duration-300"></div>
-              <div className="relative bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl shadow-blue-500/10 p-8 border border-purple-200/60">
-                <div className="flex items-center mb-6">
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl blur-sm"></div>
-                    <div className="relative w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center mr-4 shadow-md">
-                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                      </svg>
-                    </div>
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900">For Partners</h3>
-                </div>
-                <ul className="space-y-4">
-                  {[
-                    "Increased customer reach",
-                    "Simple order management system",
-                    "Reliable delivery network",
-                    "Analytics and insights dashboard"
-                  ].map((item, idx) => (
-                    <li key={idx} className="flex items-center group/item">
-                      <div className="relative w-8 h-8 mr-3 flex-shrink-0">
-                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full blur-sm group-hover/item:blur-md transition-all duration-300"></div>
-                        <div className="relative w-full h-full bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center shadow-sm">
-                          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                        </div>
-                      </div>
-                      <span className="text-gray-700 group-hover/item:text-gray-900 transition-colors duration-200">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          {/* CTA Section */}
-          <div className="text-center relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 rounded-full blur-2xl"></div>
-            <div className="relative inline-flex flex-col sm:flex-row items-center justify-center gap-6">
-              <button className="relative bg-gradient-to-r from-blue-600 to-purple-600 text-white px-10 py-4 rounded-full text-lg font-semibold shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transform hover:-translate-y-1 transition-all duration-300 active:scale-95">
-                Start Ordering Now
-              </button>
-              <button className="relative border-2 border-blue-600 text-blue-600 px-10 py-4 rounded-full text-lg font-semibold hover:bg-gradient-to-r hover:from-blue-600/5 hover:to-purple-600/5 transition-all duration-300 active:scale-95">
-                Partner With Us
-              </button>
-            </div>
-            <div className="text-gray-500 mt-6 relative">Join thousands already using DROP services</div>
-          </div>
+          
         </div>
       </section>
 

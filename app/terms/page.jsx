@@ -17,7 +17,7 @@ export default function Terms() {
   const sections = [
     {
       id: 'definitions',
-      title: "1. Definitions",
+      title: "Definitions",
       content: [
         { term: "App", definition: "means the mobile application." },
         { term: "Company, We, Us, Our", definition: "refers to DROP IN EXPRESS OPC Pvt Ltd." },
@@ -44,7 +44,7 @@ export default function Terms() {
     },
     {
       id: 'eligibility',
-      title: "2. Eligibility of Bike Driver",
+      title: "Eligibility of Bike Driver",
       content: [
         "You must be at least 18 years old to use the Services.",
         "Drivers must hold a valid driving license, vehicle registration, insurance, and any permits required under Indian law.",
@@ -54,7 +54,7 @@ export default function Terms() {
     },
     {
       id: 'scope',
-      title: "3. Scope of Services",
+      title: "Scope of Services",
       content: [
         "The Company provides a technology platform to connect drivers with customers for:",
         "a. Bike taxi / passenger transportation",
@@ -64,7 +64,7 @@ export default function Terms() {
     },
     {
       id: 'account',
-      title: "4. Account Registration",
+      title: "Account Registration",
       content: [
         "A. Users must provide accurate and complete information during registration.",
         "B. You are responsible for maintaining the confidentiality of your account credentials.",
@@ -73,7 +73,7 @@ export default function Terms() {
     },
     {
       id: 'payments',
-      title: "5. Bookings and Payments",
+      title: "Bookings and Payments",
       content: [
         "A. Fares, delivery charges, and applicable taxes will be displayed before confirmation.",
         "B. Payments may be made via UPI, cards, wallets, or other approved payment methods.",
@@ -83,7 +83,7 @@ export default function Terms() {
     },
     {
       id: 'cancellations',
-      title: "6. Cancellations and Refunds",
+      title: "Cancellations and Refunds",
       content: [
         "A. Cancellation charges may apply depending on timing and service type.",
         "B. Refunds, if applicable, will be processed to the original payment method.",
@@ -92,7 +92,7 @@ export default function Terms() {
     },
     {
       id: 'driver-obligations',
-      title: "7. Driver Obligations",
+      title: "Driver Obligations",
       content: [
         "Drivers agree to:",
         "A. Comply with all applicable Motor Vehicles Act, 1988 and traffic laws",
@@ -104,7 +104,7 @@ export default function Terms() {
     },
     {
       id: 'user-conduct',
-      title: "8. User Conduct",
+      title: "User Conduct",
       content: [
         "Users shall not:",
         "A. Misuse the App for illegal or fraudulent activities",
@@ -116,7 +116,7 @@ export default function Terms() {
     },
     {
       id: 'food-delivery',
-      title: "9. Food Delivery",
+      title: "Food Delivery",
       content: [
         "A. Food quality, preparation, and hygiene are the responsibility of the restaurant/merchant.",
         "B. The Company is not responsible for food quality but will facilitate issue resolution.",
@@ -125,7 +125,7 @@ export default function Terms() {
     },
     {
       id: 'ratings',
-      title: "10. Ratings and Reviews",
+      title: "Ratings and Reviews",
       content: [
         "Users may provide ratings and feedback.",
         "The Company reserves the right to remove inappropriate or misleading reviews."
@@ -133,7 +133,7 @@ export default function Terms() {
     },
     {
       id: 'safety',
-      title: "11. Safety and Liability",
+      title: "Safety and Liability",
       content: [
         "The Company does not guarantee uninterrupted or error-free Services.",
         "Users acknowledge inherent risks in transportation and delivery services.",
@@ -145,14 +145,14 @@ export default function Terms() {
     },
     {
       id: 'insurance',
-      title: "12. Insurance",
+      title: "Insurance",
       content: [
         "Drivers are responsible for maintaining valid vehicle insurance as per Indian law."
       ]
     },
     {
       id: 'ip',
-      title: "13. Intellectual Property",
+      title: "Intellectual Property",
       content: [
         "A. All contents, trademarks, logos, and software are owned by the Company.",
         "B. Users may not copy, modify, distribute, or exploit any content without permission."
@@ -160,7 +160,7 @@ export default function Terms() {
     },
     {
       id: 'termination',
-      title: "14. Suspension and Termination",
+      title: "Suspension and Termination",
       content: [
         "The Company may suspend or terminate access for violation of these Terms:",
         "a. For suspected fraud or safety concern",
@@ -170,7 +170,7 @@ export default function Terms() {
     },
     {
       id: 'liability',
-      title: "15. Limitation of Liability",
+      title: "Limitation of Liability",
       content: [
         "To the maximum extent permitted by law:",
         "a. The Company shall not be liable for indirect, incidental, or consequential damages.",
@@ -179,7 +179,7 @@ export default function Terms() {
     },
     {
       id: 'indemnification',
-      title: "16. Indemnification",
+      title: "Indemnification",
       content: [
         "Users agree to indemnify and hold harmless the Company from claims, losses, or damages arising from:",
         "a. Violation of these Terms",
@@ -189,28 +189,28 @@ export default function Terms() {
     },
     {
       id: 'privacy',
-      title: "17. Privacy",
+      title: "Privacy",
       content: [
         "Use of the Services is also governed by our Privacy Policy, which forms an integral part of these Terms."
       ]
     },
     {
       id: 'force-majeure',
-      title: "18. Force Majeure",
+      title: "Force Majeure",
       content: [
         "The Company shall not be liable for failure or delay due to events beyond reasonable control, including natural disasters, strikes, government actions, or network failures."
       ]
     },
     {
       id: 'governance',
-      title: "19. Governing Law and Jurisdiction",
+      title: "Governing Law and Jurisdiction",
       content: [
         "These Terms shall be governed by the laws of India."
       ]
     },
     {
       id: 'grievance',
-      title: "20. Grievance Redressal",
+      title: "Grievance Redressal",
       content: [
         "In accordance with the Information Technology (Intermediary Guidelines and Digital Media Ethics Code) Rules, 2021:",
         "a. Grievance Officer: [To be appointed]",
@@ -221,14 +221,14 @@ export default function Terms() {
     },
     {
       id: 'amendments',
-      title: "21. Amendments",
+      title: "Amendments",
       content: [
         "The Company reserves the right to modify these Terms at any time. Continued use of the Services constitutes acceptance of the revised Terms."
       ]
     },
     {
       id: 'contact',
-      title: "22. Contact Information",
+      title: "Contact Information",
       content: [
         "Company Name: Drop In Express OPC (Pvt.) Ltd.",
         "Email: dropinexpress2025@gmail.com",
@@ -263,6 +263,14 @@ export default function Terms() {
         behavior: 'smooth'
       });
     }
+  };
+
+  // Get section numbers for main content
+  const getSectionNumber = (sectionId) => {
+    const sectionIndex = sections.findIndex(s => s.id === sectionId);
+    const sectionsBefore = sections.slice(0, sectionIndex);
+    const numberedSectionsBefore = sectionsBefore.filter(s => s.id !== 'summary');
+    return numberedSectionsBefore.length + 1;
   };
 
   return (
@@ -305,7 +313,7 @@ export default function Terms() {
                       onClick={() => scrollToSection(section.id)}
                       className="px-5 py-3 bg-gradient-to-br from-gray-50 to-white border border-gray-200/60 rounded-xl text-gray-700 hover:text-blue-600 hover:border-blue-300 hover:shadow-md transition-all duration-300 text-sm font-medium"
                     >
-                      {section.title.split('. ')[1] || section.title}
+                      {section.title}
                     </button>
                   ))}
                 </div>
@@ -314,7 +322,7 @@ export default function Terms() {
           </div>
 
           <div className="flex flex-col lg:flex-row gap-8">
-            {/* Sidebar Navigation */}
+            {/* Sidebar Navigation - NO SERIAL NUMBERS */}
             <div className="lg:w-1/4">
               <div className="sticky top-32">
                 <div className="relative group">
@@ -345,9 +353,11 @@ export default function Terms() {
                                 ? 'bg-gradient-to-br from-blue-600 to-purple-600 text-white' 
                                 : 'bg-gray-100 text-gray-500 group-hover/item:bg-gray-200'
                             }`}>
-                              {idx + 1}
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={section.id === 'summary' ? "M9 12l2 2 4-4" : "M5 13l4 4L19 7"} />
+                              </svg>
                             </span>
-                            {section.title}
+                            <span>{section.title}</span>
                           </span>
                         </button>
                       ))}
@@ -375,7 +385,7 @@ export default function Terms() {
               </div>
             </div>
 
-            {/* Main Content */}
+            {/* Main Content - WITH SERIAL NUMBERS ONLY HERE */}
             <div className="lg:w-3/4">
               <div className="relative group/main">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-3xl blur-sm group-hover/main:blur-md transition-all duration-300"></div>
@@ -400,102 +410,108 @@ export default function Terms() {
 
                   {/* Terms Content */}
                   <div className="p-6 md:p-8">
-                    {sections.map((section, idx) => (
-                      <div 
-                        key={idx} 
-                        id={section.id}
-                        className={`mb-10 pb-10 ${idx < sections.length - 1 ? 'border-b border-gray-200/60' : ''}`}
-                        onMouseEnter={() => setActiveSection(section.id)}
-                      >
-                        <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
-                          <div className="relative">
-                            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl blur-sm"></div>
-                            <div className="relative w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 text-white rounded-lg flex items-center justify-center mr-4 shadow-md">
-                              {idx + 1}
-                            </div>
-                          </div>
-                          {section.title}
-                        </h3>
-                        
-                        {section.id === 'definitions' ? (
-                          <div className="relative group/def">
-                            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-xl blur-sm group-hover/def:blur-md transition-all duration-300"></div>
-                            <div className="relative bg-gradient-to-br from-gray-50/80 to-white/80 rounded-xl p-6 border border-gray-200/60">
-                              <div className="space-y-6">
-                                {section.content.map((item, itemIdx) => (
-                                  <div key={itemIdx} className="group/item">
-                                    <div className="flex flex-col md:flex-row md:items-start gap-2 md:gap-4 p-3 rounded-lg hover:bg-white/50 transition-colors duration-200">
-                                      <span className="font-medium text-gray-800 md:w-1/3">
-                                        <span className="text-blue-600">"</span>{item.term}<span className="text-blue-600">"</span>
-                                      </span>
-                                      <span className="text-gray-700 md:w-2/3">
-                                        {item.definition}
-                                      </span>
+                    {sections.map((section, idx) => {
+                      const sectionNumber = section.id === 'summary' ? '' : `${getSectionNumber(section.id)}. `;
+                      
+                      return (
+                        <div 
+                          key={idx} 
+                          id={section.id}
+                          className={`mb-10 pb-10 ${idx < sections.length - 1 ? 'border-b border-gray-200/60' : ''}`}
+                          onMouseEnter={() => setActiveSection(section.id)}
+                        >
+                          <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                            {section.id !== 'summary' && (
+                              <div className="relative">
+                                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl blur-sm"></div>
+                                <div className="relative w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 text-white rounded-lg flex items-center justify-center mr-4 shadow-md">
+                                  {getSectionNumber(section.id)}
+                                </div>
+                              </div>
+                            )}
+                            {section.id === 'summary' ? section.title : `${sectionNumber}${section.title}`}
+                          </h3>
+                          
+                          {section.id === 'definitions' ? (
+                            <div className="relative group/def">
+                              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-xl blur-sm group-hover/def:blur-md transition-all duration-300"></div>
+                              <div className="relative bg-gradient-to-br from-gray-50/80 to-white/80 rounded-xl p-6 border border-gray-200/60">
+                                <div className="space-y-6">
+                                  {section.content.map((item, itemIdx) => (
+                                    <div key={itemIdx} className="group/item">
+                                      <div className="flex flex-col md:flex-row md:items-start gap-2 md:gap-4 p-3 rounded-lg hover:bg-white/50 transition-colors duration-200">
+                                        <span className="font-medium text-gray-800 md:w-1/3">
+                                          <span className="text-blue-600">"</span>{item.term}<span className="text-blue-600">"</span>
+                                        </span>
+                                        <span className="text-gray-700 md:w-2/3">
+                                          {item.definition}
+                                        </span>
+                                      </div>
+                                      {itemIdx < section.content.length - 1 && (
+                                        <div className="h-px bg-gradient-to-r from-transparent via-gray-200/50 to-transparent mx-3"></div>
+                                      )}
                                     </div>
-                                    {itemIdx < section.content.length - 1 && (
-                                      <div className="h-px bg-gradient-to-r from-transparent via-gray-200/50 to-transparent mx-3"></div>
-                                    )}
-                                  </div>
-                                ))}
+                                  ))}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        ) : section.id === 'summary' ? (
-                          <div className="space-y-4">
-                            {section.content.map((item, itemIdx) => (
-                              <div key={itemIdx} className="flex items-start group/item">
-                                <div className="relative mt-1 mr-4 flex-shrink-0">
-                                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full blur-sm group-hover/item:blur-md transition-all duration-300"></div>
-                                  <div className="relative w-6 h-6 bg-gradient-to-br from-blue-600 to-purple-600 text-white rounded-full flex items-center justify-center text-sm shadow-sm">
-                                    {itemIdx + 1}
+                          ) : section.id === 'summary' ? (
+                            <div className="space-y-4">
+                              {section.content.map((item, itemIdx) => (
+                                <div key={itemIdx} className="flex items-start group/item">
+                                  <div className="relative mt-1 mr-4 flex-shrink-0">
+                                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full blur-sm group-hover/item:blur-md transition-all duration-300"></div>
+                                    <div className="relative w-6 h-6 bg-gradient-to-br from-blue-600 to-purple-600 text-white rounded-full flex items-center justify-center text-sm shadow-sm">
+                                      {itemIdx + 1}
+                                    </div>
+                                  </div>
+                                  <div className="text-gray-700 group-hover/item:text-gray-900 transition-colors duration-200">
+                                    {item}
                                   </div>
                                 </div>
-                                <div className="text-gray-700 group-hover/item:text-gray-900 transition-colors duration-200">
-                                  {item}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="space-y-4">
-                            {section.content.map((item, itemIdx) => {
-                              if (item.match(/^[a-z]\)/)) {
-                                return (
-                                  <div key={itemIdx} className="flex items-start ml-4 group/item">
-                                    <div className="relative mt-1 mr-3 flex-shrink-0">
-                                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full blur-sm group-hover/item:blur-md transition-all duration-300"></div>
-                                      <div className="relative w-6 h-6 bg-gradient-to-br from-blue-600 to-purple-600 text-white rounded-full flex items-center justify-center text-xs font-medium shadow-sm">
-                                        {item.split(')')[0]})
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="space-y-4">
+                              {section.content.map((item, itemIdx) => {
+                                if (item.match(/^[a-z]\)/)) {
+                                  return (
+                                    <div key={itemIdx} className="flex items-start ml-4 group/item">
+                                      <div className="relative mt-1 mr-3 flex-shrink-0">
+                                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full blur-sm group-hover/item:blur-md transition-all duration-300"></div>
+                                        <div className="relative w-6 h-6 bg-gradient-to-br from-blue-600 to-purple-600 text-white rounded-full flex items-center justify-center text-xs font-medium shadow-sm">
+                                          {item.split(')')[0]})
+                                        </div>
+                                      </div>
+                                      <div className="text-gray-700 group-hover/item:text-gray-900 transition-colors duration-200">
+                                        {item.split(') ')[1]}
                                       </div>
                                     </div>
-                                    <div className="text-gray-700 group-hover/item:text-gray-900 transition-colors duration-200">
-                                      {item.split(') ')[1]}
+                                  );
+                                } else if (item.match(/^[A-Z]\./)) {
+                                  return (
+                                    <div key={itemIdx} className="flex items-start ml-2 group/item">
+                                      <div className="text-blue-600 font-medium mr-3 mt-1">{item.split('.')[0]}.</div>
+                                      <div className="text-gray-700 group-hover/item:text-gray-900 transition-colors duration-200">
+                                        {item.split('. ')[1]}
+                                      </div>
                                     </div>
-                                  </div>
-                                );
-                              } else if (item.match(/^[A-Z]\./)) {
-                                return (
-                                  <div key={itemIdx} className="flex items-start ml-2 group/item">
-                                    <div className="text-blue-600 font-medium mr-3 mt-1">{item.split('.')[0]}.</div>
-                                    <div className="text-gray-700 group-hover/item:text-gray-900 transition-colors duration-200">
-                                      {item.split('. ')[1]}
+                                  );
+                                } else {
+                                  return (
+                                    <div key={itemIdx} className="group/item">
+                                      <div className="text-gray-700 leading-relaxed group-hover/item:text-gray-900 transition-colors duration-200">
+                                        {item}
+                                      </div>
                                     </div>
-                                  </div>
-                                );
-                              } else {
-                                return (
-                                  <div key={itemIdx} className="group/item">
-                                    <div className="text-gray-700 leading-relaxed group-hover/item:text-gray-900 transition-colors duration-200">
-                                      {item}
-                                    </div>
-                                  </div>
-                                );
-                              }
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                                  );
+                                }
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
