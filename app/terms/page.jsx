@@ -82,118 +82,114 @@ export default function Terms() {
       ]
     },
     {
-      id: 'cancellations-restaurant',
-      title: "Cancellations and Refunds - Restaurant/Food Delivery",
+      id: 'cancellations',
+      title: "Cancellations and Refunds",
       content: [
         {
-          type: "section",
-          title: "A. Customer-Initiated Cancellation",
-          items: [
-            "Cancellation Prior to Order Acceptance: User may cancel an order without penalty only until the restaurant accepts the order. In such cases, DROP shall process a full refund to the original mode of payment.",
-            "Cancellation After Order Acceptance: Once the restaurant has accepted the order and commenced preparation, customer-initiated cancellation shall not be eligible for any refund, whether in full or in part.",
-            "Cancellation After Dispatch: If the order has been picked up by the delivery partner or is en route to the delivery address, cancellation by the User shall result in no refund, under any circumstances."
+          type: "restaurant",
+          title: "Restaurant/Food Delivery",
+          letter: "A",
+          subsections: [
+            {
+              title: "1. Customer-Initiated Cancellation",
+              items: [
+                "1.1 Cancellation Prior to Order Acceptance: A User may cancel an order without penalty only until the restaurant accepts the order. In such cases, DROP shall process a full refund to the original mode of payment.",
+                "1.2 Cancellation After Order Acceptance: Once the restaurant has accepted the order and commenced preparation, customer-initiated cancellation shall not be eligible for any refund, whether in full or in part.",
+                "1.3 Cancellation After Dispatch: If the order has been picked up by the delivery partner or is en route to the delivery address, cancellation by the User shall result in no refund, under any circumstances."
+              ]
+            },
+            {
+              title: "2. Non-Refundable Circumstances",
+              items: [
+                "Refunds shall not be issued where cancellation or failure of delivery arises due to any of the following circumstances attributable to the User:",
+                "• Change of mind after order confirmation",
+                "• Incorrect order placement by the User",
+                "• Incorrect or incomplete delivery address provided by the User",
+                "• Non-availability, inaccessibility, or non-responsiveness of the User at the time of delivery",
+                "• Refusal to accept delivery at the designated location"
+              ]
+            },
+            {
+              title: "3. Cancellation or Refund Due to DROP or Restaurant Fault",
+              items: [
+                "DROP may, at its sole discretion, issue a full or partial refund if:",
+                "• The order is cancelled due to technical or operational issues attributable to DROP",
+                "• The restaurant is unable to prepare or fulfill the order",
+                "• There is a substantial delay caused by DROP or its delivery partners",
+                "• Items delivered are missing or incorrect due to restaurant error, subject to verification"
+              ]
+            },
+            {
+              title: "4. Refund Processing",
+              items: [
+                "4.1 All approved refunds shall be processed to the original payment method used at the time of placing the order.",
+                "4.2 Refunds may take five (5) to ten (10) business days to reflect, depending on the User's bank or payment service provider. DROP shall not be liable for delays caused by third-party financial institutions."
+              ]
+            },
+            {
+              title: "5. Finality of Decision",
+              items: [
+                "All decisions regarding refunds and cancellations shall be made by DROP in accordance with this Policy and shall be final and binding."
+              ]
+            },
+            {
+              title: "6. Amendments",
+              items: [
+                "DROP reserves the right to modify or amend this Policy at any time without prior notice. Continued use of the Platform after such modifications, would constitute acceptance of the revised Policy."
+              ]
+            }
           ]
         },
         {
-          type: "section",
-          title: "B. Non-Refundable Circumstances",
-          items: [
-            "Refunds shall not be issued where cancellation or failure of delivery arises due to any of the following circumstances attributable to the User:",
-            "• Change of mind after order confirmation",
-            "• Incorrect order placement by the User",
-            "• Incorrect or incomplete delivery address provided by the User",
-            "• Non-availability, inaccessibility, or non-responsiveness of the User at the time of delivery",
-            "• Refusal to accept delivery at the designated location"
-          ]
-        },
-        {
-          type: "section",
-          title: "C. Cancellation or Refund Due to DROP or Restaurant Fault",
-          items: [
-            "DROP may, at its sole discretion, issue a full or partial refund if:",
-            "• The order is cancelled due to technical or operational issues attributable to DROP",
-            "• The restaurant is unable to prepare or fulfill the order",
-            "• There is a substantial delay caused by DROP or its delivery partners",
-            "• Items delivered are missing or incorrect due to restaurant error, subject to verification"
-          ]
-        },
-        {
-          type: "section",
-          title: "D. Refund Processing",
-          items: [
-            "All approved refunds shall be processed to the original payment method used at the time of placing the order.",
-            "Refunds may take five (5) to ten (10) business days to reflect, depending on the User's bank or payment service provider. DROP shall not be liable for delays caused by third-party financial institutions."
-          ]
-        },
-        {
-          type: "section",
-          title: "E. Finality of Decision",
-          items: [
-            "All decisions regarding refunds and cancellations shall be made by DROP in accordance with this Policy and shall be final and binding."
-          ]
-        },
-        {
-          type: "section",
-          title: "F. Amendments",
-          items: [
-            "DROP reserves the right to modify or amend this Policy at any time without prior notice. Continued use of the Platform after such modifications would constitute acceptance of the revised Policy."
-          ]
-        }
-      ]
-    },
-    {
-      id: 'cancellations-bikes',
-      title: "Cancellations and Refunds - Bike Services",
-      content: [
-        {
-          type: "section",
-          title: "A. Nature of Payments",
-          items: [
-            "DROP does not collect, process, or hold any payments from Users for rides or deliveries.",
-            "All service charges are paid directly by the User to the Driver, using cash or any mutually agreed payment method.",
-            "DROP charges a platform usage fee solely to Drivers and has no control over amounts collected from Users."
-          ]
-        },
-        {
-          type: "section",
-          title: "B. Customer-Initiated Cancellation",
-          items: [
-            "Cancellation Before Ride/Delivery Commencement: User may cancel a booking at any time before the Driver arrives or before the service has commenced, without any refund obligation on DROP, as no payment is collected by DROP.",
-            "Cancellation After Service Commencement: If the User cancels after the Driver has arrived or after the service has commenced, any charges, if applicable, shall be settled directly between the User and the Driver. DROP shall not be responsible for any refund, adjustment, or compensation."
-          ]
-        },
-        {
-          type: "section",
-          title: "C. Refund Responsibility",
-          items: [
-            "Since DROP does not receive payments from Users, DROP shall not issue refunds under any circumstances.",
-            "Any dispute regarding fare, overcharging, or refund shall be resolved directly between the User and the Driver.",
-            "DROP shall not be liable for any cash or digital payments exchanged between Users and Drivers."
-          ]
-        },
-        {
-          type: "section",
-          title: "D. Driver Cancellations and Service Issues",
-          items: [
-            "In the event a Driver cancels the booking or fails to provide the service, no refund shall be due from DROP, as no payment is collected by DROP.",
-            "DROP may, at its discretion, take platform-level action against the Driver in accordance with its internal policies but shall have no financial liability toward the User."
-          ]
-        },
-        {
-          type: "section",
-          title: "E. Limitation of Liability",
-          items: [
-            "DROP acts solely as an intermediary and shall not be liable for:",
-            "• Refunds, fare disputes, or payment disagreements between Users and Drivers",
-            "• Loss, damage, or disputes arising from cash or direct digital payments",
-            "• Any claims arising from cancellation or non-completion of service"
-          ]
-        },
-        {
-          type: "section",
-          title: "F. Amendments",
-          items: [
-            "DROP reserves the right to amend or modify this Policy at any time without prior notice. Continued use of the Platform constitutes acceptance of the revised Policy."
+          type: "bikes",
+          title: "Bike Services",
+          letter: "B",
+          subsections: [
+            {
+              title: "1. Nature of Payments",
+              items: [
+                "1.1 DROP does not collect, process, or hold any payments from Users for rides or deliveries.",
+                "1.2 All service charges are paid directly by the User to the Driver, using cash or any mutually agreed payment method.",
+                "1.3 DROP charges a platform usage fee solely to Drivers and has no control over amounts collected from Users."
+              ]
+            },
+            {
+              title: "2. Customer-Initiated Cancellation",
+              items: [
+                "2.1 Cancellation Before Ride/Delivery Commencement: User may cancel a booking at any time before the Driver arrives or before the service has commenced, without any refund obligation on DROP, as no payment is collected by DROP.",
+                "2.2 Cancellation After Service Commencement: If the User cancels after the Driver has arrived or after the service has commenced, any charges, if applicable, shall be settled directly between the User and the Driver. DROP shall not be responsible for any refund, adjustment, or compensation."
+              ]
+            },
+            {
+              title: "3. Refund Responsibility",
+              items: [
+                "3.1 Since DROP does not receive payments from Users, DROP shall not issue refunds under any circumstances.",
+                "3.2 Any dispute regarding fare, overcharging, or refund shall be resolved directly between the User and the Driver.",
+                "3.3 DROP shall not be liable for any cash or digital payments exchanged between Users and Drivers."
+              ]
+            },
+            {
+              title: "4. Driver Cancellations and Service Issues",
+              items: [
+                "4.1 In the event a Driver cancels the booking or fails to provide the service, no refund shall be due from DROP, as no payment is collected by DROP.",
+                "4.2 DROP may, at its discretion, take platform-level action against the Driver in accordance with its internal policies but shall have no financial liability toward the User."
+              ]
+            },
+            {
+              title: "5. Limitation of Liability",
+              items: [
+                "DROP acts solely as an intermediary and shall not be liable for:",
+                "• Refunds, fare disputes, or payment disagreements between Users and Drivers",
+                "• Loss, damage, or disputes arising from cash or direct digital payments",
+                "• Any claims arising from cancellation or non-completion of service"
+              ]
+            },
+            {
+              title: "6. Amendments",
+              items: [
+                "DROP reserves the right to amend or modify this Policy at any time without prior notice. Continued use of the Platform constitutes acceptance of the revised Policy."
+              ]
+            }
           ]
         }
       ]
@@ -528,16 +524,19 @@ export default function Terms() {
                           className={`mb-10 pb-10 ${idx < sections.length - 1 ? 'border-b border-gray-200/60' : ''}`}
                           onMouseEnter={() => setActiveSection(section.id)}
                         >
-                          <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
-                            {section.id !== 'summary' && (
-                              <div className="relative">
-                                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl blur-sm"></div>
-                                <div className="relative w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 text-white rounded-lg flex items-center justify-center mr-4 shadow-md">
-                                  {getSectionNumber(section.id)}
+                          {/* Main Section Title - Only show purple number badge */}
+                          <h3 className="text-xl font-bold text-gray-900 mb-6">
+                            <div className="flex items-center">
+                              {section.id !== 'summary' && (
+                                <div className="relative mr-4">
+                                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl blur-sm"></div>
+                                  <div className="relative w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 text-white rounded-lg flex items-center justify-center shadow-md">
+                                    {getSectionNumber(section.id)}
+                                  </div>
                                 </div>
-                              </div>
-                            )}
-                            {section.id === 'summary' ? section.title : `${sectionNumber}${section.title}`}
+                              )}
+                              {section.id === 'summary' ? section.title : section.title}
+                            </div>
                           </h3>
                           
                           {section.id === 'definitions' ? (
@@ -579,40 +578,62 @@ export default function Terms() {
                                 </div>
                               ))}
                             </div>
-                          ) : ['cancellations-restaurant', 'cancellations-bikes'].includes(section.id) ? (
-                            <div className="space-y-6">
+                          ) : section.id === 'cancellations' ? (
+                            <div className="space-y-8">
                               {section.content.map((subsection, subsectionIdx) => (
-                                <div key={subsectionIdx} className="space-y-3">
-                                  <h4 className="text-lg font-semibold text-gray-800 flex items-center">
-                                    <span className="relative mr-3">
-                                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-lg blur-sm"></div>
-                                      <div className="relative w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 text-white rounded-lg flex items-center justify-center text-sm font-medium shadow-sm">
-                                        {subsection.title.split('.')[0]}
+                                <div key={subsectionIdx} className="space-y-6">
+                                  {/* 6A and 6B Titles with Purple Badges - No duplicate A/B */}
+                                  <div className="flex items-center">
+                                    <div className="relative mr-4">
+                                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl blur-sm"></div>
+                                      <div className="relative w-12 h-8 bg-gradient-to-br from-blue-600 to-purple-600 text-white rounded-lg flex items-center justify-center shadow-md">
+                                        6{subsection.letter}
                                       </div>
-                                    </span>
-                                    {subsection.title}
-                                  </h4>
-                                  <div className="space-y-3 ml-4">
-                                    {subsection.items.map((item, itemIdx) => (
-                                      <div key={itemIdx} className="flex items-start">
-                                        {item.startsWith('•') ? (
-                                          <div className="flex items-start w-full">
-                                            <span className="text-blue-600 mr-3 mt-1">•</span>
-                                            <span className="text-gray-700">{item.substring(2)}</span>
-                                          </div>
-                                        ) : item.includes(':') && !item.startsWith('•') ? (
-                                          <div className="space-y-2">
-                                            <div className="text-gray-800 font-medium">{item}</div>
-                                            {/* Next items will be bullet points */}
-                                          </div>
-                                        ) : (
-                                          <div className="text-gray-700">{item}</div>
+                                    </div>
+                                    <h4 className="text-lg font-bold text-gray-900">
+                                      {subsection.title}
+                                    </h4>
+                                  </div>
+                                  
+                                  {/* Subsections (1, 2, 3, etc.) */}
+                                  <div className="space-y-6 ml-8">
+                                    {subsection.subsections.map((subsubsection, subIdx) => (
+                                      <div key={subIdx} className="space-y-4">
+                                        {/* Subsection title with black text, no number badge */}
+                                        <h5 className="text-md font-semibold text-gray-800">
+                                          {subsubsection.title}
+                                        </h5>
+                                        
+                                        {/* Subsection items */}
+                                        <div className="space-y-3">
+                                          {subsubsection.items.map((item, itemIdx) => (
+                                            <div key={itemIdx} className="flex items-start">
+                                              {item.startsWith('•') ? (
+                                                <div className="flex items-start w-full ml-4">
+                                                  <span className="text-blue-600 mr-3 mt-1">•</span>
+                                                  <span className="text-gray-700">{item.substring(2)}</span>
+                                                </div>
+                                              ) : item.startsWith('1.') || item.startsWith('2.') || item.startsWith('3.') || item.startsWith('4.') || item.startsWith('5.') || item.startsWith('6.') ? (
+                                                <div className="flex items-start w-full">
+                                                  <span className="font-medium text-gray-800 min-w-[3rem]">{item.split(' ')[0]}</span>
+                                                  <span className="text-gray-700 ml-2">{item.substring(item.indexOf(' ') + 1)}</span>
+                                                </div>
+                                              ) : (
+                                                <div className="text-gray-700">{item}</div>
+                                              )}
+                                            </div>
+                                          ))}
+                                        </div>
+                                        
+                                        {subIdx < subsection.subsections.length - 1 && (
+                                          <div className="h-px bg-gradient-to-r from-transparent via-gray-200/30 to-transparent my-4"></div>
                                         )}
                                       </div>
                                     ))}
                                   </div>
+                                  
                                   {subsectionIdx < section.content.length - 1 && (
-                                    <div className="h-px bg-gradient-to-r from-transparent via-gray-200/30 to-transparent my-4"></div>
+                                    <div className="h-px bg-gradient-to-r from-transparent via-gray-200/50 to-transparent my-6"></div>
                                   )}
                                 </div>
                               ))}
