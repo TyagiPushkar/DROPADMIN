@@ -89,6 +89,9 @@ export default function Terms() {
           type: "restaurant",
           title: "Restaurant/Food Delivery",
           letter: "A",
+          policyHeader: "This Refund and Cancellation Policy ('Policy') governs the cancellation of orders and issuance of refunds for food delivery services provided through the DROP mobile application and related platforms. By placing an order on the Platform, the customer ('User') agrees to be bound by this Policy.",
+          
+          
           subsections: [
             {
               title: "1. Customer-Initiated Cancellation",
@@ -144,6 +147,7 @@ export default function Terms() {
           type: "bikes",
           title: "Bike Services",
           letter: "B",
+          policyHeader: "This Refund and Cancellation Policy ('Policy') governs cancellations and refunds in relation to services facilitated through the DROP mobile application and related platforms. DROP operates solely as a technology aggregator, connecting customers ('Users') with independent bike riders/drivers ('Drivers'), and does not collect any ride or delivery charges from Users.\nBy using the Platform, Users and Drivers agree to be bound by this Policy.",
           subsections: [
             {
               title: "1. Nature of Payments",
@@ -594,6 +598,13 @@ export default function Terms() {
                                       {subsection.title}
                                     </h4>
                                   </div>
+                                  {subsection.policyHeader && (
+                                    <div className="bg-gradient-to-r from-gray-50 to-blue-50/30 p-4 rounded-lg border border-gray-200/60 mb-6">
+                                      <div className="text-gray-700 whitespace-pre-line">
+                                        {subsection.policyHeader}
+                                      </div>
+                                    </div>
+                                  )}
                                   
                                   {/* Subsections (1, 2, 3, etc.) */}
                                   <div className="space-y-6 ml-8">
