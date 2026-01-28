@@ -96,9 +96,9 @@ export default function Terms() {
             {
               title: "1. Customer-Initiated Cancellation",
               items: [
-                "1.1 Cancellation Prior to Order Acceptance: A User may cancel an order without penalty only until the restaurant accepts the order. In such cases, DROP shall process a full refund to the original mode of payment.",
-                "1.2 Cancellation After Order Acceptance: Once the restaurant has accepted the order and commenced preparation, customer-initiated cancellation shall not be eligible for any refund, whether in full or in part.",
-                "1.3 Cancellation After Dispatch: If the order has been picked up by the delivery partner or is en route to the delivery address, cancellation by the User shall result in no refund, under any circumstances."
+                "• Cancellation Prior to Order Acceptance: A User may cancel an order without penalty only until the restaurant accepts the order. In such cases, DROP shall process a full refund to the original mode of payment.",
+                "• Cancellation After Order Acceptance: Once the restaurant has accepted the order and commenced preparation, customer-initiated cancellation shall not be eligible for any refund, whether in full or in part.",
+                "• Cancellation After Dispatch: If the order has been picked up by the delivery partner or is en route to the delivery address, cancellation by the User shall result in no refund, under any circumstances."
               ]
             },
             {
@@ -125,20 +125,20 @@ export default function Terms() {
             {
               title: "4. Refund Processing",
               items: [
-                "4.1 All approved refunds shall be processed to the original payment method used at the time of placing the order.",
-                "4.2 Refunds may take five (5) to ten (10) business days to reflect, depending on the User's bank or payment service provider. DROP shall not be liable for delays caused by third-party financial institutions."
+                "• All approved refunds shall be processed to the original payment method used at the time of placing the order.",
+                "• Refunds may take five (5) to ten (10) business days to reflect, depending on the User's bank or payment service provider. DROP shall not be liable for delays caused by third-party financial institutions."
               ]
             },
             {
               title: "5. Finality of Decision",
               items: [
-                "All decisions regarding refunds and cancellations shall be made by DROP in accordance with this Policy and shall be final and binding."
+                "• All decisions regarding refunds and cancellations shall be made by DROP in accordance with this Policy and shall be final and binding."
               ]
             },
             {
               title: "6. Amendments",
               items: [
-                "DROP reserves the right to modify or amend this Policy at any time without prior notice. Continued use of the Platform after such modifications, would constitute acceptance of the revised Policy."
+                "• DROP reserves the right to modify or amend this Policy at any time without prior notice. Continued use of the Platform after such modifications, would constitute acceptance of the revised Policy."
               ]
             }
           ]
@@ -152,31 +152,31 @@ export default function Terms() {
             {
               title: "1. Nature of Payments",
               items: [
-                "1.1 DROP does not collect, process, or hold any payments from Users for rides or deliveries.",
-                "1.2 All service charges are paid directly by the User to the Driver, using cash or any mutually agreed payment method.",
-                "1.3 DROP charges a platform usage fee solely to Drivers and has no control over amounts collected from Users."
+                "• DROP does not collect, process, or hold any payments from Users for rides or deliveries.",
+                "• All service charges are paid directly by the User to the Driver, using cash or any mutually agreed payment method.",
+                "• DROP charges a platform usage fee solely to Drivers and has no control over amounts collected from Users."
               ]
             },
             {
               title: "2. Customer-Initiated Cancellation",
               items: [
-                "2.1 Cancellation Before Ride/Delivery Commencement: User may cancel a booking at any time before the Driver arrives or before the service has commenced, without any refund obligation on DROP, as no payment is collected by DROP.",
-                "2.2 Cancellation After Service Commencement: If the User cancels after the Driver has arrived or after the service has commenced, any charges, if applicable, shall be settled directly between the User and the Driver. DROP shall not be responsible for any refund, adjustment, or compensation."
+                "• Cancellation Before Ride/Delivery Commencement: User may cancel a booking at any time before the Driver arrives or before the service has commenced, without any refund obligation on DROP, as no payment is collected by DROP.",
+                "• Cancellation After Service Commencement: If the User cancels after the Driver has arrived or after the service has commenced, any charges, if applicable, shall be settled directly between the User and the Driver. DROP shall not be responsible for any refund, adjustment, or compensation."
               ]
             },
             {
               title: "3. Refund Responsibility",
               items: [
-                "3.1 Since DROP does not receive payments from Users, DROP shall not issue refunds under any circumstances.",
-                "3.2 Any dispute regarding fare, overcharging, or refund shall be resolved directly between the User and the Driver.",
-                "3.3 DROP shall not be liable for any cash or digital payments exchanged between Users and Drivers."
+                "• Since DROP does not receive payments from Users, DROP shall not issue refunds under any circumstances.",
+                "• Any dispute regarding fare, overcharging, or refund shall be resolved directly between the User and the Driver.",
+                "• DROP shall not be liable for any cash or digital payments exchanged between Users and Drivers."
               ]
             },
             {
               title: "4. Driver Cancellations and Service Issues",
               items: [
-                "4.1 In the event a Driver cancels the booking or fails to provide the service, no refund shall be due from DROP, as no payment is collected by DROP.",
-                "4.2 DROP may, at its discretion, take platform-level action against the Driver in accordance with its internal policies but shall have no financial liability toward the User."
+                "• In the event a Driver cancels the booking or fails to provide the service, no refund shall be due from DROP, as no payment is collected by DROP.",
+                "• DROP may, at its discretion, take platform-level action against the Driver in accordance with its internal policies but shall have no financial liability toward the User."
               ]
             },
             {
@@ -191,7 +191,7 @@ export default function Terms() {
             {
               title: "6. Amendments",
               items: [
-                "DROP reserves the right to amend or modify this Policy at any time without prior notice. Continued use of the Platform constitutes acceptance of the revised Policy."
+                "• DROP reserves the right to amend or modify this Policy at any time without prior notice. Continued use of the Platform constitutes acceptance of the revised Policy."
               ]
             }
           ]
