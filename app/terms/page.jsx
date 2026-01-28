@@ -57,37 +57,145 @@ export default function Terms() {
       title: "Scope of Services",
       content: [
         "The Company provides a technology platform to connect drivers with customers for:",
-        "a. Bike taxi / passenger transportation",
-        "b. Food delivery services",
-        "c. The Company does not own, operate, or control vehicles and is not a transportation provider."
+        "• Bike taxi / passenger transportation",
+        "• Food delivery services",
+        "The Company does not own, operate, or control vehicles and is not a transportation provider."
       ]
     },
     {
       id: 'account',
       title: "Account Registration",
       content: [
-        "A. Users must provide accurate and complete information during registration.",
-        "B. You are responsible for maintaining the confidentiality of your account credentials.",
-        "C. The Company reserves the right to suspend or terminate accounts providing false or misleading information."
+        "Users must provide accurate and complete information during registration.",
+        "You are responsible for maintaining the confidentiality of your account credentials.",
+        "The Company reserves the right to suspend or terminate accounts providing false or misleading information."
       ]
     },
     {
       id: 'payments',
       title: "Bookings and Payments",
       content: [
-        "A. Fares, delivery charges, and applicable taxes will be displayed before confirmation.",
-        "B. Payments may be made via UPI, cards, wallets, or other approved payment methods.",
-        "C. The Company may charge a platform/service fee.",
-        "D. All payments are processed through third-party payment gateways in compliance with RBI guidelines."
+        "Fares, delivery charges, and applicable taxes will be displayed before confirmation.",
+        "Payments may be made via UPI, cards, wallets, or other approved payment methods.",
+        "The Company may charge a platform/service fee.",
+        "All payments are processed through third-party payment gateways in compliance with RBI guidelines."
       ]
     },
     {
-      id: 'cancellations',
-      title: "Cancellations and Refunds",
+      id: 'cancellations-restaurant',
+      title: "Cancellations and Refunds - Restaurant/Food Delivery",
       content: [
-        "A. Cancellation charges may apply depending on timing and service type.",
-        "B. Refunds, if applicable, will be processed to the original payment method.",
-        "C. The Company reserves the right to modify cancellation and refund policies at any time."
+        {
+          type: "section",
+          title: "A. Customer-Initiated Cancellation",
+          items: [
+            "Cancellation Prior to Order Acceptance: User may cancel an order without penalty only until the restaurant accepts the order. In such cases, DROP shall process a full refund to the original mode of payment.",
+            "Cancellation After Order Acceptance: Once the restaurant has accepted the order and commenced preparation, customer-initiated cancellation shall not be eligible for any refund, whether in full or in part.",
+            "Cancellation After Dispatch: If the order has been picked up by the delivery partner or is en route to the delivery address, cancellation by the User shall result in no refund, under any circumstances."
+          ]
+        },
+        {
+          type: "section",
+          title: "B. Non-Refundable Circumstances",
+          items: [
+            "Refunds shall not be issued where cancellation or failure of delivery arises due to any of the following circumstances attributable to the User:",
+            "• Change of mind after order confirmation",
+            "• Incorrect order placement by the User",
+            "• Incorrect or incomplete delivery address provided by the User",
+            "• Non-availability, inaccessibility, or non-responsiveness of the User at the time of delivery",
+            "• Refusal to accept delivery at the designated location"
+          ]
+        },
+        {
+          type: "section",
+          title: "C. Cancellation or Refund Due to DROP or Restaurant Fault",
+          items: [
+            "DROP may, at its sole discretion, issue a full or partial refund if:",
+            "• The order is cancelled due to technical or operational issues attributable to DROP",
+            "• The restaurant is unable to prepare or fulfill the order",
+            "• There is a substantial delay caused by DROP or its delivery partners",
+            "• Items delivered are missing or incorrect due to restaurant error, subject to verification"
+          ]
+        },
+        {
+          type: "section",
+          title: "D. Refund Processing",
+          items: [
+            "All approved refunds shall be processed to the original payment method used at the time of placing the order.",
+            "Refunds may take five (5) to ten (10) business days to reflect, depending on the User's bank or payment service provider. DROP shall not be liable for delays caused by third-party financial institutions."
+          ]
+        },
+        {
+          type: "section",
+          title: "E. Finality of Decision",
+          items: [
+            "All decisions regarding refunds and cancellations shall be made by DROP in accordance with this Policy and shall be final and binding."
+          ]
+        },
+        {
+          type: "section",
+          title: "F. Amendments",
+          items: [
+            "DROP reserves the right to modify or amend this Policy at any time without prior notice. Continued use of the Platform after such modifications would constitute acceptance of the revised Policy."
+          ]
+        }
+      ]
+    },
+    {
+      id: 'cancellations-bikes',
+      title: "Cancellations and Refunds - Bike Services",
+      content: [
+        {
+          type: "section",
+          title: "A. Nature of Payments",
+          items: [
+            "DROP does not collect, process, or hold any payments from Users for rides or deliveries.",
+            "All service charges are paid directly by the User to the Driver, using cash or any mutually agreed payment method.",
+            "DROP charges a platform usage fee solely to Drivers and has no control over amounts collected from Users."
+          ]
+        },
+        {
+          type: "section",
+          title: "B. Customer-Initiated Cancellation",
+          items: [
+            "Cancellation Before Ride/Delivery Commencement: User may cancel a booking at any time before the Driver arrives or before the service has commenced, without any refund obligation on DROP, as no payment is collected by DROP.",
+            "Cancellation After Service Commencement: If the User cancels after the Driver has arrived or after the service has commenced, any charges, if applicable, shall be settled directly between the User and the Driver. DROP shall not be responsible for any refund, adjustment, or compensation."
+          ]
+        },
+        {
+          type: "section",
+          title: "C. Refund Responsibility",
+          items: [
+            "Since DROP does not receive payments from Users, DROP shall not issue refunds under any circumstances.",
+            "Any dispute regarding fare, overcharging, or refund shall be resolved directly between the User and the Driver.",
+            "DROP shall not be liable for any cash or digital payments exchanged between Users and Drivers."
+          ]
+        },
+        {
+          type: "section",
+          title: "D. Driver Cancellations and Service Issues",
+          items: [
+            "In the event a Driver cancels the booking or fails to provide the service, no refund shall be due from DROP, as no payment is collected by DROP.",
+            "DROP may, at its discretion, take platform-level action against the Driver in accordance with its internal policies but shall have no financial liability toward the User."
+          ]
+        },
+        {
+          type: "section",
+          title: "E. Limitation of Liability",
+          items: [
+            "DROP acts solely as an intermediary and shall not be liable for:",
+            "• Refunds, fare disputes, or payment disagreements between Users and Drivers",
+            "• Loss, damage, or disputes arising from cash or direct digital payments",
+            "• Any claims arising from cancellation or non-completion of service"
+          ]
+        },
+        {
+          type: "section",
+          title: "F. Amendments",
+          items: [
+            "DROP reserves the right to amend or modify this Policy at any time without prior notice. Continued use of the Platform constitutes acceptance of the revised Policy."
+          ]
+        }
       ]
     },
     {
@@ -95,11 +203,11 @@ export default function Terms() {
       title: "Driver Obligations",
       content: [
         "Drivers agree to:",
-        "A. Comply with all applicable Motor Vehicles Act, 1988 and traffic laws",
-        "B. Maintain vehicle safety and cleanliness",
-        "C. Behave professionally and respectfully",
-        "D. Not engage in unlawful, abusive, or unsafe conduct",
-        "E. Complete rides or deliveries once accepted unless justified"
+        "• Comply with all applicable Motor Vehicles Act, 1988 and traffic laws",
+        "• Maintain vehicle safety and cleanliness",
+        "• Behave professionally and respectfully",
+        "• Not engage in unlawful, abusive, or unsafe conduct",
+        "• Complete rides or deliveries once accepted unless justified"
       ]
     },
     {
@@ -107,20 +215,20 @@ export default function Terms() {
       title: "User Conduct",
       content: [
         "Users shall not:",
-        "A. Misuse the App for illegal or fraudulent activities",
-        "B. Harass, abuse, or threaten drivers or customers",
-        "C. Damage vehicles or delivery items",
-        "D. Provide false information",
-        "E. Attempt to bypass the platform's payment system"
+        "• Misuse the App for illegal or fraudulent activities",
+        "• Harass, abuse, or threaten drivers or customers",
+        "• Damage vehicles or delivery items",
+        "• Provide false information",
+        "• Attempt to bypass the platform's payment system"
       ]
     },
     {
       id: 'food-delivery',
       title: "Food Delivery",
       content: [
-        "A. Food quality, preparation, and hygiene are the responsibility of the restaurant/merchant.",
-        "B. The Company is not responsible for food quality but will facilitate issue resolution.",
-        "C. Delivery times are estimates and may vary due to traffic or other factors."
+        "Food quality, preparation, and hygiene are the responsibility of the restaurant/merchant.",
+        "The Company is not responsible for food quality but will facilitate issue resolution.",
+        "Delivery times are estimates and may vary due to traffic or other factors."
       ]
     },
     {
@@ -138,9 +246,9 @@ export default function Terms() {
         "The Company does not guarantee uninterrupted or error-free Services.",
         "Users acknowledge inherent risks in transportation and delivery services.",
         "The Company is not liable for:",
-        "a. Acts or omissions of drivers or users",
-        "b. Loss of personal belongings",
-        "c. Delays due to weather, traffic, or force majeure"
+        "• Acts or omissions of drivers or users",
+        "• Loss of personal belongings",
+        "• Delays due to weather, traffic, or force majeure"
       ]
     },
     {
@@ -154,8 +262,8 @@ export default function Terms() {
       id: 'ip',
       title: "Intellectual Property",
       content: [
-        "A. All contents, trademarks, logos, and software are owned by the Company.",
-        "B. Users may not copy, modify, distribute, or exploit any content without permission."
+        "All contents, trademarks, logos, and software are owned by the Company.",
+        "Users may not copy, modify, distribute, or exploit any content without permission."
       ]
     },
     {
@@ -163,8 +271,8 @@ export default function Terms() {
       title: "Suspension and Termination",
       content: [
         "The Company may suspend or terminate access for violation of these Terms:",
-        "a. For suspected fraud or safety concern",
-        "b. To comply with legal requirements",
+        "• For suspected fraud or safety concern",
+        "• To comply with legal requirements",
         "Users may request account deletion subject to applicable laws."
       ]
     },
@@ -173,8 +281,8 @@ export default function Terms() {
       title: "Limitation of Liability",
       content: [
         "To the maximum extent permitted by law:",
-        "a. The Company shall not be liable for indirect, incidental, or consequential damages.",
-        "b. Total liability shall not exceed the amount paid by the user in the previous 3 months."
+        "• The Company shall not be liable for indirect, incidental, or consequential damages.",
+        "• Total liability shall not exceed the amount paid by the user in the previous 3 months."
       ]
     },
     {
@@ -182,9 +290,9 @@ export default function Terms() {
       title: "Indemnification",
       content: [
         "Users agree to indemnify and hold harmless the Company from claims, losses, or damages arising from:",
-        "a. Violation of these Terms",
-        "b. Misuse of the Services",
-        "c. Breach of applicable laws"
+        "• Violation of these Terms",
+        "• Misuse of the Services",
+        "• Breach of applicable laws"
       ]
     },
     {
@@ -213,10 +321,10 @@ export default function Terms() {
       title: "Grievance Redressal",
       content: [
         "In accordance with the Information Technology (Intermediary Guidelines and Digital Media Ethics Code) Rules, 2021:",
-        "a. Grievance Officer: [To be appointed]",
-        "b. Email: dropinexpress2025@gmail.com",
-        "c. Address: 43, Karaya Road, Kolkata-700017, West Bengal",
-        "d. Response Time: Within 30 days"
+        "• Grievance Officer: [To be appointed]",
+        "• Email: dropinexpress2025@gmail.com",
+        "• Address: 43, Karaya Road, Kolkata-700017, West Bengal",
+        "• Response Time: Within 30 days"
       ]
     },
     {
@@ -322,7 +430,7 @@ export default function Terms() {
           </div>
 
           <div className="flex flex-col lg:flex-row gap-8">
-            {/* Sidebar Navigation - NO SERIAL NUMBERS */}
+            {/* Sidebar Navigation */}
             <div className="lg:w-1/4">
               <div className="sticky top-32">
                 <div className="relative group">
@@ -385,7 +493,7 @@ export default function Terms() {
               </div>
             </div>
 
-            {/* Main Content - WITH SERIAL NUMBERS ONLY HERE */}
+            {/* Main Content */}
             <div className="lg:w-3/4">
               <div className="relative group/main">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-3xl blur-sm group-hover/main:blur-md transition-all duration-300"></div>
@@ -471,33 +579,68 @@ export default function Terms() {
                                 </div>
                               ))}
                             </div>
+                          ) : ['cancellations-restaurant', 'cancellations-bikes'].includes(section.id) ? (
+                            <div className="space-y-6">
+                              {section.content.map((subsection, subsectionIdx) => (
+                                <div key={subsectionIdx} className="space-y-3">
+                                  <h4 className="text-lg font-semibold text-gray-800 flex items-center">
+                                    <span className="relative mr-3">
+                                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-lg blur-sm"></div>
+                                      <div className="relative w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 text-white rounded-lg flex items-center justify-center text-sm font-medium shadow-sm">
+                                        {subsection.title.split('.')[0]}
+                                      </div>
+                                    </span>
+                                    {subsection.title}
+                                  </h4>
+                                  <div className="space-y-3 ml-4">
+                                    {subsection.items.map((item, itemIdx) => (
+                                      <div key={itemIdx} className="flex items-start">
+                                        {item.startsWith('•') ? (
+                                          <div className="flex items-start w-full">
+                                            <span className="text-blue-600 mr-3 mt-1">•</span>
+                                            <span className="text-gray-700">{item.substring(2)}</span>
+                                          </div>
+                                        ) : item.includes(':') && !item.startsWith('•') ? (
+                                          <div className="space-y-2">
+                                            <div className="text-gray-800 font-medium">{item}</div>
+                                            {/* Next items will be bullet points */}
+                                          </div>
+                                        ) : (
+                                          <div className="text-gray-700">{item}</div>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                  {subsectionIdx < section.content.length - 1 && (
+                                    <div className="h-px bg-gradient-to-r from-transparent via-gray-200/30 to-transparent my-4"></div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
                           ) : (
                             <div className="space-y-4">
                               {section.content.map((item, itemIdx) => {
-                                if (item.match(/^[a-z]\)/)) {
+                                // Check if item is a section header (ends with :)
+                                if (item.endsWith(':')) {
+                                  return (
+                                    <div key={itemIdx} className="pt-2">
+                                      <h4 className="text-lg font-semibold text-gray-800 mb-2">{item}</h4>
+                                    </div>
+                                  );
+                                }
+                                // Check if item is a bullet point
+                                else if (item.startsWith('•')) {
                                   return (
                                     <div key={itemIdx} className="flex items-start ml-4 group/item">
-                                      <div className="relative mt-1 mr-3 flex-shrink-0">
-                                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full blur-sm group-hover/item:blur-md transition-all duration-300"></div>
-                                        <div className="relative w-6 h-6 bg-gradient-to-br from-blue-600 to-purple-600 text-white rounded-full flex items-center justify-center text-xs font-medium shadow-sm">
-                                          {item.split(')')[0]})
-                                        </div>
-                                      </div>
+                                      <span className="text-blue-600 mr-3 mt-1">•</span>
                                       <div className="text-gray-700 group-hover/item:text-gray-900 transition-colors duration-200">
-                                        {item.split(') ')[1]}
+                                        {item.substring(2)}
                                       </div>
                                     </div>
                                   );
-                                } else if (item.match(/^[A-Z]\./)) {
-                                  return (
-                                    <div key={itemIdx} className="flex items-start ml-2 group/item">
-                                      <div className="text-blue-600 font-medium mr-3 mt-1">{item.split('.')[0]}.</div>
-                                      <div className="text-gray-700 group-hover/item:text-gray-900 transition-colors duration-200">
-                                        {item.split('. ')[1]}
-                                      </div>
-                                    </div>
-                                  );
-                                } else {
+                                }
+                                // Regular paragraph
+                                else {
                                   return (
                                     <div key={itemIdx} className="group/item">
                                       <div className="text-gray-700 leading-relaxed group-hover/item:text-gray-900 transition-colors duration-200">
