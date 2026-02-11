@@ -1,7 +1,7 @@
 // websocket-server.js
 import { WebSocketServer } from "ws";
 
-const PORT = process.env.WS_PORT || 6010;
+const PORT = process.env.WS_PORT || 6011;
 const HOST = process.env.WS_HOST || "0.0.0.0";
 
 const wss = new WebSocketServer({
