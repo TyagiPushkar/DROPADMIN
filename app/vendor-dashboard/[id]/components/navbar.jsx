@@ -57,7 +57,8 @@ export default function Navbar({ onMenuClick }) {
 
   useEffect(() => {
     // Use your server's IP directly
-     const wsUrl = process.env.NEXT_PUBLIC_WS_URL || "ws://62.72.12.37:6011";
+     const wsUrl =
+       process.env.NEXT_PUBLIC_WS_URL || "wss://dropinexpress.in/ws";
      let socket = new WebSocket(wsUrl);
 
     socket.onopen = () => {
