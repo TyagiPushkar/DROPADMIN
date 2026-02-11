@@ -62,7 +62,7 @@ export default function Navbar({ onMenuClick }) {
      let socket = new WebSocket(wsUrl);
 
     socket.onopen = () => {
-      console.log("WS Connected to 62.72.12.37:6010");
+      console.log("WS Connected to 62.72.12.37:6011");
     };
 
     socket.onmessage = (event) => {
