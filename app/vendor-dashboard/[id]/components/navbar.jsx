@@ -57,7 +57,8 @@ export default function Navbar({ onMenuClick }) {
 
   useEffect(() => {
     // Use your server's IP directly
-    let socket = new WebSocket("ws://62.72.12.37:6010");
+     const wsUrl = process.env.NEXT_PUBLIC_WS_URL || "ws://62.72.12.37:6010";
+     let socket = new WebSocket(wsUrl);
 
     socket.onopen = () => {
       console.log("WS Connected to 62.72.12.37:6010");
