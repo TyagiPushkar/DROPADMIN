@@ -58,7 +58,10 @@ useEffect(() => {
   
   
   useEffect(() => {
-    let socket = new WebSocket("ws://139.5.190.143:6010");
+    const wsUrl =
+      process.env.NEXT_PUBLIC_WS_URL || `ws://${window.location.hostname}:6010`;
+
+    let socket = new WebSocket(wsUrl);
   
     socket.onopen = () => {
       console.log("WS Connected");
