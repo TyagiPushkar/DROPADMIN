@@ -2,21 +2,13 @@
 import WebSocket from "ws";
 
 export default async function handler(req, res) {
-  // Only allow POST requests
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  // Optional: Restrict to your PHP server IP
-  // const allowedIP = '139.5.190.143';
-  // if (req.socket.remoteAddress !== allowedIP) {
-  //     return res.status(403).json({ error: 'Forbidden' });
-  // }
-
   try {
     const data = req.body;
 
-    // Connect to local WebSocket server
     const ws = new WebSocket("ws://localhost:6011");
 
     await new Promise((resolve, reject) => {
