@@ -502,12 +502,10 @@ export default function RiderDetailsPage() {
     },
     {
       label: "Vehicle Documents",
-      number: rider.VehicleNumber,
+
       type: "Vehicle",
       icon: Car,
-      urls: [
-        { label: "RC (Smart Card)", url: rider.VehicleNumberPlatePhotoURL },
-      ],
+      urls: [{ label: "RC (Smart Card)", url: rider.RC_IMAGE }],
     },
   ];
 
