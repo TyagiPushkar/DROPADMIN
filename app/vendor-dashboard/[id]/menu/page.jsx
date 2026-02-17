@@ -408,7 +408,7 @@ export default function MenuPage() {
       price: formattedPortions[0].price
     };
   
-    console.log("EDIT MENU DATA 👉", menuData);
+   
   
     const formData = new FormData();
     formData.append("menu_data", JSON.stringify(menuData));
@@ -1108,7 +1108,7 @@ export default function MenuPage() {
 
                     <tbody>
                       {menu.map((item) => {
-                        console.log("menu",menu);
+                       
                         let minPrice = "—";
                         if (item.portions && item.portions.length > 0) {
                           const prices = item.portions

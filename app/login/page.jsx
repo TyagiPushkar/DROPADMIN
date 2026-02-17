@@ -179,6 +179,17 @@ export default function LoginPage() {
                   &nbsp;Onboard here
                 </a>
               </p>
+
+              <p className="text-center text-sm text-gray-600 mt-3">
+                  Click
+                  <a
+                    href="/add-vendor"
+                    className="text-blue-600 hover:underline font-medium"
+                  >
+                    &nbsp;here
+                  </a>{" "}
+                  to register your restaurant
+                </p>
             </form>
           </div>
         </div>

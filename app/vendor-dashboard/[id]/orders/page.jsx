@@ -282,10 +282,10 @@ export default function OrdersPage() {
 
   const statusCounts = {
     all: orders.length,
-    pending: orders.filter(o => o.order_status?.toLowerCase() === 'pending').length,
+    pending: orders.filter(o => o.order_status?.toLowerCase() === 'placed').length,
     preparing: orders.filter(o => o.order_status?.toLowerCase() === 'preparing').length,
-    ready: orders.filter(o => o.order_status?.toLowerCase() === 'ready').length,
-    completed: orders.filter(o => o.order_status?.toLowerCase() === 'completed').length,
+    Transit: orders.filter(o => o.order_status?.toLowerCase() === 'rout for delivery').length,
+    completed: orders.filter(o => o.order_status?.toLowerCase() === 'delivered').length,
   }
 
   // Status update function

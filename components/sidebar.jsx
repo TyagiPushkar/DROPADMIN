@@ -21,9 +21,9 @@ import {
 } from "lucide-react";
 
 const menuItems = [
-  // { name: "Dashboard", href: "/analytics", icon: Home, badge: null },
-  // { name: "Orders", href: "/orders", icon: ShoppingCart, badge: null },
-  // { name: "Vendors", href: "/vendors", icon: Package, badge: null },
+  { name: "Dashboard", href: "/analytics", icon: Home, badge: null },
+  { name: "Orders", href: "/orders", icon: ShoppingCart, badge: null },
+  { name: "Vendors", href: "/vendors", icon: Package, badge: null },
   { name: "Riders", href: "/riders", icon: Users, badge: null },
   { name: "Rides", href: "/rides", icon: Bike, badge: null },
   { name: "Wallet", href: "/rider-ledger", icon: Wallet, badge: null },
