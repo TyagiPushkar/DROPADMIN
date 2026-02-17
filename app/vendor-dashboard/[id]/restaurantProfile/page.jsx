@@ -380,20 +380,41 @@ export default function RestaurantProfile() {
       const result = await response.json();
   
       if (result.success) {
-        // Update local state
-        const updatedRestaurant = {
+        let updatedRestaurant = {
           ...restaurant,
           ...editForm,
           ...result.restaurant,
           updated_at: new Date().toISOString()
         };
+      
+       
+        if (typeof updatedRestaurant.cuisines === "string") {
+          try {
+            updatedRestaurant.cuisines = JSON.parse(updatedRestaurant.cuisines);
+          } catch {
+            updatedRestaurant.cuisines = [];
+          }
+        }
+      
+       
+        if (typeof updatedRestaurant.days_open === "string") {
+          try {
+            updatedRestaurant.days_open = JSON.parse(updatedRestaurant.days_open);
+          } catch {
+            updatedRestaurant.days_open = [];
+          }
+        }
+      
+        setRestaurant(updatedRestaurant);
+        setOriginalRestaurant(updatedRestaurant);
+      
   
         setRestaurant(updatedRestaurant);
         setOriginalRestaurant(updatedRestaurant);
         setIsEditing(false);
         setSaveSuccess(true);
   
-        // Clear files
+        
         setSelectedFiles({ gstProof: null, fssaiProof: null, bankProof: null });
         setFilePreviews({ gstProof: null, fssaiProof: null, bankProof: null });
   
@@ -1051,7 +1072,10 @@ export default function RestaurantProfile() {
                               placeholder="Indian, Chinese, Italian"
                             />
                           ) : (
-                            <p className="text-gray-900">{restaurant.cuisines.join(', ')}</p>
+                            <p className="text-gray-900">{Array.isArray(restaurant.cuisines)
+                              ? restaurant.cuisines.join(', ')
+                              : restaurant.cuisines || "—"}
+                            </p>
                           )}
                         </div>
                       )}

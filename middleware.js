@@ -19,7 +19,7 @@ export function middleware(request) {
   }
 
   // Public routes
-  const publicRoutes = ["/", "/login","/add-rider","/about","/privacy","/services", "/terms"];
+  const publicRoutes = ["/", "/login","/add-rider","/about","/privacy","/services", "/terms","/add-vendor"];
   if (publicRoutes.includes(path)) {
     return NextResponse.next();
   }
@@ -32,10 +32,10 @@ export function middleware(request) {
  
   if (user.UserType === "SuperAdmin") {
     const superAdminAllowed = [
-      // "/analytics",
-      // "/orders",
+      "/analytics",
+      "/orders",
       "/settings",
-      // "/vendors",
+      "/vendors",
       "/riders",
       "/rides",
       "/rider-ledger",
