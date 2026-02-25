@@ -12,7 +12,10 @@ import {
   ChevronDown, 
   Receipt, 
   TrendingUp, 
-  AlertCircle 
+  AlertCircle,
+  IndianRupee,
+  PieChart,
+  Percent
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { BASE_URL } from "../page";
@@ -27,94 +30,105 @@ export default function DriverLedger() {
   const [refreshing, setRefreshing] = useState(false);
 
   // Fetch riders data
-  // Fetch all riders once
-const fetchRiders = async () => {
-  try {
-    const response = await fetch(BASE_URL + 'rider/get_all_rider.php');
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    const result = await response.json();
-    if (result.success) {
-      setRiderData(result.data); // cache riders
-      return result.data;
+  const fetchRiders = async () => {
+    try {
+      const response = await fetch(BASE_URL + 'rider/get_all_rider.php');
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const result = await response.json();
+      if (result.success) {
+        setRiderData(result.data);
+        return result.data;
+      }
+      throw new Error(result.message || 'Failed to fetch riders');
+    } catch (err) {
+      console.error('Error fetching riders:', err);
+      return [];
     }
-    throw new Error(result.message || 'Failed to fetch riders');
-  } catch (err) {
-    console.error('Error fetching riders:', err);
-    return [];
-  }
-};
+  };
 
+  // Calculate split amounts (59% Drop Fee, 41% GST Advance)
+  const calculateSplit = (totalBalance) => {
+    const dropFee = totalBalance * 0.59; // 59% for Drop Fee
+    const gstAdvance = totalBalance * 0.41; // 41% for GST Advance
+    return {
+      total: totalBalance,
+      dropFee: dropFee,
+      gstAdvance: gstAdvance
+    };
+  };
 
+  // Fetch all wallets first, then enrich with rider info
+  const fetchData = async (showLoading = true) => {
+    try {
+      if (showLoading) setLoading(true);
+      setError(null);
 
-// Fetch all wallets first, then enrich with rider info
-// Fetch all wallets first, then enrich with rider info
-const fetchData = async (showLoading = true) => {
-  try {
-    if (showLoading) setLoading(true);
-    setError(null);
+      // Fetch riders first
+      const riders = await fetchRiders();
+      
+      // Fetch all wallets
+      const walletResponse = await fetch(BASE_URL + 'wallets/get_all_wallets.php');
+      if (!walletResponse.ok) throw new Error(`HTTP error! status: ${walletResponse.status}`);
+      const walletResult = await walletResponse.json();
+      if (!walletResult.success) throw new Error(walletResult.message || 'Failed to fetch wallet data');
 
-    // Fetch riders first (always fetch fresh data to ensure consistency)
-    const riders = await fetchRiders();
-    
-    // Fetch all wallets
-    const walletResponse = await fetch(BASE_URL + 'wallets/get_all_wallets.php');
-    if (!walletResponse.ok) throw new Error(`HTTP error! status: ${walletResponse.status}`);
-    const walletResult = await walletResponse.json();
-    if (!walletResult.success) throw new Error(walletResult.message || 'Failed to fetch wallet data');
+      const wallets = walletResult.data;
 
-    const wallets = walletResult.data;
+      // Create a map for quick rider lookup
+      const riderMap = {};
+      riders.forEach(rider => {
+        riderMap[Number(rider.RiderId)] = {
+          name: rider.Name,
+          phone: rider.PhoneNumber
+        };
+      });
 
-    // Create a map for quick rider lookup
-    const riderMap = {};
-    riders.forEach(rider => {
-      riderMap[Number(rider.RiderId)] = {
-        name: rider.Name,
-        phone: rider.PhoneNumber
-      };
-    });
+      // Transform wallet data with rider info and split calculations
+      const transformedData = wallets.map((wallet, index) => {
+        const riderId = Number(wallet.RiderId);
+        const riderInfo = riderMap[riderId] || {
+          name: `Driver ${riderId}`,
+          phone: null
+        };
 
-    // Transform wallet data with rider info
-    const transformedData = wallets.map((wallet, index) => {
-      const riderId = Number(wallet.RiderId);
-      const riderInfo = riderMap[riderId] || {
-        name: `Rider ${riderId}`,
-        phone: null
-      };
+        const totalBalance = parseFloat(wallet.Balance) || 0;
+        const splitAmounts = calculateSplit(totalBalance);
 
-      const lastTransaction = wallet.last_transaction;
-      const transactionAmount = lastTransaction ? parseFloat(lastTransaction.Amount) || 0 : 0;
-      const transactionType = lastTransaction ? lastTransaction.TransactionType : null;
-      const transactionDate = lastTransaction ? lastTransaction.CreatedAt : wallet.UpdatedAt;
+        const lastTransaction = wallet.last_transaction;
+        const transactionAmount = lastTransaction ? parseFloat(lastTransaction.Amount) || 0 : 0;
+        const transactionType = lastTransaction ? lastTransaction.TransactionType : null;
+        const transactionDate = lastTransaction ? lastTransaction.CreatedAt : wallet.UpdatedAt;
 
-      return {
-        id: wallet.WalletId || index,
-        RiderId: riderId,
-        riderName: riderInfo.name,
-        riderPhone: riderInfo.phone,
-        balance: parseFloat(wallet.Balance) || 0,
-        lastTransactionAmount: transactionAmount,
-        lastTransactionType: transactionType,
-        updatedAt: wallet.UpdatedAt,
-        transactionDate,
-        rawData: wallet
-      };
-    });
+        return {
+          id: wallet.WalletId || index,
+          RiderId: riderId,
+          riderName: riderInfo.name,
+          riderPhone: riderInfo.phone,
+          totalBalance: totalBalance,
+          dropFeeBalance: splitAmounts.dropFee,
+          gstAdvanceBalance: splitAmounts.gstAdvance,
+          lastTransactionAmount: transactionAmount,
+          lastTransactionType: transactionType,
+          updatedAt: wallet.UpdatedAt,
+          transactionDate,
+          rawData: wallet
+        };
+      });
 
-    setData(transformedData);
+      setData(transformedData);
 
-  } catch (err) {
-    console.error('Error fetching data:', err);
-    setError(err.message || 'Something went wrong');
-  } finally {
-    setLoading(false);
-    setRefreshing(false);
-  }
-};
+    } catch (err) {
+      console.error('Error fetching data:', err);
+      setError(err.message || 'Something went wrong');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
 
-useEffect(() => {
-  fetchData();
-}, []);
-
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -189,8 +203,8 @@ useEffect(() => {
         <div className="mb-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Rider Wallets</h1>
-              <p className="text-gray-600 mt-2 text-sm md:text-base">Manage and monitor rider wallet balances</p>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Driver Wallets</h1>
+              <p className="text-gray-600 mt-2 text-sm md:text-base">Manage and monitor driver wallet balances (Drop Fee | GST Advance)</p>
             </div>
             <div className="flex items-center gap-3">
               <button 
@@ -211,7 +225,7 @@ useEffect(() => {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search by Rider ID, Name, or Phone..."
+                  placeholder="Search by Driver ID, Name, or Phone..."
                   className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -228,10 +242,11 @@ useEffect(() => {
               <table className="w-full">
                 <thead>
                   <tr className="bg-gray-50 border-b border-gray-200">
-                    <th className="text-left p-6 font-semibold text-gray-700 text-sm uppercase tracking-wider">Rider</th>
+                    <th className="text-left p-6 font-semibold text-gray-700 text-sm uppercase tracking-wider">Driver</th>
                     <th className="text-left p-6 font-semibold text-gray-700 text-sm uppercase tracking-wider">Last Activity</th>
-                    <th className="text-left p-6 font-semibold text-gray-700 text-sm uppercase tracking-wider">Wallet Balance</th>
-                    <th className="text-left p-6 font-semibold text-gray-700 text-sm uppercase tracking-wider">Last Transaction</th>
+                    <th className="text-left p-6 font-semibold text-gray-700 text-sm uppercase tracking-wider">Drop Fee</th>
+                    <th className="text-left p-6 font-semibold text-gray-700 text-sm uppercase tracking-wider">GST Advance</th>
+                    <th className="text-left p-6 font-semibold text-gray-700 text-sm uppercase tracking-wider">Total Balance</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -247,7 +262,7 @@ useEffect(() => {
                             <div className="text-sm text-gray-600 mt-1">
                               <div className="flex items-center gap-2">
                                 <Hash className="w-3 h-3" />
-                                <span>Rider ID: {item.RiderId}</span>
+                                <span>Driver ID: {item.RiderId}</span>
                               </div>
                               {item.riderPhone && (
                                 <div className="flex items-center gap-2 mt-1">
@@ -269,37 +284,38 @@ useEffect(() => {
                         </div>
                       </td>
                       <td className="p-6">
-                        <div className="flex items-center gap-4">
-                          <div className={`p-3 rounded-xl ${item.balance >= 100 ? 'bg-green-50 border-green-200' : item.balance > 0 ? 'bg-yellow-50 border-yellow-200' : 'bg-gray-50 border-gray-200'}`}>
-                            <Wallet className={`w-6 h-6 ${item.balance >= 100 ? 'text-green-600' : item.balance > 0 ? 'text-yellow-600' : 'text-gray-600'}`} />
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-lg ${item.dropFeeBalance >= 100 ? 'bg-green-50' : item.dropFeeBalance > 0 ? 'bg-yellow-50' : 'bg-gray-50'}`}>
+                            
                           </div>
                           <div>
-                            <div className={`font-bold text-2xl ${item.balance >= 100 ? 'text-green-700' : item.balance > 0 ? 'text-yellow-700' : 'text-gray-700'}`}>₹{item.balance.toFixed(2)}</div>
+                            <div className={`font-bold text-lg ${item.dropFeeBalance >= 100 ? 'text-green-700' : item.dropFeeBalance > 0 ? 'text-yellow-700' : 'text-gray-700'}`}>
+                              ₹{item.dropFeeBalance.toFixed(2)}
+                            </div>
                           </div>
                         </div>
                       </td>
                       <td className="p-6">
-                        {item.lastTransactionType ? (
-                          <div className="flex flex-col gap-1">
-                            <div className={`flex items-center gap-2 font-medium ${item.lastTransactionType === "RECHARGE" ? "text-green-700" : "text-blue-700"}`}>
-                              {item.lastTransactionType === "RECHARGE" ? (
-                                <>
-                                  <TrendingUp className="w-4 h-4" />
-                                  Recharge
-                                </>
-                              ) : (
-                                <>
-                                  <Receipt className="w-4 h-4" />
-                                  Refund
-                                </>
-                              )}
-                            </div>
-                            <div className="text-lg font-bold">₹{item.lastTransactionAmount.toFixed(2)}</div>
-                            <div className="text-xs text-gray-500">{formatDate(item.transactionDate)}</div>
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-lg ${item.gstAdvanceBalance >= 50 ? 'bg-purple-50' : item.gstAdvanceBalance > 0 ? 'bg-indigo-50' : 'bg-gray-50'}`}>
+                            
                           </div>
-                        ) : (
-                          <div className="text-gray-400 text-sm italic">No transaction history</div>
-                        )}
+                          <div>
+                            <div className={`font-bold text-lg ${item.gstAdvanceBalance >= 50 ? 'text-purple-700' : item.gstAdvanceBalance > 0 ? 'text-indigo-700' : 'text-gray-700'}`}>
+                              ₹{item.gstAdvanceBalance.toFixed(2)}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-6">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-lg bg-blue-50">
+                           
+                          </div>
+                          <div>
+                            <div className="font-bold text-lg text-blue-700">₹{item.totalBalance.toFixed(2)}</div>
+                          </div>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -322,7 +338,7 @@ useEffect(() => {
                   <div className="text-sm text-gray-600 mt-1">
                     <div className="flex items-center gap-2">
                       <Hash className="w-3 h-3" />
-                      <span>Rider ID: {item.RiderId}</span>
+                      <span>Driver ID: {item.RiderId}</span>
                     </div>
                     {item.riderPhone && (
                       <div className="flex items-center gap-2 mt-1">
@@ -333,24 +349,43 @@ useEffect(() => {
                   </div>
                 </div>
               </div>
-              <div className="mb-4">
-                <div className={`p-4 rounded-xl mb-3 ${item.balance >= 100 ? 'bg-green-50 border-green-200' : item.balance > 0 ? 'bg-yellow-50 border-yellow-200' : 'bg-gray-50 border-gray-200'}`}>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="text-sm text-gray-600 mb-1">Current Balance</div>
-                      <div className={`font-bold text-2xl ${item.balance >= 100 ? 'text-green-700' : item.balance > 0 ? 'text-yellow-700' : 'text-gray-700'}`}>₹{item.balance.toFixed(2)}</div>
-                    </div>
-                    <Wallet className={`w-8 h-8 ${item.balance >= 100 ? 'text-green-600' : item.balance > 0 ? 'text-yellow-600' : 'text-gray-600'}`} />
+
+              {/* Balance Breakdown */}
+              <div className="space-y-3 mb-4">
+                <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    
+                    <span className="text-sm font-medium text-gray-700">Drop Fee</span>
                   </div>
+                  <span className="font-bold text-green-700">₹{item.dropFeeBalance.toFixed(2)}</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <CalendarDays className="w-4 h-4" />
-                  <span>Updated: {timeAgo(item.updatedAt)}</span>
+                
+                <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    
+                    <span className="text-sm font-medium text-gray-700">GST Advance</span>
+                  </div>
+                  <span className="font-bold text-purple-700">₹{item.gstAdvanceBalance.toFixed(2)}</span>
                 </div>
+                
+                <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    
+                    <span className="text-sm font-medium text-gray-700">Total Balance</span>
+                  </div>
+                  <span className="font-bold text-blue-700">₹{item.totalBalance.toFixed(2)}</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 text-sm text-gray-600 pt-3 border-t border-gray-100">
+                <CalendarDays className="w-4 h-4" />
+                <span>Updated: {timeAgo(item.updatedAt)}</span>
               </div>
             </div>
           ))}
         </div>
+
+        
       </div>
     </div>
   );

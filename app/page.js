@@ -87,8 +87,8 @@ export default function Home() {
                   </svg>
                 </div>
               </div>
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">Trusted Riders</h3>
-              <div className="text-gray-600">Independent riders you can trust</div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">Trusted Drivers</h3>
+              <div className="text-gray-600">Independent drivers you can trust</div>
             </div>
           </div>
 

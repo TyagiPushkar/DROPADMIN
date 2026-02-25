@@ -15,6 +15,9 @@ export default function TransactionsDashboard() {
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [sortConfig, setSortConfig] = useState({ key: 'TransactionId', direction: 'desc' });
+  const [currentPage, setCurrentPage] = useState(1);
+const itemsPerPage = 10;
+
 
   // Filters - Changed userId to riderId
   const [filters, setFilters] = useState({
@@ -146,6 +149,12 @@ export default function TransactionsDashboard() {
     setFilteredTransactions(filtered);
   }, [transactions, filters, sortConfig]);
 
+  // Reset to page 1 when filters/search change
+useEffect(() => {
+  setCurrentPage(1);
+}, [filters, sortConfig]);
+
+
   // Handle sort
   const handleSort = (key) => {
     let direction = 'asc';
@@ -182,7 +191,7 @@ export default function TransactionsDashboard() {
 
   // Export to CSV - Updated headers
   const exportToCSV = () => {
-    const headers = ['Rider ID', 'Rider Name', 'Transaction ID', 'Amount', 'Type', 'Mode', 'Status', 'Description', 'Date'];
+    const headers = ['Driver ID', 'Driver Name', 'Transaction ID', 'Amount', 'Type', 'Mode', 'Status', 'Description', 'Date'];
     const csvData = filteredTransactions.map(t => [
       t.RiderId,
       t.Name,
@@ -239,6 +248,16 @@ export default function TransactionsDashboard() {
       typeBreakdown
     };
   }, [filteredTransactions]);
+ 
+ 
+  // 📄 Pagination Logic
+const totalPages = Math.max(1, Math.ceil(filteredTransactions.length / itemsPerPage));
+
+const paginatedTransactions = useMemo(() => {
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  return filteredTransactions.slice(startIndex, startIndex + itemsPerPage);
+}, [filteredTransactions, currentPage, itemsPerPage]);
+
 
   // Format date
   const formatDate = (dateString) => {
@@ -304,7 +323,7 @@ export default function TransactionsDashboard() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Transaction Dashboard</h1>
-              <p className="text-gray-600 mt-1">Monitor and manage all rider transactions</p> {/* Updated text */}
+              <p className="text-gray-600 mt-1">Monitor and manage all driver transactions</p> {/* Updated text */}
             </div>
             <div className="flex items-center space-x-3">
               <button
@@ -339,7 +358,7 @@ export default function TransactionsDashboard() {
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
                     type="text"
-                    placeholder="Search by Rider ID, Rider Name, Description..."
+                    placeholder="Search by Driver ID, Driver Name, Description..."
                     value={filters.searchQuery}
                     onChange={(e) => setFilters({...filters, searchQuery: e.target.value})}
                     className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-text"
@@ -369,13 +388,13 @@ export default function TransactionsDashboard() {
                 {/* Rider ID Filter - Updated */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Rider ID
+                    Driver ID
                   </label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                     <input
                       type="text"
-                      placeholder="Enter Rider ID"
+                      placeholder="Enter Driver ID"
                       value={filters.riderId} // Changed from userId
                       onChange={(e) => setFilters({...filters, riderId: e.target.value})} // Changed from userId
                       className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-text"
@@ -548,7 +567,7 @@ export default function TransactionsDashboard() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredTransactions.map((transaction) => (
+                  {paginatedTransactions.map((transaction) => (
                     <tr
                       key={transaction.TransactionId}
                       onClick={() => openTransactionModal(transaction)}
@@ -581,7 +600,7 @@ export default function TransactionsDashboard() {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {transaction.PaymentMode}
+                        {transaction.PaymentMode ? transaction.PaymentMode : "Cash"} 
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(transaction.Status)}`}>
@@ -603,6 +622,59 @@ export default function TransactionsDashboard() {
             </div>
           )}
         </div>
+        {/* Pagination Controls */}
+{!isLoading && !error && filteredTransactions.length > 0 && (
+  <div className="flex items-center justify-between px-6 py-4 border-t bg-white">
+    <p className="text-sm text-gray-600">
+      Showing {(currentPage - 1) * itemsPerPage + 1}–
+      {Math.min(currentPage * itemsPerPage, filteredTransactions.length)} of{" "}
+      {filteredTransactions.length} transactions
+    </p>
+
+    <div className="flex items-center gap-2">
+      {/* Prev Button */}
+      <button
+        onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+        disabled={currentPage === 1}
+        className="px-3 py-1 border rounded disabled:opacity-50 hover:bg-gray-100"
+      >
+        Prev
+      </button>
+
+      {/* Page Numbers (Smart Window) */}
+      {Array.from({ length: totalPages }, (_, i) => i + 1)
+        .slice(
+          Math.max(currentPage - 2, 0),
+          Math.min(currentPage + 1, totalPages)
+        )
+        .map((page) => (
+          <button
+            key={page}
+            onClick={() => setCurrentPage(page)}
+            className={`px-3 py-1 rounded ${
+              currentPage === page
+                ? "bg-blue-600 text-white"
+                : "border hover:bg-gray-100"
+            }`}
+          >
+            {page}
+          </button>
+        ))}
+
+      {/* Next Button */}
+      <button
+        onClick={() =>
+          setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+        }
+        disabled={currentPage === totalPages}
+        className="px-3 py-1 border rounded disabled:opacity-50 hover:bg-gray-100"
+      >
+        Next
+      </button>
+    </div>
+  </div>
+)}
+
       </main>
 
       {/* Transaction Details Modal - Updated for RiderId */}
@@ -682,8 +754,8 @@ export default function TransactionsDashboard() {
                   {/* Details Grid - Updated for Rider */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 cursor-default">
                     {[
-                      { label: 'Rider ID', value: selectedTransaction.RiderId },
-                      { label: 'Rider Name', value: selectedTransaction.Name || '-' },
+                      { label: 'Driver ID', value: selectedTransaction.RiderId },
+                      { label: 'Driver Name', value: selectedTransaction.Name || '-' },
                       { label: 'Transaction Type', value: selectedTransaction.TransactionType.replace(/_/g, ' ') },
                       { label: 'Payment Mode', value: selectedTransaction.PaymentMode },
                       { label: 'Payment Gateway', value: selectedTransaction.PaymentGateway || 'N/A' },
@@ -726,8 +798,8 @@ export default function TransactionsDashboard() {
                     <button
                       onClick={() => {
                         const text = `Transaction ID: ${selectedTransaction.TransactionId}
-Rider ID: ${selectedTransaction.RiderId}
-Rider Name: ${selectedTransaction.Name || '-'}
+Driver ID: ${selectedTransaction.RiderId}
+Driver Name: ${selectedTransaction.Name || '-'}
 Amount: ₹${selectedTransaction.Amount}
 Type: ${selectedTransaction.TransactionType}
 Status: ${selectedTransaction.Status}

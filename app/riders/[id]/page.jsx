@@ -306,7 +306,7 @@ export default function RiderDetailsPage() {
 
   const fetchWalletData = async (riderId) => {
     if (!riderId) return;
-    console.log('r',riderId);
+    
     
     try {
       setLoadingWallet(true);
@@ -430,17 +430,17 @@ export default function RiderDetailsPage() {
               <User className="w-8 h-8 text-gray-400" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Rider not found
+              Driver not found
             </h3>
             <p className="text-gray-600 mb-6">
-              The requested rider details could not be loaded.
+              The requested driver details could not be loaded.
             </p>
             <button
               onClick={() => router.back()}
               className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
-              Back to Riders
+              Back to Drivers
             </button>
           </div>
         </div>
@@ -538,7 +538,7 @@ export default function RiderDetailsPage() {
                   </h1>
                   <div className="flex items-center gap-3 mt-1">
                     <span className="text-sm text-gray-500">
-                      Rider ID: #{rider.RiderId}
+                      Driver ID: #{rider.RiderId}
                     </span>
                     <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded">
                       Joined{" "}
@@ -575,7 +575,7 @@ export default function RiderDetailsPage() {
                         ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                         : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200"
                     }`}
-                    title="Approve Rider"
+                    title="Approve Driver"
                   >
                     {updating ? (
                       <div className="w-4 h-4 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
@@ -596,7 +596,7 @@ export default function RiderDetailsPage() {
                         ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                         : "bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200"
                     }`}
-                    title="Reject Rider"
+                    title="Reject Driver"
                   >
                     {updating ? (
                       <div className="w-4 h-4 border-2 border-rose-600 border-t-transparent rounded-full animate-spin"></div>

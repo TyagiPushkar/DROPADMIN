@@ -1,52 +1,97 @@
 "use client"
 
-import { Clock, Truck, MapPin } from "lucide-react"
+import { useEffect, useState } from "react"
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts"
+import { BASE_URL } from "@/app/page"
 
-export default function DeliveryStats() {
-  const stats = [
-    {
-      title: "Avg Delivery Time",
-      value: "32 min",
-      subtitle: "-5% from yesterday",
-      icon: Clock,
-      iconColor: "text-blue-500",
-    },
-    {
-      title: "Active Drivers",
-      value: "47",
-      subtitle: "+3 from last hour",
-      icon: Truck,
-      iconColor: "text-green-500",
-    },
-    {
-      title: "Coverage Areas",
-      value: "12",
-      subtitle: "All operational",
-      icon: MapPin,
-      iconColor: "text-purple-500",
-    },
-  ]
+const COLORS = ["#16a34a", "#dc2626", "#2563eb"]
+
+export default function RestaurantStatusDistribution() {
+  const [data, setData] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    fetchRestaurants()
+  }, [])
+
+  const fetchRestaurants = async () => {
+    try {
+      
+
+      const response = await fetch(
+        `${BASE_URL}restaurants/get_restaurants.php`
+      )
+
+      if (!response.ok) throw new Error("Failed to fetch restaurants")
+
+      const result = await response.json()
+
+      if (result.success && Array.isArray(result.data)) {
+        processData(result.data)
+      } else {
+        throw new Error("Invalid data format")
+      }
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const processData = (restaurants) => {
+    let active = 0
+    let inactive = 0
+    let verified = 0
+
+    restaurants.forEach((r) => {
+      if (r.status === "active") active++
+      else inactive++
+
+      if (r.is_verified === 1) verified++
+    })
+
+    setData([
+      { name: "Active", value: active },
+      { name: "Inactive", value: inactive },
+      { name: "Verified", value: verified },
+    ])
+  }
+
+  if (loading) return <div className="p-4">Loading...</div>
+  if (error) return <div className="p-4 text-red-500">{error}</div>
 
   return (
-    <div className="rounded-lg  bg-white p-4 shadow-lg">
-      <h2 className="text-lg font-semibold text-gray-800">Delivery Stats</h2>
-      <p className="text-sm text-gray-500 mb-4">Key delivery performance metrics</p>
+    <div className="bg-white rounded-lg p-4 shadow-lg">
+      <h2 className="text-lg font-semibold mb-4">
+        Restaurant Status Distribution
+      </h2>
 
-      <div className="space-y-4">
-        {stats.map((stat) => {
-          const Icon = stat.icon
-          return (
-            <div key={stat.title} className="flex items-center space-x-3">
-              <Icon className={`h-6 w-6 ${stat.iconColor}`} />
-              <div>
-                <p className="text-sm font-medium text-gray-600">{stat.title}</p>
-                <p className="text-lg font-semibold text-gray-900">{stat.value}</p>
-                <p className="text-xs text-gray-500">{stat.subtitle}</p>
-              </div>
-            </div>
-          )
-        })}
-      </div>
+      <ResponsiveContainer width="100%" height={280}>
+        <PieChart>
+          <Pie
+            data={data}
+            dataKey="value"
+            nameKey="name"
+            innerRadius={60}
+            outerRadius={90}
+            label
+          >
+            {data.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            ))}
+          </Pie>
+          <Tooltip />
+          <Legend />
+        </PieChart>
+      </ResponsiveContainer>
     </div>
   )
 }

@@ -391,9 +391,9 @@ export default function Pincodes() {
                     <th className="text-left p-4 font-semibold text-gray-700 text-sm uppercase tracking-wider">
                       Pricing
                     </th>
-                    <th className="text-left p-4 font-semibold text-gray-700 text-sm uppercase tracking-wider">
+                    {/* <th className="text-left p-4 font-semibold text-gray-700 text-sm uppercase tracking-wider">
                       Night Charges
-                    </th>
+                    </th> */}
                     <th className="text-left p-4 font-semibold text-gray-700 text-sm uppercase tracking-wider">
                       Status
                     </th>
@@ -456,7 +456,7 @@ export default function Pincodes() {
                       </td>
 
                       {/* Night Charges */}
-                      <td className="p-4">
+                      {/* <td className="p-4">
                         <div className="space-y-2">
                           <div className="flex items-center gap-2">
                             <Moon className="w-4 h-4 text-purple-500" />
@@ -472,7 +472,7 @@ export default function Pincodes() {
                             {pincode.night_charge_value}
                           </div>
                         </div>
-                      </td>
+                      </td> */}
 
                       {/* Status */}
                       <td className="p-4">

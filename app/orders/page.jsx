@@ -56,7 +56,7 @@ export default function OrdersPage() {
             className="ml-2 w-full bg-transparent outline-none text-sm"
           />
         </div>
-        <OrderStatus />
+        {/* <OrderStatus /> */}
         <div className="flex items-center gap-2">
           <select
             value={filter}

@@ -42,13 +42,13 @@ export default function About() {
               <div className="space-y-6 text-gray-700 text-lg leading-relaxed">
                 <div>
                   DROP is a technology-driven delivery platform built to bridge the gap between customers, restaurants,
-                  and independent riders. Our goal is to simplify delivery services while creating opportunities for local
-                  businesses and riders to thrive.
+                  and independent drivers. Our goal is to simplify delivery services while creating opportunities for local
+                  businesses and drivers to thrive.
                 </div>
                 <div>
                   We believe delivery should be fast, transparent, and accessible to everyone. By leveraging smart
                   technology, DROP empowers customers to order with confidence, restaurants to expand their business,
-                  and riders to work independently with flexibility.
+                  and drivers to work independently with flexibility.
                 </div>
               </div>
             </div>

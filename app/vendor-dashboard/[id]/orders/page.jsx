@@ -2,7 +2,7 @@
 
 import Cookies from "js-cookie"
 import { useEffect, useState } from "react"
-import { Search, Filter, RefreshCw, Clock, CheckCircle, XCircle, Truck, AlertCircle, X, MoreVertical } from "lucide-react"
+import { Search, Filter, RefreshCw, Clock, CheckCircle, XCircle, Truck, AlertCircle, X, MoreVertical, ChefHat, MapPin, Home, Package, UserCheck, Bike, Store } from "lucide-react"
 import Sidebar from "../components/sidebar"
 import Navbar from "../components/navbar"
 import { OrderModalProvider } from "../components/orderModalProvider"
@@ -225,31 +225,54 @@ export default function OrdersPage() {
     })
   }
 
+  // Enhanced status icon mapping
   const getStatusIcon = (status) => {
     const statusLower = status?.toLowerCase()
     switch (statusLower) {
-      case 'pending': return Clock
-      case 'confirmed': return CheckCircle
-      case 'preparing': return Clock
-      case 'ready': return CheckCircle
-      case 'completed': return CheckCircle
-      case 'cancelled': return XCircle
+      case 'placed': return Clock
+      case 'restaurant_accepted': return Store
+      case 'driver_assigned': return UserCheck
+      case 'reach_restaurant': return MapPin
+      case 'preparing': return ChefHat
+      case 'out for delivery': return Bike
+      case 'reached_location': return Home
       case 'delivered': return Truck
+      case 'cancelled': return XCircle
       default: return AlertCircle
     }
   }
 
+  // Enhanced status color mapping
   const getStatusColor = (status) => {
     const statusLower = status?.toLowerCase()
     switch (statusLower) {
-      case 'pending': return 'bg-amber-100 text-amber-800'
-      case 'confirmed': return 'bg-blue-100 text-blue-800'
-      case 'preparing': return 'bg-purple-100 text-purple-800'
-      case 'ready': return 'bg-green-100 text-green-800'
-      case 'completed': return 'bg-gray-100 text-gray-800'
-      case 'cancelled': return 'bg-red-100 text-red-800'
-      case 'delivered': return 'bg-emerald-100 text-emerald-800'
-      default: return 'bg-gray-100 text-gray-800'
+      case 'placed': return 'bg-blue-50 text-blue-700 border-blue-200'
+      case 'restaurant_accepted': return 'bg-indigo-50 text-indigo-700 border-indigo-200'
+      case 'driver_assigned': return 'bg-purple-50 text-purple-700 border-purple-200'
+      case 'reach_restaurant': return 'bg-cyan-50 text-cyan-700 border-cyan-200'
+      case 'preparing': return 'bg-yellow-50 text-yellow-700 border-yellow-200'
+      case 'out for delivery': return 'bg-orange-50 text-orange-700 border-orange-200'
+      case 'reached_location': return 'bg-teal-50 text-teal-700 border-teal-200'
+      case 'delivered': return 'bg-green-50 text-green-700 border-green-200'
+      case 'cancelled': return 'bg-red-50 text-red-700 border-red-200'
+      default: return 'bg-gray-50 text-gray-700 border-gray-200'
+    }
+  }
+
+  // Get status display name
+  const getStatusDisplay = (status) => {
+    const statusLower = status?.toLowerCase()
+    switch (statusLower) {
+      case 'placed': return 'Placed'
+      case 'restaurant_accepted': return 'Accepted'
+      case 'driver_assigned': return 'Driver Assigned'
+      case 'reach_restaurant': return 'Reach Restaurant'
+      case 'preparing': return 'Preparing'
+      case 'out for delivery': return 'Out for Delivery'
+      case 'reached_location': return 'Reached Location'
+      case 'delivered': return 'Delivered'
+      case 'cancelled': return 'Cancelled'
+      default: return status || '—'
     }
   }
 
@@ -273,20 +296,52 @@ export default function OrdersPage() {
     return `₹${parseFloat(amount).toLocaleString('en-IN')}`
   }
 
-  // Apply both search and status filters
-  const filteredOrders = searchOrders(orders, searchTerm).filter(order => {
-    const matchesStatus = statusFilter === "all" || 
-      (order.order_status?.toLowerCase() === statusFilter.toLowerCase())
-    return matchesStatus
-  })
+  // Define all possible statuses from your DB
+  const allStatuses = [
+    "Placed",
+    "Restaurant_Accepted",
+    "Driver_Assigned",
+    "Reach_restaurant",
+    "Preparing",
+    "Out for Delivery",
+    "Reached_Location",
+    "Delivered",
+    "Cancelled"
+  ]
 
+  // Calculate status counts
   const statusCounts = {
     all: orders.length,
-    pending: orders.filter(o => o.order_status?.toLowerCase() === 'placed').length,
-    preparing: orders.filter(o => o.order_status?.toLowerCase() === 'preparing').length,
-    Transit: orders.filter(o => o.order_status?.toLowerCase() === 'rout for delivery').length,
-    completed: orders.filter(o => o.order_status?.toLowerCase() === 'delivered').length,
+    ...allStatuses.reduce((acc, status) => {
+      acc[status] = orders.filter(o => 
+        o.order_status?.toLowerCase() === status.toLowerCase()
+      ).length
+      return acc
+    }, {})
   }
+
+  // Group counts by status category for better visualization
+  const pendingOrders = allStatuses
+    .filter(s => !['Delivered', 'Cancelled'].includes(s))
+    .reduce((sum, status) => sum + (statusCounts[status] || 0), 0)
+
+  const completedOrders = statusCounts['Delivered'] || 0
+  const cancelledOrders = statusCounts['Cancelled'] || 0
+
+  // Apply both search and status filters
+  const filteredOrders = searchOrders(orders, searchTerm).filter(order => {
+    if (statusFilter === "all") return true
+    if (statusFilter === "pending") {
+      return !['delivered', 'cancelled'].includes(order.order_status?.toLowerCase())
+    }
+    if (statusFilter === "completed") {
+      return order.order_status?.toLowerCase() === 'delivered'
+    }
+    if (statusFilter === "cancelled") {
+      return order.order_status?.toLowerCase() === 'cancelled'
+    }
+    return order.order_status?.toLowerCase() === statusFilter.toLowerCase()
+  })
 
   // Status update function
   const handleStatusUpdate = async (newStatus) => {
@@ -305,15 +360,19 @@ export default function OrdersPage() {
       // Update the selectedOrder in state
       setSelectedOrder(updatedOrder);
       
-      // If you have an orders list, update that too
-      // updateOrdersList(updatedOrder);
+      // Update orders list
+      setOrders(prevOrders => 
+        prevOrders.map(order => 
+          (order.order_id === orderId || order.id === orderId) 
+            ? { ...order, order_status: newStatus } 
+            : order
+        )
+      );
       
-      // Optional: Show success message
       console.log(`Order status updated to ${newStatus}`);
       
     } catch (error) {
       console.error('Failed to update order status:', error);
-      // Optional: Show error message to user
     }
   };
 
@@ -340,7 +399,7 @@ export default function OrdersPage() {
           <Navbar setOpen={setOpen} />
 
           {/* Header Section */}
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8 mx-8 mt-8">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6 mx-6 mt-6">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">
                 Order Management
@@ -362,7 +421,7 @@ export default function OrdersPage() {
             <button
               onClick={handleRefresh}
               disabled={refreshing}
-              className="flex cursor-pointer items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+              className="flex cursor-pointer items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 shadow-sm"
             >
               <RefreshCw
                 size={18}
@@ -372,28 +431,138 @@ export default function OrdersPage() {
             </button>
           </div>
 
-          {/* Stats Overview */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6 mx-8">
-            {Object.entries(statusCounts).map(([status, count]) => (
-              <div
-                key={status}
-                onClick={() => setStatusFilter(status)}
-                className={`bg-white p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                  statusFilter === status
-                    ? "border-blue-500 shadow-md"
-                    : "border-gray-200 hover:border-gray-300"
-                }`}
-              >
-                <div className="text-2xl font-bold text-gray-900">{count}</div>
-                <div className="text-sm font-medium text-gray-600 capitalize">
-                  {status === "all" ? "All Orders" : status}
+          {/* Improved Stats Overview - First Row: Summary Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4 mx-6">
+            {/* All Orders Card */}
+            <div
+              onClick={() => setStatusFilter("all")}
+              className={`bg-white rounded-xl p-5 border-2 cursor-pointer transition-all hover:shadow-lg ${
+                statusFilter === "all"
+                  ? "border-blue-500 shadow-md bg-blue-50/50"
+                  : "border-gray-200 hover:border-gray-300"
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 mb-1">Total Orders</p>
+                  <p className="text-3xl font-bold text-gray-900">{statusCounts.all}</p>
+                </div>
+                <div className={`p-3 rounded-full ${statusFilter === "all" ? "bg-blue-500" : "bg-gray-100"}`}>
+                  <Package className={`w-6 h-6 ${statusFilter === "all" ? "text-white" : "text-gray-600"}`} />
                 </div>
               </div>
-            ))}
+              <div className="mt-2 text-xs text-gray-500">All orders across all statuses</div>
+            </div>
+
+            {/* Active Orders Card */}
+            <div
+              onClick={() => setStatusFilter("pending")}
+              className={`bg-white rounded-xl p-5 border-2 cursor-pointer transition-all hover:shadow-lg ${
+                statusFilter === "pending"
+                  ? "border-orange-500 shadow-md bg-orange-50/50"
+                  : "border-gray-200 hover:border-gray-300"
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 mb-1">Active Orders</p>
+                  <p className="text-3xl font-bold text-orange-600">{pendingOrders}</p>
+                </div>
+                <div className={`p-3 rounded-full ${statusFilter === "pending" ? "bg-orange-500" : "bg-orange-100"}`}>
+                  <Clock className={`w-6 h-6 ${statusFilter === "pending" ? "text-white" : "text-orange-600"}`} />
+                </div>
+              </div>
+              <div className="mt-2 text-xs text-gray-500">Orders in progress</div>
+            </div>
+
+            {/* Completed Orders Card */}
+            <div
+              onClick={() => setStatusFilter("completed")}
+              className={`bg-white rounded-xl p-5 border-2 cursor-pointer transition-all hover:shadow-lg ${
+                statusFilter === "completed"
+                  ? "border-green-500 shadow-md bg-green-50/50"
+                  : "border-gray-200 hover:border-gray-300"
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 mb-1">Delivered</p>
+                  <p className="text-3xl font-bold text-green-600">{completedOrders}</p>
+                </div>
+                <div className={`p-3 rounded-full ${statusFilter === "completed" ? "bg-green-500" : "bg-green-100"}`}>
+                  <CheckCircle className={`w-6 h-6 ${statusFilter === "completed" ? "text-white" : "text-green-600"}`} />
+                </div>
+              </div>
+              <div className="mt-2 text-xs text-gray-500">Successfully delivered</div>
+            </div>
+
+            {/* Cancelled Orders Card */}
+            <div
+              onClick={() => setStatusFilter("cancelled")}
+              className={`bg-white rounded-xl p-5 border-2 cursor-pointer transition-all hover:shadow-lg ${
+                statusFilter === "cancelled"
+                  ? "border-red-500 shadow-md bg-red-50/50"
+                  : "border-gray-200 hover:border-gray-300"
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 mb-1">Cancelled</p>
+                  <p className="text-3xl font-bold text-red-600">{cancelledOrders}</p>
+                </div>
+                <div className={`p-3 rounded-full ${statusFilter === "cancelled" ? "bg-red-500" : "bg-red-100"}`}>
+                  <XCircle className={`w-6 h-6 ${statusFilter === "cancelled" ? "text-white" : "text-red-600"}`} />
+                </div>
+              </div>
+              <div className="mt-2 text-xs text-gray-500">Orders that were cancelled</div>
+            </div>
+          </div>
+
+          {/* Second Row: Detailed Status Cards - Horizontal Scrollable */}
+          <div className="mb-6 mx-6">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold text-gray-700">Order Status Breakdown</h3>
+              <span className="text-xs text-gray-500">Scroll for more →</span>
+            </div>
+            <div className="overflow-x-auto pb-2 -mb-2">
+              <div className="flex gap-3 min-w-max">
+                {allStatuses.map((status) => {
+                  const count = statusCounts[status] || 0
+                  const StatusIcon = getStatusIcon(status)
+                  const colorClass = getStatusColor(status)
+                  const isActive = statusFilter === status
+                  
+                  return (
+                    <div
+                      key={status}
+                      onClick={() => setStatusFilter(status)}
+                      className={`bg-white rounded-xl p-4 border-2 cursor-pointer transition-all hover:shadow-md w-40 ${
+                        isActive
+                          ? "border-blue-500 shadow-md"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <div className={`p-2 rounded-lg ${colorClass.split(' ')[0]}`}>
+                          <StatusIcon size={18} className={colorClass.split(' ')[1]} />
+                        </div>
+                        <span className="text-xl font-bold text-gray-900">{count}</span>
+                      </div>
+                      <div className="text-sm font-medium text-gray-700">
+                        {getStatusDisplay(status)}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        {count === 1 ? 'order' : 'orders'}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
           </div>
 
           {/* Search and Filter Bar */}
-          <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6 mx-8">
+          <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6 mx-6 shadow-sm">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-1 relative">
                 <Search
@@ -422,13 +591,17 @@ export default function OrdersPage() {
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="px-4 py-3 border cursor-pointer border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-4 py-3 border cursor-pointer border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                 >
                   <option value="all">All Status</option>
-                  <option value="pending">Pending</option>
-                  <option value="preparing">Preparing</option>
-                  <option value="ready">Ready</option>
-                  <option value="completed">Completed</option>
+                  <option value="pending">Active Orders</option>
+                  {allStatuses.map(status => (
+                    <option key={status} value={status}>
+                      {getStatusDisplay(status)}
+                    </option>
+                  ))}
+                  <option value="completed">Delivered</option>
+                  <option value="cancelled">Cancelled</option>
                 </select>
               </div>
             </div>
@@ -453,11 +626,14 @@ export default function OrdersPage() {
                 )}
 
                 {statusFilter !== "all" && (
-                  <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded-full flex items-center gap-1">
-                    Status: {statusFilter}
+                  <span className={`px-2 py-1 rounded-full flex items-center gap-1 ${getStatusColor(statusFilter)}`}>
+                    Status: {statusFilter === "pending" ? "Active Orders" : 
+                            statusFilter === "completed" ? "Delivered" :
+                            statusFilter === "cancelled" ? "Cancelled" :
+                            getStatusDisplay(statusFilter)}
                     <button
                       onClick={() => setStatusFilter("all")}
-                      className="hover:text-gray-900"
+                      className="hover:opacity-70"
                     >
                       <X size={14} />
                     </button>
@@ -488,7 +664,7 @@ export default function OrdersPage() {
 
           {/* Error State */}
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center mx-8">
+            <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center mx-6">
               <AlertCircle className="mx-auto text-red-500 mb-3" size={32} />
               <h3 className="text-lg font-semibold text-red-800 mb-2">
                 Something went wrong
@@ -499,7 +675,7 @@ export default function OrdersPage() {
 
           {/* Empty State */}
           {!loading && filteredOrders.length === 0 && (
-            <div className="bg-white rounded-xl border border-gray-200 p-12 text-center mx-8">
+            <div className="bg-white rounded-xl border border-gray-200 p-12 text-center mx-6">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <AlertCircle className="text-gray-400" size={32} />
               </div>
@@ -527,7 +703,7 @@ export default function OrdersPage() {
 
           {/* Orders Table */}
           {!loading && filteredOrders.length > 0 && (
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mx-8 mb-8">
+            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mx-6 mb-8 shadow-sm">
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
@@ -604,7 +780,7 @@ export default function OrdersPage() {
                               className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.order_status)}`}
                             >
                               <StatusIcon size={14} />
-                              {order.order_status ?? order.status ?? "—"}
+                              {getStatusDisplay(order.order_status)}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
@@ -719,9 +895,7 @@ export default function OrdersPage() {
                             <div
                               className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(selectedOrder.order_status)}`}
                             >
-                              {selectedOrder.order_status ??
-                                selectedOrder.status ??
-                                "—"}
+                              {getStatusDisplay(selectedOrder.order_status)}
                             </div>
                           </div>
                           <div className="flex justify-between">
@@ -756,26 +930,20 @@ export default function OrdersPage() {
                               Update Order Status
                             </label>
                             <div className="flex flex-wrap gap-2">
-                              {[
-                                
-                                "Restaurant_Accepted",
-                                "Preparing",
-
-                                "Cancelled",
-                              ].map((status) => (
+                              {allStatuses.map((status) => (
                                 <button
                                   key={status}
                                   onClick={() => handleStatusUpdate(status)}
                                   disabled={
-                                    selectedOrder.order_status === status
+                                    selectedOrder.order_status?.toLowerCase() === status.toLowerCase()
                                   }
                                   className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                    selectedOrder.order_status === status
-                                      ? "bg-blue-600 text-white cursor-not-allowed"
+                                    selectedOrder.order_status?.toLowerCase() === status.toLowerCase()
+                                      ? `${getStatusColor(status)} cursor-not-allowed`
                                       : "bg-gray-200 text-gray-700 hover:bg-gray-300 cursor-pointer"
                                   }`}
                                 >
-                                  {status}
+                                  {getStatusDisplay(status)}
                                 </button>
                               ))}
                             </div>

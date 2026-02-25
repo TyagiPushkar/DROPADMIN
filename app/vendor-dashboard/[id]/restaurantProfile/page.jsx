@@ -55,12 +55,14 @@ export default function RestaurantProfile() {
   const [selectedFiles, setSelectedFiles] = useState({
     gstProof: null,
     fssaiProof: null,
-    bankProof: null
+    bankProof: null,
+    agreementProof: null
   });
   const [filePreviews, setFilePreviews] = useState({
     gstProof: null,
     fssaiProof: null,
-    bankProof: null
+    bankProof: null,
+    agreementProof: null
   });
 
   // Fetch user from cookies
@@ -86,68 +88,72 @@ export default function RestaurantProfile() {
     }
   }, []);
 
-  // Fetch restaurant data
-  useEffect(() => {
-    if (!user?.Email) {
-      if (user) {
-        console.warn("[RestaurantProfile] User email missing");
-        setLoading(false);
-      }
-      return;
+  
+useEffect(() => {
+  if (!user?.Email) {
+    if (user) {
+      console.warn("[RestaurantProfile] User email missing");
+      setLoading(false);
     }
+    return;
+  }
 
-    async function fetchRestaurant() {
-      try {
-        setLoading(true);
-        const res = await fetch(`${RESTAURANT_API}?t=${refreshKey}`);
-        const json = await res.json();
+  async function fetchRestaurant() {
+    try {
+      setLoading(true);
+      const res = await fetch(`${RESTAURANT_API}?t=${refreshKey}`);
+      const json = await res.json();
 
-        if (!json.success || !Array.isArray(json.data)) {
-          setError("Restaurant API error");
-          return;
-        }
-
-        let matched = null;
-        for (const r of json.data) {
-          if (r.email && r.email.toLowerCase() === user.Email.toLowerCase()) {
-            matched = r;
-            break;
-          }
-        }
-
-        if (!matched) {
-          setError("No restaurant linked to this account");
-          return;
-        }
-
-        // Parse arrays if they exist
-        if (matched.cuisines && typeof matched.cuisines === 'string') {
-          try {
-            matched.cuisines = JSON.parse(matched.cuisines);
-          } catch (e) {
-            matched.cuisines = [];
-          }
-        }
-        if (matched.days_open && typeof matched.days_open === 'string') {
-          try {
-            matched.days_open = JSON.parse(matched.days_open);
-          } catch (e) {
-            matched.days_open = [];
-          }
-        }
-
-        setRestaurant(matched);
-        setOriginalRestaurant(matched);
-        setError(null);
-      } catch (err) {
-        setError("Failed to load restaurant profile");
-      } finally {
-        setLoading(false);
+      if (!json.success || !Array.isArray(json.data)) {
+        setError("Restaurant API error");
+        return;
       }
-    }
 
-    fetchRestaurant();
-  }, [user, refreshKey]);
+      let matched = null;
+      for (const r of json.data) {
+        if (r.email && r.email.toLowerCase() === user.Email.toLowerCase()) {
+          matched = r;
+          break;
+        }
+      }
+
+      if (!matched) {
+        setError("No restaurant linked to this account");
+        return;
+      }
+
+      // Parse arrays if they exist
+      if (matched.cuisines && typeof matched.cuisines === 'string') {
+        try {
+          matched.cuisines = JSON.parse(matched.cuisines);
+        } catch (e) {
+          matched.cuisines = [];
+        }
+      }
+      if (matched.days_open && typeof matched.days_open === 'string') {
+        try {
+          matched.days_open = JSON.parse(matched.days_open);
+        } catch (e) {
+          matched.days_open = [];
+        }
+      }
+
+      // Ensure file URLs are complete
+      console.log("Fetched restaurant data:", matched); // Debug log
+
+      setRestaurant(matched);
+      setOriginalRestaurant(matched);
+      setError(null);
+    } catch (err) {
+      console.error("Fetch error:", err);
+      setError("Failed to load restaurant profile");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  fetchRestaurant();
+}, [user, refreshKey]);
 
   // Initialize edit form when restaurant data is available
   useEffect(() => {
@@ -179,6 +185,7 @@ export default function RestaurantProfile() {
         gst_proof: restaurant.gst_proof || "",
         fssai_proof: restaurant.fssai_proof || "",
         bank_proof: restaurant.bank_proof || "",
+        agreement_proof: restaurant.agreement_proof || "",
         cuisines: Array.isArray(restaurant.cuisines) ? restaurant.cuisines : [],
         days_open: Array.isArray(restaurant.days_open) ? restaurant.days_open : [],
         type: restaurant.type || "",
@@ -223,6 +230,7 @@ export default function RestaurantProfile() {
         gst_proof: originalRestaurant.gst_proof || "",
         fssai_proof: originalRestaurant.fssai_proof || "",
         bank_proof: originalRestaurant.bank_proof || "",
+        agreement_proof: originalRestaurant.agreement_proof || "",
         cuisines: Array.isArray(originalRestaurant.cuisines) ? originalRestaurant.cuisines : [],
         days_open: Array.isArray(originalRestaurant.days_open) ? originalRestaurant.days_open : [],
         type: originalRestaurant.type || "",
@@ -233,12 +241,14 @@ export default function RestaurantProfile() {
     setSelectedFiles({
       gstProof: null,
       fssaiProof: null,
-      bankProof: null
+      bankProof: null,
+      agreementProof: null
     });
     setFilePreviews({
       gstProof: null,
       fssaiProof: null,
-      bankProof: null
+      bankProof: null,
+      agreementProof: null
     });
   };
 
@@ -306,133 +316,159 @@ export default function RestaurantProfile() {
     }));
   };
 
-  // Save restaurant data
-  const handleSave = async () => {
-    if (!restaurant?.restaurant_id) return;
   
-    // Basic validation
-    if (!editForm.restaurant_name?.trim()) {
-      setSaveError("Restaurant name is required");
-      return;
+const handleSave = async () => {
+  if (!restaurant?.restaurant_id) return;
+
+  // Basic validation
+  if (!editForm.restaurant_name?.trim()) {
+    setSaveError("Restaurant name is required");
+    return;
+  }
+  if (!editForm.email?.trim()) {
+    setSaveError("Email is required");
+    return;
+  }
+  if (!editForm.phone?.trim()) {
+    setSaveError("Phone number is required");
+    return;
+  }
+
+  setSaveLoading(true);
+  setSaveError(null);
+  setSaveSuccess(false);
+
+  try {
+    // Prepare data
+    const dataToSend = {
+      ...editForm,
+      restaurant_id: restaurant.restaurant_id,
+      delivery: editForm.delivery ? 1 : 0,
+      cuisines: Array.isArray(editForm.cuisines) ? editForm.cuisines : [],
+      days_open: Array.isArray(editForm.days_open) ? editForm.days_open : [],
+      avg_cost: editForm.avg_cost?.trim() ? parseFloat(editForm.avg_cost) : null,
+      avg_cost_for_two: editForm.avg_cost_for_two?.trim() ? parseFloat(editForm.avg_cost_for_two) : null
+    };
+
+    // Detect if any file is selected
+    const hasFiles = Object.values(selectedFiles).some(file => file !== null);
+
+    let response;
+
+    if (hasFiles) {
+      // Use FormData when files are present
+      const formData = new FormData();
+      formData.append('restaurant_data', JSON.stringify(dataToSend));
+
+      Object.entries(selectedFiles).forEach(([key, file]) => {
+        if (file) formData.append(key, file);
+      });
+
+      response = await fetch(UPDATE_API, {
+        method: 'POST',
+        body: formData
+      });
+
+    } else {
+      // Send JSON if no files
+      response = await fetch(UPDATE_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dataToSend)
+      });
     }
-    if (!editForm.email?.trim()) {
-      setSaveError("Email is required");
-      return;
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`HTTP error! Status: ${response.status}. Body: ${text}`);
     }
-    if (!editForm.phone?.trim()) {
-      setSaveError("Phone number is required");
-      return;
-    }
-  
-    setSaveLoading(true);
-    setSaveError(null);
-    setSaveSuccess(false);
-  
-    try {
-      // Prepare data
-      const dataToSend = {
-        ...editForm,
-        restaurant_id: restaurant.restaurant_id,
-        delivery: editForm.delivery ? 1 : 0,
-        cuisines: Array.isArray(editForm.cuisines) ? editForm.cuisines : [],
-        days_open: Array.isArray(editForm.days_open) ? editForm.days_open : [],
-        avg_cost: editForm.avg_cost?.trim() ? parseFloat(editForm.avg_cost) : null,
-        avg_cost_for_two: editForm.avg_cost_for_two?.trim() ? parseFloat(editForm.avg_cost_for_two) : null
+
+    const result = await response.json();
+
+    if (result.success) {
+      // IMPORTANT FIX: Properly merge the returned restaurant data
+      let updatedRestaurant = {
+        ...restaurant, // Start with current restaurant data
+        ...editForm,   // Override with edited form data
       };
-      
-  
-      // Detect if any file is selected
-      const hasFiles = Object.values(selectedFiles).some(file => file !== null);
-  
-      let response;
-  
-      if (hasFiles) {
-        // Use FormData when files are present
-        const formData = new FormData();
-        formData.append('restaurant_data', JSON.stringify(dataToSend));
-  
-        Object.entries(selectedFiles).forEach(([key, file]) => {
-          if (file) formData.append(key, file);
-        });
-  
-        // Debug: check FormData keys
-        // for (const pair of formData.entries()) console.log(pair[0], pair[1]);
-  
-        response = await fetch(UPDATE_API, {
-          method: 'POST',
-          body: formData
-        });
-  
-      } else {
-        // Send JSON if no files
-        response = await fetch(UPDATE_API, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(dataToSend)
-        });
-      }
-  
-      if (!response.ok) {
-        const text = await response.text(); // get response body for debugging
-        throw new Error(`HTTP error! Status: ${response.status}. Body: ${text}`);
-      }
-  
-      const result = await response.json();
-  
-      if (result.success) {
-        let updatedRestaurant = {
-          ...restaurant,
-          ...editForm,
-          ...result.restaurant,
-          updated_at: new Date().toISOString()
+
+      // If the API returned updated restaurant data, merge it
+      if (result.restaurant) {
+        updatedRestaurant = {
+          ...updatedRestaurant,
+          ...result.restaurant
         };
-      
-       
-        if (typeof updatedRestaurant.cuisines === "string") {
-          try {
-            updatedRestaurant.cuisines = JSON.parse(updatedRestaurant.cuisines);
-          } catch {
-            updatedRestaurant.cuisines = [];
-          }
-        }
-      
-       
-        if (typeof updatedRestaurant.days_open === "string") {
-          try {
-            updatedRestaurant.days_open = JSON.parse(updatedRestaurant.days_open);
-          } catch {
-            updatedRestaurant.days_open = [];
-          }
-        }
-      
-        setRestaurant(updatedRestaurant);
-        setOriginalRestaurant(updatedRestaurant);
-      
-  
-        setRestaurant(updatedRestaurant);
-        setOriginalRestaurant(updatedRestaurant);
-        setIsEditing(false);
-        setSaveSuccess(true);
-  
-        
-        setSelectedFiles({ gstProof: null, fssaiProof: null, bankProof: null });
-        setFilePreviews({ gstProof: null, fssaiProof: null, bankProof: null });
-  
-        setRefreshKey(prev => prev + 1);
-        setTimeout(() => setSaveSuccess(false), 3000);
-  
-      } else {
-        throw new Error(result.message || "Failed to update restaurant");
       }
-  
-    } catch (error) {
-      console.error("Save failed:", error);
-      setSaveError(error.message || "Failed to save changes. Please try again.");
-    } finally {
-      setSaveLoading(false);
+
+      // Parse JSON strings if needed
+      if (typeof updatedRestaurant.cuisines === "string") {
+        try {
+          updatedRestaurant.cuisines = JSON.parse(updatedRestaurant.cuisines);
+        } catch {
+          updatedRestaurant.cuisines = [];
+        }
+      }
+
+      if (typeof updatedRestaurant.days_open === "string") {
+        try {
+          updatedRestaurant.days_open = JSON.parse(updatedRestaurant.days_open);
+        } catch {
+          updatedRestaurant.days_open = [];
+        }
+      }
+
+      // Ensure file URLs are properly set from the API response
+      // This is critical - the API returns the full URLs in result.restaurant
+      if (result.restaurant) {
+        if (result.restaurant.gst_proof) {
+          updatedRestaurant.gst_proof = result.restaurant.gst_proof;
+        }
+        if (result.restaurant.fssai_proof) {
+          updatedRestaurant.fssai_proof = result.restaurant.fssai_proof;
+        }
+        if (result.restaurant.bank_proof) {
+          updatedRestaurant.bank_proof = result.restaurant.bank_proof;
+        }
+        if (result.restaurant.agreement_proof) {
+          updatedRestaurant.agreement_proof = result.restaurant.agreement_proof;
+        }
+      }
+
+      // Update states
+      setRestaurant(updatedRestaurant);
+      setOriginalRestaurant(updatedRestaurant);
+      setIsEditing(false);
+      setSaveSuccess(true);
+
+      // Clear selected files
+      setSelectedFiles({ 
+        gstProof: null, 
+        fssaiProof: null, 
+        bankProof: null,
+        agreementProof: null
+      });
+      setFilePreviews({ 
+        gstProof: null, 
+        fssaiProof: null, 
+        bankProof: null,
+        agreementProof: null
+      });
+
+      // Force a refresh to get the latest data
+      setRefreshKey(prev => prev + 1);
+      setTimeout(() => setSaveSuccess(false), 3000);
+
+    } else {
+      throw new Error(result.message || "Failed to update restaurant");
     }
-  };
-  
+
+  } catch (error) {
+    console.error("Save failed:", error);
+    setSaveError(error.message || "Failed to save changes. Please try again.");
+  } finally {
+    setSaveLoading(false);
+  }
+};
 
   const formatDateTime = (dateString) => {
     if (!dateString) return "Not available";
@@ -482,142 +518,166 @@ export default function RestaurantProfile() {
       </span>
     );
   };
+// File upload component - FIXED VERSION
+const FileUploadField = ({ label, field, currentFileUrl, icon: Icon }) => {
+  // Use the currentFileUrl prop directly from parent
+  const hasFile = selectedFiles[field] || currentFileUrl;
+  const preview = filePreviews[field] || currentFileUrl;
+  const isImage = preview && (preview.startsWith('data:image') || 
+                currentFileUrl?.match(/\.(jpg|jpeg|png|gif)$/i));
 
-  // File upload component
-  const FileUploadField = ({ label, field, currentFileUrl }) => {
-    const hasFile = selectedFiles[field] || currentFileUrl;
-    const preview = filePreviews[field] || currentFileUrl;
-    const isImage = preview && (preview.startsWith('data:image') || 
-                  currentFileUrl?.match(/\.(jpg|jpeg|png|gif)$/i));
+  // Debug log to see when URL changes
+  useEffect(() => {
+    console.log(`${field} URL updated:`, currentFileUrl);
+  }, [currentFileUrl, field]);
 
-    return (
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          {label}
-        </label>
-        
-        {isEditing ? (
-          <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => document.getElementById(`${field}-file`).click()}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
-              >
-                <DocumentArrowUpIcon className="h-4 w-4" />
-                {hasFile ? 'Change File' : 'Upload File'}
-              </button>
-              
-              <input
-                id={`${field}-file`}
-                type="file"
-                onChange={(e) => handleFileSelect(field, e.target.files[0])}
-                className="hidden"
-                accept=".jpg,.jpeg,.png,.pdf"
-              />
-              
-              {hasFile && (
-                <button
-                  type="button"
-                  onClick={() => handleRemoveFile(field)}
-                  className="px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors flex items-center gap-2"
-                >
-                  <TrashIcon className="h-4 w-4" />
-                  Remove
-                </button>
-              )}
-            </div>
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 p-5 hover:border-blue-300 transition-all hover:shadow-md">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="p-2 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg">
+          {Icon ? <Icon className="h-5 w-5 text-blue-600" /> : <DocumentTextIcon className="h-5 w-5 text-blue-600" />}
+        </div>
+        <h4 className="font-medium text-gray-800">{label}</h4>
+      </div>
+      
+      {isEditing ? (
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+            <button
+              type="button"
+              onClick={() => document.getElementById(`${field}-file`).click()}
+              className="w-full sm:w-auto px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm font-medium"
+            >
+              <DocumentArrowUpIcon className="h-4 w-4" />
+              {hasFile ? 'Change File' : 'Upload File'}
+            </button>
+            
+            <input
+              id={`${field}-file`}
+              type="file"
+              onChange={(e) => handleFileSelect(field, e.target.files[0])}
+              className="hidden"
+              accept=".jpg,.jpeg,.png,.pdf"
+            />
             
             {hasFile && (
-              <div className="p-4 bg-gray-50 rounded-lg border">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    {isImage ? (
-                      <div className="relative w-20 h-20">
-                        <img
-                          src={preview}
-                          alt="Preview"
-                          className="w-full h-full object-cover rounded"
-                        />
-                      </div>
-                    ) : (
-                      <div className="p-3 bg-blue-100 rounded-lg">
-                        <DocumentTextIcon className="h-8 w-8 text-blue-600" />
-                      </div>
-                    )}
-                    <div>
-                      <p className="font-medium text-gray-900">
-                        {selectedFiles[field]?.name || currentFileUrl?.split('/').pop()}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {selectedFiles[field] ? 
-                          `${(selectedFiles[field].size / 1024 / 1024).toFixed(2)} MB` : 
-                          'Existing file'}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  {currentFileUrl && !selectedFiles[field] && (
-                    <a
-                      href={currentFileUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2"
-                    >
-                      <EyeIcon className="h-4 w-4" />
-                      View
-                    </a>
-                  )}
-                </div>
-              </div>
-            )}
-            
-            {!hasFile && (
-              <p className="text-sm text-gray-500 italic">
-                No file selected. Allowed: JPG, PNG, PDF (max 5MB)
-              </p>
+              <button
+                type="button"
+                onClick={() => handleRemoveFile(field)}
+                className="w-full sm:w-auto px-4 py-2.5 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors flex items-center justify-center gap-2 text-sm font-medium border border-red-200"
+              >
+                <TrashIcon className="h-4 w-4" />
+                Remove
+              </button>
             )}
           </div>
-        ) : (
-          <div>
-            {currentFileUrl ? (
-              <div className="flex items-center gap-3">
+          
+          {hasFile && (
+            <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                 {isImage ? (
-                  <div className="relative w-20 h-20">
+                  <div className="relative w-16 h-16 flex-shrink-0">
                     <img
-                      src={currentFileUrl}
-                      alt={label}
-                      className="w-full h-full object-cover rounded"
+                      src={preview}
+                      alt="Preview"
+                      className="w-full h-full object-cover rounded-lg border border-gray-300"
+                      onError={(e) => {
+                        console.log("Image failed to load:", preview);
+                        e.target.style.display = 'none';
+                      }}
                     />
                   </div>
                 ) : (
-                  <div className="p-3 bg-blue-100 rounded-lg">
+                  <div className="p-3 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg flex-shrink-0">
                     <DocumentTextIcon className="h-8 w-8 text-blue-600" />
                   </div>
                 )}
-                <div>
-                  <p className="font-medium text-gray-900">
-                    {currentFileUrl.split('/').pop()}
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-gray-900 truncate">
+                    {selectedFiles[field]?.name || currentFileUrl?.split('/').pop() || 'Document'}
                   </p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {selectedFiles[field] ? 
+                      `${(selectedFiles[field].size / 1024 / 1024).toFixed(2)} MB` : 
+                      currentFileUrl ? 'Existing document' : 'No file'}
+                  </p>
+                </div>
+                
+                {currentFileUrl && !selectedFiles[field] && (
                   <a
                     href={currentFileUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1"
+                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2 text-sm font-medium whitespace-nowrap"
                   >
                     <EyeIcon className="h-4 w-4" />
-                    View Document
+                    View
                   </a>
-                </div>
+                )}
               </div>
-            ) : (
-              <p className="text-gray-500 italic">No document uploaded</p>
-            )}
-          </div>
-        )}
-      </div>
-    );
-  };
+            </div>
+          )}
+          
+          {!hasFile && (
+            <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 border-dashed">
+              <p className="text-sm text-gray-500 text-center">
+                No file selected. Click upload to add document
+              </p>
+            </div>
+          )}
+          
+          <p className="text-xs text-gray-500 flex items-center gap-1">
+            <ExclamationCircleIcon className="h-3 w-3" />
+            Allowed: JPG, PNG, PDF (max 5MB)
+          </p>
+        </div>
+      ) : (
+        <div>
+          {currentFileUrl ? (
+            <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl border border-gray-200">
+              {isImage ? (
+                <div className="relative w-16 h-16 flex-shrink-0">
+                  <img
+                    src={currentFileUrl}
+                    alt={label}
+                    className="w-full h-full object-cover rounded-lg border border-gray-300"
+                    onError={(e) => {
+                      console.log("Image failed to load:", currentFileUrl);
+                      e.target.style.display = 'none';
+                    }}
+                  />
+                </div>
+              ) : (
+                <div className="p-3 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg flex-shrink-0">
+                  <DocumentTextIcon className="h-8 w-8 text-blue-600" />
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-gray-900 truncate">
+                  {currentFileUrl.split('/').pop()}
+                </p>
+                <a
+                  href={currentFileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1 mt-1"
+                >
+                  <EyeIcon className="h-4 w-4" />
+                  View Document
+                </a>
+              </div>
+            </div>
+          ) : (
+            <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 border-dashed text-center">
+              <DocumentTextIcon className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+              <p className="text-gray-500 text-sm">No document uploaded</p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
 
   if (loading) {
     return (
@@ -968,113 +1028,50 @@ export default function RestaurantProfile() {
                   </div>
                 </div>
 
-                {/* Additional Information Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {/* Compliance Status */}
-                  <div className="bg-gradient-to-br from-red-50 to-pink-50 rounded-xl p-6 border border-red-100">
-                    <div className="flex items-center gap-3 mb-4">
-                      <ShieldCheckIcon className="h-6 w-6 text-red-600" />
-                      <h3 className="text-lg font-semibold text-gray-900">Compliance Status</h3>
-                    </div>
-                    <div className="space-y-6">
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
-                          <div className="flex items-center gap-2">
-                            <DocumentTextIcon className="h-5 w-5 text-gray-500" />
-                            <span className="text-gray-700">FSSAI License</span>
-                          </div>
-                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                            restaurant.fssai ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                          }`}>
-                            {restaurant.fssai ? 'Registered' : 'Pending'}
-                          </span>
-                        </div>
-                        {isEditing ? (
-                          <input
-                            type="text"
-                            value={editForm.fssai || ""}
-                            onChange={(e) => handleInputChange('fssai', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Enter FSSAI Number"
-                          />
-                        ) : (
-                          <p className="text-sm text-gray-600">{restaurant.fssai || "Not provided"}</p>
-                        )}
-                        <FileUploadField
-                          label="FSSAI Proof Document"
-                          field="fssaiProof"
-                          currentFileUrl={restaurant.fssai_proof}
-                        />
-                      </div>
-                      
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
-                          <div className="flex items-center gap-2">
-                            <BanknotesIcon className="h-5 w-5 text-gray-500" />
-                            <span className="text-gray-700">GST Registration</span>
-                          </div>
-                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                            restaurant.gst ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                          }`}>
-                            {restaurant.gst ? 'Registered' : 'Pending'}
-                          </span>
-                        </div>
-                        {isEditing ? (
-                          <input
-                            type="text"
-                            value={editForm.gst || ""}
-                            onChange={(e) => handleInputChange('gst', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Enter GST Number"
-                          />
-                        ) : (
-                          <p className="text-sm text-gray-600">{restaurant.gst || "Not provided"}</p>
-                        )}
-                        <FileUploadField
-                          label="GST Proof Document"
-                          field="gstProof"
-                          currentFileUrl={restaurant.gst_proof}
-                        />
-                      </div>
-                    </div>
+                {/* IMPROVED DOCUMENTS SECTION - 2 BOXES PER ROW */}
+                <div className="mb-8">
+                  <div className="flex items-center gap-3 mb-4">
+                    <DocumentTextIcon className="h-6 w-6 text-gray-500" />
+                    <h3 className="text-xl font-semibold text-gray-900">Documents & Compliance</h3>
                   </div>
-
-                  {/* Business Details */}
-                  <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-6 border border-blue-100">
+                  
+                  {/* Business Details Card - Full Width */}
+                  <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-6 border border-blue-100 mb-6">
                     <div className="flex items-center gap-3 mb-4">
                       <CreditCardIcon className="h-6 w-6 text-blue-600" />
                       <h3 className="text-lg font-semibold text-gray-900">Business Details</h3>
                     </div>
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-700">Restaurant ID</span>
-                        <span className="font-medium text-gray-900">{restaurant.restaurant_id}</span>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div className="bg-white/50 rounded-lg p-4">
+                        <p className="text-sm text-gray-600 mb-1">Restaurant ID</p>
+                        <p className="font-medium text-gray-900">{restaurant.restaurant_id}</p>
                       </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-700">Delivery Service</span>
+                      <div className="bg-white/50 rounded-lg p-4">
+                        <p className="text-sm text-gray-600 mb-1">Delivery Service</p>
                         {getDeliveryBadge(restaurant.delivery)}
                       </div>
                       {restaurant.owner_name && (
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-700">Owner Name</span>
-                          <span className="font-medium text-gray-900">{restaurant.owner_name}</span>
+                        <div className="bg-white/50 rounded-lg p-4">
+                          <p className="text-sm text-gray-600 mb-1">Owner Name</p>
+                          <p className="font-medium text-gray-900">{restaurant.owner_name}</p>
                         </div>
                       )}
                       {restaurant.cuisines && restaurant.cuisines.length > 0 && (
-                        <div>
-                          <p className="text-sm text-gray-700 mb-1">Cuisines</p>
+                        <div className="bg-white/50 rounded-lg p-4">
+                          <p className="text-sm text-gray-600 mb-1">Cuisines</p>
                           {isEditing ? (
                             <input
                               type="text"
                               value={Array.isArray(editForm.cuisines) ? editForm.cuisines.join(', ') : ""}
                               onChange={(e) => handleArrayChange('cuisines', e.target.value)}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                               placeholder="Indian, Chinese, Italian"
                             />
                           ) : (
-                            <p className="text-gray-900">{Array.isArray(restaurant.cuisines)
-                              ? restaurant.cuisines.join(', ')
-                              : restaurant.cuisines || "—"}
+                            <p className="text-gray-900 text-sm">
+                              {Array.isArray(restaurant.cuisines)
+                                ? restaurant.cuisines.join(', ')
+                                : restaurant.cuisines || "—"}
                             </p>
                           )}
                         </div>
@@ -1082,54 +1079,134 @@ export default function RestaurantProfile() {
                     </div>
                   </div>
 
-                  {/* Bank Details & Timestamps */}
+                  {/* Documents Grid - 2 Boxes Per Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* FSSAI Document */}
+                    <FileUploadField
+                      label="FSSAI License"
+                      field="fssaiProof"
+                      currentFileUrl={restaurant.fssai_proof}
+                      icon={DocumentTextIcon}
+                    />
+
+                    {/* GST Document */}
+                    <FileUploadField
+                      label="GST Registration"
+                      field="gstProof"
+                      currentFileUrl={restaurant.gst_proof}
+                      icon={BanknotesIcon}
+                    />
+
+                    {/* Bank Proof Document */}
+                    <FileUploadField
+                      label="Bank Proof"
+                      field="bankProof"
+                      currentFileUrl={restaurant.bank_proof}
+                      icon={CreditCardIcon}
+                    />
+
+                    {/* Agreement Document */}
+                    <FileUploadField
+                      label="Restaurant Agreement"
+                      field="agreementProof"
+                      currentFileUrl={restaurant.agreement_proof}
+                      icon={DocumentTextIcon}
+                    />
+                  </div>
+
+                  {/* Status Note */}
+                  <div className="mt-4 p-4 bg-blue-50 rounded-lg flex items-start gap-3">
+                    <ExclamationCircleIcon className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <p className="text-sm text-blue-800">
+                      <span className="font-medium">Document Requirements:</span> All documents must be clear, legible, and in JPG, PNG, or PDF format. Maximum file size: 5MB per document.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Bank Details & Timestamps - Separate Section */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl p-6 border border-purple-100">
                     <div className="flex items-center gap-3 mb-4">
-                      <CalendarDaysIcon className="h-6 w-6 text-purple-600" />
-                      <h3 className="text-lg font-semibold text-gray-900">Bank Details</h3>
+                      <CreditCardIcon className="h-6 w-6 text-purple-600" />
+                      <h3 className="text-lg font-semibold text-gray-900">Bank Account Details</h3>
                     </div>
                     <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Account Name</label>
-                        {isEditing ? (
-                          <input
-                            type="text"
-                            value={editForm.account_name || ""}
-                            onChange={(e) => handleInputChange('account_name', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          />
-                        ) : (
-                          <p className="text-gray-900">{restaurant.account_name || "Not provided"}</p>
-                        )}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-600 mb-1">Account Name</label>
+                          {isEditing ? (
+                            <input
+                              type="text"
+                              value={editForm.account_name || ""}
+                              onChange={(e) => handleInputChange('account_name', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            />
+                          ) : (
+                            <p className="font-medium text-gray-900">{restaurant.account_name || "Not provided"}</p>
+                          )}
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-600 mb-1">Account Number</label>
+                          {isEditing ? (
+                            <input
+                              type="text"
+                              value={editForm.account_number || ""}
+                              onChange={(e) => handleInputChange('account_number', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            />
+                          ) : (
+                            <p className="font-medium text-gray-900">{restaurant.account_number ? '••••' + restaurant.account_number.slice(-4) : "Not provided"}</p>
+                          )}
+                        </div>
                       </div>
                       
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Account Number</label>
-                        {isEditing ? (
-                          <input
-                            type="text"
-                            value={editForm.account_number || ""}
-                            onChange={(e) => handleInputChange('account_number', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          />
-                        ) : (
-                          <p className="text-gray-900">{restaurant.account_number || "Not provided"}</p>
-                        )}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-600 mb-1">IFSC Code</label>
+                          {isEditing ? (
+                            <input
+                              type="text"
+                              value={editForm.ifsc || ""}
+                              onChange={(e) => handleInputChange('ifsc', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            />
+                          ) : (
+                            <p className="font-medium text-gray-900">{restaurant.ifsc || "Not provided"}</p>
+                          )}
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-600 mb-1">UPI ID</label>
+                          {isEditing ? (
+                            <input
+                              type="text"
+                              value={editForm.upi || ""}
+                              onChange={(e) => handleInputChange('upi', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            />
+                          ) : (
+                            <p className="font-medium text-gray-900">{restaurant.upi || "Not provided"}</p>
+                          )}
+                        </div>
                       </div>
-                      
-                      <FileUploadField
-                        label="Bank Proof Document"
-                        field="bankProof"
-                        currentFileUrl={restaurant.bank_proof}
-                      />
-                      
-                      <div className="pt-4 border-t border-purple-200">
-                        <p className="text-sm text-gray-600 mb-1">Account Created</p>
-                        <p className="font-medium text-gray-900">{formatDateTime(restaurant.created_at)}</p>
+                    </div>
+                  </div>
+
+                  {/* Timestamps */}
+                  <div className="bg-gradient-to-br from-gray-50 to-slate-50 rounded-xl p-6 border border-gray-200">
+                    <div className="flex items-center gap-3 mb-4">
+                      <CalendarDaysIcon className="h-6 w-6 text-gray-600" />
+                      <h3 className="text-lg font-semibold text-gray-900">Timeline</h3>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-3 bg-white rounded-lg">
+                        <span className="text-gray-600">Account Created</span>
+                        <span className="font-medium text-gray-900">{formatDateTime(restaurant.created_at)}</span>
                       </div>
-                      <div>
-                        <p className="text-sm text-gray-600 mb-1">Last Updated</p>
-                        <p className="font-medium text-gray-900">{formatDateTime(restaurant.updated_at)}</p>
+                      <div className="flex items-center justify-between p-3 bg-white rounded-lg">
+                        <span className="text-gray-600">Last Updated</span>
+                        <span className="font-medium text-gray-900">{formatDateTime(restaurant.updated_at)}</span>
                       </div>
                     </div>
                   </div>
@@ -1162,12 +1239,12 @@ export default function RestaurantProfile() {
   );
 }
 
-// Enhanced InfoCard component with edit support
+// Enhanced InfoCard component
 function InfoCard({ label, value, icon: Icon, editing = false, editValue, onEditChange, type = "text", isLink = false, prefix = "" }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5 hover:border-blue-300 transition-colors">
+    <div className="bg-white rounded-xl border border-gray-200 p-5 hover:border-blue-300 transition-all hover:shadow-md">
       <div className="flex items-center gap-3 mb-3">
-        <div className="p-2 bg-blue-50 rounded-lg">
+        <div className="p-2 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg">
           <Icon className="h-5 w-5 text-blue-600" />
         </div>
         <h4 className="font-medium text-gray-700">{label}</h4>

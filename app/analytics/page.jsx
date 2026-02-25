@@ -51,7 +51,7 @@ export default function AnalyticsPage() {
       </div>
 
      
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => {
           const Icon = stat.icon
           const isIncrease = stat.changeType === "increase"
@@ -80,7 +80,7 @@ export default function AnalyticsPage() {
             </div>
           )
         })}
-      </div>
+      </div> */}
 
      
       <div className="grid gap-6 lg:grid-cols-2">
@@ -91,11 +91,13 @@ export default function AnalyticsPage() {
         <DeliveryTimes />
         <DeliveryStats />
       </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <VendorPerformance />
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-  <LiveOrders />
+      <LiveOrders /></div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+ <SystemHealth/>
   <PeakHours />
-  <SystemHealth />
+ 
 </div>
     </div>
   )
