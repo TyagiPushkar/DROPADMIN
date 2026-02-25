@@ -328,14 +328,14 @@ export default function Rides() {
           </div>
         </div>
 
-        {/* Search and Filter Section */}
+        
         <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm mb-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search by location, rider phone, Aadhar, or ride ID..."
+                placeholder="Search by location, driver phone, Aadhar, or ride ID..."
                 className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -394,7 +394,7 @@ export default function Rides() {
           </div>
         </div>
 
-        {/* Main Content */}
+        
         {loading ? (
           <div className="flex flex-col items-center justify-center h-96">
             <div className="relative">
@@ -424,7 +424,7 @@ export default function Rides() {
                           <div className="p-2 bg-white/10 rounded-lg">
                             <User className="w-4 h-4" />
                           </div>
-                          <span>Rider Info</span>
+                          <span>Driver Info</span>
                         </div>
                       </th>
                       <th className="text-left p-6 font-semibold text-gray-100 text-sm uppercase tracking-wider">
@@ -443,14 +443,14 @@ export default function Rides() {
                           <span>Timings</span>
                         </div>
                       </th>
-                      <th className="text-left p-6 font-semibold text-gray-100 text-sm uppercase tracking-wider">
+                      {/* <th className="text-left p-6 font-semibold text-gray-100 text-sm uppercase tracking-wider">
                         <div className="flex items-center gap-3">
                           <div className="p-2 bg-white/10 rounded-lg">
                             <Timer className="w-4 h-4" />
                           </div>
                           <span>Duration</span>
                         </div>
-                      </th>
+                      </th> */}
                       <th className="text-left p-6 font-semibold text-gray-100 text-sm uppercase tracking-wider">
                         <div className="flex items-center gap-3">
                           <div className="p-2 bg-white/10 rounded-lg">
@@ -559,14 +559,14 @@ export default function Rides() {
                             </div>
                           </td>
                           
-                          <td className="p-6">
+                          {/* <td className="p-6">
                             <div className="flex items-center gap-3">
                               <div className="p-2 bg-orange-50 rounded-lg group-hover:bg-orange-100 transition-colors duration-150">
                                 <Timer className="w-4 h-4 text-orange-500" />
                               </div>
                               <span className="font-bold text-orange-700">{rideDuration}</span>
                             </div>
-                          </td>
+                          </td> */}
                           
                           <td className="p-6">
                             <div className="flex items-center gap-3 font-bold text-green-700">
@@ -710,7 +710,7 @@ export default function Rides() {
         )}
       </div>
 
-      {/* Modal - Enhanced */}
+      
       {selectedRide && (
         <div 
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md transition-opacity"
@@ -720,7 +720,7 @@ export default function Rides() {
             className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden animate-in fade-in zoom-in-95 duration-300"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal Header */}
+            
             <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-indigo-700 p-6 z-10">
               <div className="flex justify-between items-start">
                 <div className="space-y-2">
@@ -751,9 +751,9 @@ export default function Rides() {
               </div>
             </div>
 
-            {/* Modal Content */}
+            
             <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-200px)]">
-              {/* Summary Cards */}
+              
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-5 border border-blue-200">
                   <div className="text-sm text-blue-700 mb-1">Total Fare</div>
@@ -778,12 +778,12 @@ export default function Rides() {
                 </div>
               </div>
 
-              {/* Ride Route Map */}
+              
               <div className="bg-gray-50 rounded-xl p-1">
                 <RideRouteMap selectedRide={selectedRide} />
               </div>
 
-              {/* Route Information */}
+             
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-white border border-gray-200 rounded-xl p-5">
                   <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
@@ -838,12 +838,12 @@ export default function Rides() {
                 </div>
               </div>
 
-              {/* Rider Information */}
+              
               {selectedRide.rider && (
                 <div className="bg-white border border-gray-200 rounded-xl p-5">
                   <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                     <User className="w-5 h-5 text-indigo-600" />
-                    Rider Information
+                    Driver Information
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1">
@@ -865,7 +865,7 @@ export default function Rides() {
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <div className="text-sm text-gray-500">Rider ID</div>
+                      <div className="text-sm text-gray-500">Driver ID</div>
                       <div className="font-medium bg-gray-100 px-3 py-1 rounded-lg inline-block">
                         #{selectedRide.rider.RiderId}
                       </div>

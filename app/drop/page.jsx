@@ -32,7 +32,7 @@ const topRiders = [
   { name: "Arjun", earnings: "₹9,700" },
 ]
 const activityFeed = [
-  { text: "Rider Rohit picked up Ankit", status: "success" },
+  { text: "Driver Rohit picked up Ankit", status: "success" },
   { text: "Trip TRIP125 cancelled", status: "error" },
   { text: "₹200 payout released to Arjun", status: "info" },
 ]
@@ -80,7 +80,7 @@ export default function AdminDashboard() {
          
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <HeroStat
-              label="Total Riders"
+              label="Total Drivers"
               value="1,245"
               icon={<Bike className="w-5 h-5 text-blue-600" />}
               sub="+5% this week"

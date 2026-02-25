@@ -128,7 +128,7 @@ export default function DashboardHome() {
       .slice(0, 5);
   }, [orders]);
 
-  // FIXED: Handle tie in most ordered dishes - shows ALL tied dishes with scrollable container
+  // Handle tie in most ordered dishes - shows ALL tied dishes with scrollable container
   const mostOrderedDishes = useMemo(() => {
     if (!orders.length) return [];
     
@@ -197,6 +197,19 @@ export default function DashboardHome() {
       !['delivered', 'completed', 'cancelled'].includes(order.order_status?.toLowerCase())
     ).length;
   }, [orders]);
+
+  // Navigation helper functions
+  const navigateToOrders = () => {
+    if (id) {
+      router.push(`/vendor-dashboard/${id}/orders`);
+    }
+  };
+
+  const navigateToMenu = () => {
+    if (id) {
+      router.push(`/vendor-dashboard/${id}/menu`);
+    }
+  };
 
   // Modal functions
   const openOrderModal = (order) => {
@@ -277,11 +290,11 @@ export default function DashboardHome() {
               <p className="text-gray-600 mt-2">Welcome back! Here's your business overview</p>
             </div>
 
-           
+            {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               {/* Total Earnings */}
               <div 
-                onClick={() => router.push("/orders")}
+                onClick={navigateToOrders}
                 className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer group hover:border-green-200"
               >
                 <div className="flex items-center justify-between">
@@ -304,7 +317,7 @@ export default function DashboardHome() {
 
               {/* Total Orders */}
               <div 
-                onClick={() => router.push("/orders")}
+                onClick={navigateToOrders}
                 className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer group hover:border-blue-200"
               >
                 <div className="flex items-center justify-between">
@@ -326,7 +339,7 @@ export default function DashboardHome() {
 
               {/* Active Orders */}
               <div 
-                onClick={() => router.push("/orders")}
+                onClick={navigateToOrders}
                 className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer group hover:border-orange-200"
               >
                 <div className="flex items-center justify-between">
@@ -348,7 +361,7 @@ export default function DashboardHome() {
 
               {/* Most Popular Dishes */}
               <div 
-                onClick={() => router.push("/menu")}
+                onClick={navigateToMenu}
                 className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer group hover:border-purple-200"
               >
                 <div className="flex items-center justify-between">
@@ -416,7 +429,7 @@ export default function DashboardHome() {
                           {recentOrders.length} active
                         </span>
                         <button
-                          onClick={() => router.push("/orders")}
+                          onClick={navigateToOrders}
                           className="text-sm text-blue-600 hover:text-blue-800 font-medium cursor-pointer"
                         >
                           View all
@@ -484,7 +497,7 @@ export default function DashboardHome() {
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-xl font-semibold text-gray-900">Order Status</h2>
                     <button
-                      onClick={() => router.push("/orders")}
+                      onClick={navigateToOrders}
                       className="text-sm text-blue-600 hover:text-blue-800 font-medium cursor-pointer"
                     >
                       View all
@@ -494,7 +507,7 @@ export default function DashboardHome() {
                     {Object.entries(orderStatusCounts).map(([status, count]) => (
                       <div 
                         key={status} 
-                        onClick={() => router.push("/orders")}
+                        onClick={navigateToOrders}
                         className="flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg cursor-pointer group"
                       >
                         <div className="flex items-center space-x-3">
@@ -517,7 +530,7 @@ export default function DashboardHome() {
                   <h2 className="text-xl font-semibold text-gray-900 mb-4">Today's Overview</h2>
                   <div className="space-y-4">
                     <div 
-                      onClick={() => router.push("/orders")}
+                      onClick={navigateToOrders}
                       className="flex justify-between items-center p-2 hover:bg-gray-50 rounded-lg cursor-pointer group"
                     >
                       <span className="text-gray-600">Orders Today</span>
@@ -533,7 +546,7 @@ export default function DashboardHome() {
                       </div>
                     </div>
                     <div 
-                      onClick={() => router.push("/orders")}
+                      onClick={navigateToOrders}
                       className="flex justify-between items-center p-2 hover:bg-gray-50 rounded-lg cursor-pointer group"
                     >
                       <span className="text-gray-600">Revenue Today</span>

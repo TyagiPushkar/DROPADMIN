@@ -1,30 +1,91 @@
 "use client"
 
-const peakHours = [
-  { time: "12:00 PM - 1:00 PM", orders: 187, revenue: 4250 },
-  { time: "7:00 PM - 8:00 PM", orders: 165, revenue: 3890 },
-  { time: "6:00 PM - 7:00 PM", orders: 134, revenue: 3120 },
-]
+import { useEffect, useState } from "react"
+import { BASE_URL } from "@/app/page"
 
-export default function PeakHours() {
+export default function RiderProductivityLeaderboard() {
+  const [data, setData] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchRides()
+  }, [])
+
+  const fetchRides = async () => {
+    try {
+      const response = await fetch(`${BASE_URL}rides/get_all_rides.php`)
+      const result = await response.json()
+
+      if (result.success) {
+        processData(result.data)
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const processData = (rides) => {
+    const riderMap = new Map()
+
+    rides.forEach((ride) => {
+      if (!riderMap.has(ride.rider_id)) {
+        riderMap.set(ride.rider_id, {
+          riderId: ride.rider_id,
+          totalRides: 0,
+          revenue: 0,
+          cancelled: 0,
+        })
+      }
+
+      const rider = riderMap.get(ride.rider_id)
+      rider.totalRides++
+      rider.revenue += parseFloat(ride.fare || 0)
+
+      if (ride.status.includes("cancelled")) {
+        rider.cancelled++
+      }
+    })
+
+    const formatted = Array.from(riderMap.values())
+      .map(r => ({
+        ...r,
+        avgFare: (r.revenue / r.totalRides).toFixed(1),
+      }))
+      .sort((a, b) => b.revenue - a.revenue)
+
+    setData(formatted)
+  }
+
+  if (loading) return <div className="p-6">Loading rider leaderboard...</div>
+
   return (
-    <div className="bg-white shadow-md rounded-lg p-4">
-      <h2 className="text-lg font-semibold mb-2">Peak Hours</h2>
-      <p className="text-sm text-gray-500 mb-4">Busiest times today</p>
-      <div className="space-y-2">
-        {peakHours.map((slot, index) => (
-          <div
-            key={index}
-            className="flex justify-between items-center border-b last:border-b-0 py-2"
-          >
-            <div>
-              <p className="text-sm font-medium">{slot.time}</p>
-              <p className="text-xs text-gray-500">{slot.orders} orders</p>
-            </div>
-            <p className="text-sm font-semibold">${slot.revenue}</p>
-          </div>
-        ))}
-      </div>
+    <div className="bg-white rounded-lg shadow-lg p-6 mt-6">
+      <h2 className="text-lg font-semibold text-gray-800 mb-4">
+        Rider Productivity Leaderboard
+      </h2>
+
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="text-left border-b">
+            <th className="py-2">Rider ID</th>
+            <th>Total Rides</th>
+            <th>Revenue</th>
+            <th>Avg Fare</th>
+            <th>Cancelled</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((rider, index) => (
+            <tr key={index} className="border-b">
+              <td className="py-2 font-medium">{rider.riderId}</td>
+              <td>{rider.totalRides}</td>
+              <td>₹{rider.revenue.toFixed(1)}</td>
+              <td>₹{rider.avgFare}</td>
+              <td className="text-red-500">{rider.cancelled}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   )
 }

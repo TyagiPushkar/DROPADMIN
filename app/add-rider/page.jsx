@@ -338,7 +338,7 @@ export default function RiderOnboarding() {
       const responseData = await response.json();
 
       if (response.ok && responseData.success) {
-        setSuccess("✅ Rider onboarded successfully!");
+        setSuccess("✅ Driver onboarded successfully!");
         // Reset form
         reset();
         fileDataRef.current = {
@@ -371,7 +371,7 @@ export default function RiderOnboarding() {
           <div className="flex items-center gap-3">
             <img src="/images/droplogo.jpg" alt="DROP" className="w-10 h-10" />
             <h1 className="text-xl font-bold text-cyan-900 hidden sm:block">
-              DROP Rider Onboarding
+              DROP Driver Onboarding
             </h1>
           </div>
           <div className="text-sm text-cyan-700 font-medium">

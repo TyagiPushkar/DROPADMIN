@@ -171,7 +171,7 @@ export default function LoginPage() {
               */}
 
               <p className="text-center text-sm text-gray-600 mt-3">
-                New Rider?
+                New Driver?
                 <a
                   href="/add-rider"
                   className="text-blue-600 hover:underline font-medium"
