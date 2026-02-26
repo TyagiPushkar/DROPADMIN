@@ -102,11 +102,11 @@ export default function Home() {
               <div className="space-y-6 text-gray-700 text-lg leading-relaxed">
                 <div>
                   Whether you're craving your favorite meal or need items delivered across town,
-                  DROP connects you with trusted independent riders who get the job done—on time, every time.
+                  DROP connects you with trusted independent drivers who get the job done—on time, every time.
                 </div>
                 <div>
                   With just a few taps, customers can place orders, track deliveries in real time, and enjoy seamless
-                  service. Restaurants grow their reach, riders earn on their own terms, and customers enjoy convenience
+                  service. Restaurants grow their reach, drivers earn on their own terms, and customers enjoy convenience
                   like never before.
                 </div>
                 <div className="pt-6 border-t border-gray-200/60">
