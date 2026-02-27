@@ -304,8 +304,14 @@ useEffect(() => {
     }
   };
 
-  // Remove selected file
+  // Remove selected file (only for non-agreement files)
   const handleRemoveFile = (field) => {
+    // Don't allow removing agreement proof
+    if (field === 'agreementProof' && restaurant?.agreement_proof) {
+      setSaveError("Agreement proof cannot be removed once uploaded");
+      return;
+    }
+    
     setSelectedFiles(prev => ({
       ...prev,
       [field]: null
@@ -350,8 +356,12 @@ const handleSave = async () => {
       avg_cost_for_two: editForm.avg_cost_for_two?.trim() ? parseFloat(editForm.avg_cost_for_two) : null
     };
 
-    // Detect if any file is selected
-    const hasFiles = Object.values(selectedFiles).some(file => file !== null);
+    // Detect if any file is selected (excluding agreement if already uploaded)
+    const hasFiles = Object.entries(selectedFiles).some(([key, file]) => {
+      // Don't include agreement files if already uploaded
+      if (key === 'agreementProof' && restaurant?.agreement_proof) return false;
+      return file !== null;
+    });
 
     let response;
 
@@ -361,6 +371,8 @@ const handleSave = async () => {
       formData.append('restaurant_data', JSON.stringify(dataToSend));
 
       Object.entries(selectedFiles).forEach(([key, file]) => {
+        // Don't append agreement file if already uploaded
+        if (key === 'agreementProof' && restaurant?.agreement_proof) return;
         if (file) formData.append(key, file);
       });
 
@@ -440,12 +452,12 @@ const handleSave = async () => {
       setIsEditing(false);
       setSaveSuccess(true);
 
-      // Clear selected files
+      // Clear selected files (but keep agreement if uploaded)
       setSelectedFiles({ 
         gstProof: null, 
         fssaiProof: null, 
         bankProof: null,
-        agreementProof: null
+        agreementProof: null  // Always clear selected file
       });
       setFilePreviews({ 
         gstProof: null, 
@@ -518,8 +530,12 @@ const handleSave = async () => {
       </span>
     );
   };
-// File upload component - FIXED VERSION
+
+// File upload component - FIXED VERSION with agreement protection
 const FileUploadField = ({ label, field, currentFileUrl, icon: Icon }) => {
+  // Check if this is agreement field and already has file
+  const isAgreementWithFile = field === 'agreementProof' && currentFileUrl;
+  
   // Use the currentFileUrl prop directly from parent
   const hasFile = selectedFiles[field] || currentFileUrl;
   const preview = filePreviews[field] || currentFileUrl;
@@ -538,39 +554,61 @@ const FileUploadField = ({ label, field, currentFileUrl, icon: Icon }) => {
           {Icon ? <Icon className="h-5 w-5 text-blue-600" /> : <DocumentTextIcon className="h-5 w-5 text-blue-600" />}
         </div>
         <h4 className="font-medium text-gray-800">{label}</h4>
+        {isAgreementWithFile && (
+          <span className="ml-auto px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
+            Locked
+          </span>
+        )}
       </div>
       
       {isEditing ? (
         <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-            <button
-              type="button"
-              onClick={() => document.getElementById(`${field}-file`).click()}
-              className="w-full sm:w-auto px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm font-medium"
-            >
-              <DocumentArrowUpIcon className="h-4 w-4" />
-              {hasFile ? 'Change File' : 'Upload File'}
-            </button>
-            
-            <input
-              id={`${field}-file`}
-              type="file"
-              onChange={(e) => handleFileSelect(field, e.target.files[0])}
-              className="hidden"
-              accept=".jpg,.jpeg,.png,.pdf"
-            />
-            
-            {hasFile && (
-              <button
-                type="button"
-                onClick={() => handleRemoveFile(field)}
-                className="w-full sm:w-auto px-4 py-2.5 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors flex items-center justify-center gap-2 text-sm font-medium border border-red-200"
-              >
-                <TrashIcon className="h-4 w-4" />
-                Remove
-              </button>
-            )}
-          </div>
+          {/* Only show upload controls if not agreement with file */}
+          {!isAgreementWithFile ? (
+            <>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => document.getElementById(`${field}-file`).click()}
+                  className="w-full sm:w-auto px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm font-medium"
+                >
+                  <DocumentArrowUpIcon className="h-4 w-4" />
+                  {hasFile ? 'Change File' : 'Upload File'}
+                </button>
+                
+                <input
+                  id={`${field}-file`}
+                  type="file"
+                  onChange={(e) => handleFileSelect(field, e.target.files[0])}
+                  className="hidden"
+                  accept=".jpg,.jpeg,.png,.pdf"
+                />
+                
+                {hasFile && (
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveFile(field)}
+                    className="w-full sm:w-auto px-4 py-2.5 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors flex items-center justify-center gap-2 text-sm font-medium border border-red-200"
+                  >
+                    <TrashIcon className="h-4 w-4" />
+                    Remove
+                  </button>
+                )}
+              </div>
+              
+              <p className="text-xs text-gray-500 flex items-center gap-1">
+                <ExclamationCircleIcon className="h-3 w-3" />
+                Allowed: JPG, PNG, PDF (max 5MB)
+              </p>
+            </>
+          ) : (
+            <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+              <p className="text-sm text-yellow-700 flex items-center gap-2">
+                <ShieldCheckIcon className="h-5 w-5" />
+                Agreement proof is locked and cannot be modified after upload
+              </p>
+            </div>
+          )}
           
           {hasFile && (
             <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
@@ -618,18 +656,13 @@ const FileUploadField = ({ label, field, currentFileUrl, icon: Icon }) => {
             </div>
           )}
           
-          {!hasFile && (
+          {!hasFile && !isAgreementWithFile && (
             <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 border-dashed">
               <p className="text-sm text-gray-500 text-center">
                 No file selected. Click upload to add document
               </p>
             </div>
           )}
-          
-          <p className="text-xs text-gray-500 flex items-center gap-1">
-            <ExclamationCircleIcon className="h-3 w-3" />
-            Allowed: JPG, PNG, PDF (max 5MB)
-          </p>
         </div>
       ) : (
         <div>
